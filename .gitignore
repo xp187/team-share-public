@@ -1,0 +1,7 @@
+# Temporary annotation scripts
+worklog-2026-07-15/annotate.py
+worklog-2026-07-15/fix_footer.py
+
+# Python cache
+__pycache__/
+*.pyc
