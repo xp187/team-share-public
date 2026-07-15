@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>工作日志 2026-07-15 (2026年7月15日 · 周三)</title>
+<style>
+:root {
+  --bg: #f7f8fa;
+  --surface: #ffffff;
+  --fg: #1f2937;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --accent: #2563eb;
+  --accent-soft: #dbeafe;
+  --pass: #16a34a;
+  --pass-soft: #dcfce7;
+  --fail: #dc2626;
+  --fail-soft: #fee2e2;
+  --warn: #d97706;
+  --warn-soft: #fef3c7;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 6px 18px rgba(0,0,0,0.05);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --fg: #f1f5f9;
+    --muted: #94a3b8;
+    --border: #334155;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a;
+    --pass: #4ade80;
+    --pass-soft: #14532d;
+    --fail: #f87171;
+    --fail-soft: #7f1d1d;
+    --warn: #fbbf24;
+    --warn-soft: #78350f;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 6px 18px rgba(0,0,0,0.25);
+  }
+}
+* { box-sizing: border-box; }
+body { margin:0; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--fg); line-height:1.75; }
+.page { display:flex; min-height:100vh; }
+.toc { position:fixed; left:0; top:0; width:240px; height:100vh; background:var(--surface); border-right:1px solid var(--border); padding:28px 20px; overflow-y:auto; z-index:50; }
+.toc h2 { margin:0 0 18px; font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; font-weight:700; }
+.toc ul { list-style:none; padding:0; margin:0; }
+.toc li { margin:0; }
+.toc a { display:block; padding:8px 10px; color:var(--fg); text-decoration:none; border-radius:8px; font-size:13.5px; transition:background .15s; }
+.toc a:hover { background:var(--accent-soft); color:var(--accent); }
+.toc a.active { background:var(--accent-soft); color:var(--accent); font-weight:600; }
+.toc .toc-h3 { padding-left:20px; color:var(--muted); }
+.main { margin-left:240px; flex:1; max-width:900px; padding:0 40px 100px; }
+.hero { background:linear-gradient(135deg, var(--accent-soft) 0%, transparent 100%); border-bottom:1px solid var(--border); padding:54px 0 38px; margin-bottom:44px; }
+.hero h1 { margin:0 0 14px; font-size:34px; line-height:1.25; font-weight:800; }
+.hero .subtitle { color:var(--muted); font-size:16px; margin-bottom:22px; }
+.hero .badges { display:flex; gap:10px; flex-wrap:wrap; }
+.section { margin-bottom:56px; }
+.section h2 { font-size:24px; margin:0 0 22px; padding-bottom:10px; border-bottom:2px solid var(--accent); display:inline-block; font-weight:700; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:26px; box-shadow:var(--shadow); }
+.task-item { display:flex; align-items:flex-start; gap:12px; padding:14px 0; border-bottom:1px solid var(--border); }
+.task-item:last-child { border-bottom:none; padding-bottom:0; }
+.task-item:first-child { padding-top:0; }
+.task-item input { width:18px; height:18px; accent-color:var(--accent); flex:0 0 auto; margin-top:5px; }
+.task-item span { flex:1; }
+.tag { display:inline-flex; align-items:center; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+.proj { background:var(--accent-soft); color:var(--accent); }
+.proj-mini { background:var(--accent-soft); color:var(--accent); padding:2px 8px; font-size:11px; }
+.result.pass { background:var(--pass-soft); color:var(--pass); }
+.result.fail { background:var(--fail-soft); color:var(--fail); }
+.seed { background:var(--bg); color:var(--muted); border:1px solid var(--border); }
+.case-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:26px; margin-bottom:22px; box-shadow:var(--shadow); }
+.case-header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:18px; flex-wrap:wrap; }
+.case-title { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:15px; font-weight:700; color:var(--fg); }
+.case-meta { display:flex; gap:8px; flex-wrap:wrap; }
+.case-note { color:var(--fg); font-size:14.5px; background:var(--bg); border-radius:12px; padding:20px; margin-bottom:20px; }
+.case-note > div { margin-bottom:16px; }
+.case-note > div:last-child { margin-bottom:0; }
+.note-label { display:inline-block; min-width:54px; font-weight:700; color:var(--accent); margin-right:8px; }
+.note-bg { color:var(--muted); line-height:1.7; padding-bottom:16px; border-bottom:1px dashed var(--border); }
+.note-bg.same { color:var(--muted); font-style:italic; padding-bottom:16px; border-bottom:1px dashed var(--border); }
+.note-desc, .note-check { line-height:1.8; }
+.note-desc span:not(.note-label), .note-check span:not(.note-label), .note-bg span:not(.note-label) { display:inline; }
+.note-bg br, .note-desc br, .note-check br { content:""; display:block; margin-bottom:10px; }
+.case-images { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px; }
+.case-images.three { grid-template-columns:repeat(3, 1fr); }
+.case-images img { width:100%; border-radius:12px; border:1px solid var(--border); cursor:zoom-in; transition:transform .15s, box-shadow .15s; }
+.case-images img:hover { transform:translateY(-2px); box-shadow:var(--shadow); }
+.blocker-list { list-style:none; padding:0; margin:0; }
+.blocker-list li { padding:16px 18px; margin-bottom:12px; background:var(--warn-soft); border-left:4px solid var(--warn); border-radius:10px; color:var(--fg); line-height:1.7; }
+.blocker-list li:last-child { margin-bottom:0; }
+.mobile-toggle { display:none; position:fixed; top:12px; left:12px; z-index:100; background:var(--accent); color:#fff; border:none; border-radius:8px; padding:8px 14px; font-size:14px; cursor:pointer; }
+.lightbox { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.92); justify-content:center; align-items:center; cursor:grab; }
+.lightbox.show { display:flex; }
+.lightbox img { max-width:95vw; max-height:95vh; object-fit:contain; transition:transform .1s; cursor:grab; border-radius:4px; }
+.lightbox img.grabbing { cursor:grabbing; }
+@media (max-width:1100px) { .case-images.three { grid-template-columns:repeat(2, 1fr); } }
+@media (max-width:900px) {
+  .toc { transform:translateX(-100%); transition:transform .2s; }
+  .toc.open { transform:translateX(0); }
+  .main { margin-left:0; padding:70px 18px 40px; max-width:100%; }
+  .mobile-toggle { display:block; }
+  .case-header { flex-direction:column; }
+}
+@media (max-width:700px) { .case-images { grid-template-columns:1fr !important; } }
+</style>
+</head>
+<body>
+<button class="mobile-toggle" id="mobile-toggle">☰ 目录</button>
+<div class="page">
+  <aside class="toc" id="toc">
+    <h2>目录</h2>
+    <ul id="toc-list">
+      <li><a href="#overview" class="toc-h2">概览</a></li>
+      <li><a href="#tasks" class="toc-h2">任务</a></li>
+      <li><a href="#sims" class="toc-h2">仿真 / 回归</a></li>
+      <li><a href="#case-t_8b2lane_PON_OPT_I" class="toc-h3">t_8b2lane_PON_OPT_I</a></li><li><a href="#case-t_8b2lane_PON_OPT_I1" class="toc-h3">t_8b2lane_PON_OPT_I1</a></li><li><a href="#case-t_8b2lane_WAKE_I" class="toc-h3">t_8b2lane_WAKE_I</a></li><li><a href="#case-t_8b2lane_WAKE_CS_SEL0" class="toc-h3">t_8b2lane_WAKE_CS_SEL0</a></li><li><a href="#case-t_8b2lane_WAKE_CS_SEL1" class="toc-h3">t_8b2lane_WAKE_CS_SEL1</a></li><li><a href="#case-t_8b2lane_WAKE_CS_SEL3" class="toc-h3">t_8b2lane_WAKE_CS_SEL3</a></li><li><a href="#case-t_8b2lane_WAKE_PD_OPT0" class="toc-h3">t_8b2lane_WAKE_PD_OPT0</a></li><li><a href="#case-t_8b2lane_WAKE_PD_OPT1" class="toc-h3">t_8b2lane_WAKE_PD_OPT1</a></li><li><a href="#case-t_8b2lane_WAKE_PD_OPT3" class="toc-h3">t_8b2lane_WAKE_PD_OPT3</a></li><li><a href="#case-t_8b2lane_XON" class="toc-h3">t_8b2lane_XON</a></li>
+      <li><a href="#blockers" class="toc-h2">阻塞 / 明日计划 / 笔记</a></li>
+    </ul>
+  </aside>
+  <main class="main">
+    <section class="hero" id="overview">
+      <h1>工作日志 2026-07-15 (2026年7月15日 · 周三)</h1>
+      <div class="subtitle">HV2M23 数字验证 · 工作日志报告</div>
+      <div class="badges">
+        <span class="tag proj">HV2M23</span>
+        <span class="tag result pass">仿真通过 10/10</span>
+      </div>
+    </section>
+
+    <section class="section" id="tasks">
+      <h2>任务</h2>
+      <div class="card">
+        
+    <label class="task-item">
+      <input type="checkbox"  disabled>
+      <span>IO case </span>
+      <span class="tag proj-mini">HV2M23</span>
+    </label>
+    
+      </div>
+    </section>
+
+    <section class="section" id="sims">
+      <h2>仿真 / 回归</h2>
+      
+    <div class="case-card" id="case-t_8b2lane_PON_OPT_I">
+      <div class="case-header">
+        <div class="case-title">t_8b2lane_PON_OPT_I</div>
+        <div class="case-meta">
+          <span class="tag proj">HV2M23</span>
+          <span class="tag result pass">PASS</span>
+          
+        </div>
+      </div>
+      <div class="case-note"><div class="note-desc"><span class="note-label">描述</span><span>该 case 已作废。PON_OPT 是上电配置选项：PON_OPT=1 时，上电会将 DRA_CS 拉高；PON_OPT=0 时，会额外将 CS_AGND 拉低。</span></div></div>
+      
+    </div>
+    
+    <div class="case-card" id="case-t_8b2lane_PON_OPT_I1">
+      <div class="case-header">
+        <div class="case-title">t_8b2lane_PON_OPT_I1</div>
+        <div class="case-meta">
+          <span class="tag proj">HV2M23</span>
+          <span class="tag result pass">PASS</span>
+          
+        </div>
+      </div>
+      <div class="case-note"><div class="note-bg"><span class="note-label">背景</span><span>PON_OPT=L 表示上电输出拉 GND；PON_OPT_GND=H 表示上电时输出 short together，进入 charge-share 模式。</span></div><div class="note-desc"><span class="note-label">描述</span><span>本 case 验证上电阶段即将 PON_OPT_I 置为 1 的场景。此时上电选项 PON_OPT=1，会使 DRA_CS 在上电时直接拉高，而不再额外拉低 CS_AGND。</span></div><div class="note-check"><span class="note-label">检查点</span><span>上电后 sim_out 应稳定为 0x88（对应 charge-share 短路模式）；CS_AGND 不应再被拉高，DRA_CS 保持为高；数据检查由脚本自动完成。</span></div></div>
+      <div class="case-images"><img src="./t_8b2lane_PON_OPT_I1_1.png" alt="t_8b2lane_PON_OPT_I1 截图 1"></div>
+    </div>
+    
+    <div class="case-card" id="case-t_8b2lane_WAKE_I">
+      <div class="case-header">
+        <div class="case-title">t_8b2lane_WAKE_I</div>
+        <div class="case-meta">
+          <span class="tag proj">HV2M23</span>
+          <span class="tag result pass">PASS</span>
+          
+        </div>
+      </div>
+      <div class="case-note"><div class="note-bg"><span class="note-label">背景</span><span>WAKE_CS_SEL 决定 WAKE 唤醒后的输出状态：00=AGND、01=HAVDD、1X=HiZ；WAKE_PD_OPT 决定功耗模式：00=Normal（正常）、01=CDR lane 掉电、10=CDR lane 掉电且 SD 关断、11=SD 关断且 CDR 异步。</span></div><div class="note-desc"><span class="note-label">描述</span><span>在默认配置 WAKE_CS_SEL=10（HiZ）、WAKE_PD_OPT=10（CDR lane 掉电且 SD 关断）下，验证 WAKE 信号从 1→0→1 的完整切换过程。TEST7 修改后，WAKE 信号接入数字域。</span></div><div class="note-check"><span class="note-label">检查点</span><span>WAKE_I 出现 1→0→1 跳变时，输出 sim_out 应为 0x22（高阻态 HiZ）；reg_lane_pd 应被拉高，表示 CDR lane 进入掉电状态；POFF_DRA_CH、POFF_DRA_BIAS、POFF_DRA_CH0_1446R/L 等 SD 关断信号应被拉高（channel=1440 时，721-726L 恒为 1）。</span></div></div>
+      <div class="case-images"><img src="./t_8b2lane_WAKE_I_1.png" alt="t_8b2lane_WAKE_I 截图 1"><img src="./t_8b2lane_WAKE_I_2.png" alt="t_8b2lane_WAKE_I 截图 2"></div>
+    </div>
+    
+    <div class="case-card" id="case-t_8b2lane_WAKE_CS_SEL0">
+      <div class="case-header">
+        <div class="case-title">t_8b2lane_WAKE_CS_SEL0</div>
+        <div class="case-meta">
+          <span class="tag proj">HV2M23</span>
+          <span class="tag result pass">PASS</span>
+          
+        </div>
+      </div>
+      <div class="case-note"><div class="note-bg same"><span class="note-label">背景</span><span>同上</span></div><div class="note-desc"><span class="note-label">描述</span><span>将 WAKE 输出选择配置为 00（AGND），其余保持默认 WAKE_PD_OPT=10，验证 WAKE 切换时输出被拉至 AGND。</span></div><div class="note-check"><span class="note-label">检查点</span><span>sim_out 应为 0x00（AGND 模式）；reg_lane_pd 拉高；SD 关断相关信号拉高；CS_AGND 被拉高。</span></div></div>
+      <div class="case-images"><img src="./t_8b2lane_WAKE_CS_SEL0_1.png" alt="t_8b2lane_WAKE_CS_SEL0 截图 1"></div><div class="case-note" style="background:#fff7ed;border-left:4px solid #f97316;"><span class="note-label" style="color:#c2410c;">说明</span><span style="color:#7c2d12;">WAKE_CS_SEL0 的另一张原始截图（应为 POFF_DRA_CH 相关信号）在之前的自动标注过程中被误删除，当前缺失。待重新提供后可补入。</span></div>
+    </div>
+    
+    <div class="case-card" id="case-t_8b2lane_WAKE_CS_SEL1">
+      <div class="case-header">
+        <div class="case-title">t_8b2lane_WAKE_CS_SEL1</div>
+        <div class="case-meta">
+          <span class="tag proj">HV2M23</span>
+          <span class="tag result pass">PASS</span>
+          
+        </div>
+      </div>
+      <div class="case-note"><div class="note-bg same"><span class="note-label">背景</span><span>同上</span></div><div class="note-desc"><span class="note-label">描述</span><span>将 WAKE 输出选择配置为 01（HAVDD），其余保持默认 WAKE_PD_OPT=10，验证 WAKE 切换时输出被拉至 HAVDD。</span></div><div class="note-check"><span class="note-label">检查点</span><span>sim_out 应为 0xAA（HAVDD 模式）；reg_lane_pd 拉高；SD 关断相关信号拉高；CS_HVDDA 被拉高。</span></div></div>
+      <div class="case-images"><img src="./t_8b2lane_WAKE_CS_SEL1_1.png" alt="t_8b2lane_WAKE_CS_SEL1 截图 1"><img src="./t_8b2lane_WAKE_CS_SEL1_2.png" alt="t_8b2lane_WAKE_CS_SEL1 截图 2"></div>
+    </div>
+    
+    <div class="case-card" id="case-t_8b2lane_WAKE_CS_SEL3">
+      <div class="case-header">
+        <div class="case-title">t_8b2lane_WAKE_CS_SEL3</div>
+        <div class="case-meta">
+          <span class="tag proj">HV2M23</span>
+          <span class="tag result pass">PASS</span>
+          
+        </div>
+      </div>
+      <div class="case-note"><div class="note-bg same"><span class="note-label">背景</span><span>同上</span></div><div class="note-desc"><span class="note-label">描述</span><span>将 WAKE 输出选择配置为 11（HiZ），其余保持默认 WAKE_PD_OPT=10，验证 WAKE 切换时输出呈高阻态。</span></div><div class="note-check"><span class="note-label">检查点</span><span>sim_out 应为 0x22（HiZ 模式）；reg_lane_pd 拉高；SD 关断相关信号拉高。</span></div></div>
+      <div class="case-images"><img src="./t_8b2lane_WAKE_CS_SEL3_1.png" alt="t_8b2lane_WAKE_CS_SEL3 截图 1"><img src="./t_8b2lane_WAKE_CS_SEL3_2.png" alt="t_8b2lane_WAKE_CS_SEL3 截图 2"></div>
+    </div>
+    
+    <div class="case-card" id="case-t_8b2lane_WAKE_PD_OPT0">
+      <div class="case-header">
+        <div class="case-title">t_8b2lane_WAKE_PD_OPT0</div>
+        <div class="case-meta">
+          <span class="tag proj">HV2M23</span>
+          <span class="tag result pass">PASS</span>
+          
+        </div>
+      </div>
+      <div class="case-note"><div class="note-bg same"><span class="note-label">背景</span><span>同上</span></div><div class="note-desc"><span class="note-label">描述</span><span>WAKE 输出选择保持默认 HiZ，功耗选项配置为 00（Normal，正常模式），验证 WAKE 切换时 CDR 与 SD 均不掉电。</span></div><div class="note-check"><span class="note-label">检查点</span><span>WAKE_I 1→0→1 切换时，sim_out 保持 WAKE 拉低前的值；reg_lane_pd 保持不变（CDR lane 不掉电）；SD 关断相关信号保持不变（SD 未关断）。</span></div></div>
+      <div class="case-images"><img src="./t_8b2lane_WAKE_PD_OPT0_1.png" alt="t_8b2lane_WAKE_PD_OPT0 截图 1"><img src="./t_8b2lane_WAKE_PD_OPT0_2.png" alt="t_8b2lane_WAKE_PD_OPT0 截图 2"></div>
+    </div>
+    
+    <div class="case-card" id="case-t_8b2lane_WAKE_PD_OPT1">
+      <div class="case-header">
+        <div class="case-title">t_8b2lane_WAKE_PD_OPT1</div>
+        <div class="case-meta">
+          <span class="tag proj">HV2M23</span>
+          <span class="tag result pass">PASS</span>
+          
+        </div>
+      </div>
+      <div class="case-note"><div class="note-bg same"><span class="note-label">背景</span><span>同上</span></div><div class="note-desc"><span class="note-label">描述</span><span>WAKE 输出选择保持默认 HiZ，功耗选项配置为 WAKE_PD_OPT=01，验证 CDR lane 掉电模式下 WAKE 切换行为。</span></div><div class="note-check"><span class="note-label">检查点</span><span>WAKE_I 1→0→1 切换时，sim_out 保持 WAKE 拉低前的值；reg_lane_pd 拉高（CDR lane 掉电）；SD 关断相关信号不变（无 SD off）。</span></div></div>
+      <div class="case-images"><img src="./t_8b2lane_WAKE_PD_OPT1_1.png" alt="t_8b2lane_WAKE_PD_OPT1 截图 1"><img src="./t_8b2lane_WAKE_PD_OPT1_2.png" alt="t_8b2lane_WAKE_PD_OPT1 截图 2"></div>
+    </div>
+    
+    <div class="case-card" id="case-t_8b2lane_WAKE_PD_OPT3">
+      <div class="case-header">
+        <div class="case-title">t_8b2lane_WAKE_PD_OPT3</div>
+        <div class="case-meta">
+          <span class="tag proj">HV2M23</span>
+          <span class="tag result pass">PASS</span>
+          
+        </div>
+      </div>
+      <div class="case-note"><div class="note-bg same"><span class="note-label">背景</span><span>同上</span></div><div class="note-desc"><span class="note-label">描述</span><span>WAKE 输出选择保持默认 HiZ，功耗选项配置为 11（SD 关断、CDR 异步），验证 WAKE 切换时 SD 关断但 CDR 不掉电。</span></div><div class="note-check"><span class="note-label">检查点</span><span>sim_out 应为 0x22（HiZ 模式）；reg_lane_pd 不拉高（CDR lane 不掉电）；SD 关断相关信号拉高。</span></div></div>
+      <div class="case-images"><img src="./t_8b2lane_WAKE_PD_OPT3_1.png" alt="t_8b2lane_WAKE_PD_OPT3 截图 1"><img src="./t_8b2lane_WAKE_PD_OPT3_2.png" alt="t_8b2lane_WAKE_PD_OPT3 截图 2"></div>
+    </div>
+    
+    <div class="case-card" id="case-t_8b2lane_XON">
+      <div class="case-header">
+        <div class="case-title">t_8b2lane_XON</div>
+        <div class="case-meta">
+          <span class="tag proj">HV2M23</span>
+          <span class="tag result pass">PASS</span>
+          
+        </div>
+      </div>
+      <div class="case-note"><div class="note-desc"><span class="note-label">描述</span><span>验证 XON（输出使能）信号对 sim_out 输出的控制作用。</span></div><div class="note-check"><span class="note-label">检查点</span><span>1) 仿真过程中将 XON 拉低后再拉高；2) XON=0 期间需手动检查波形，确认 sim_out 输出为 0，包括 data chopper polarity；3) analog 按帧检查，时序上 XON 信号不易传到 scoreboard，不影响寄存器，不做自动检查；4) XON=0 时 SOUT pull GND（SIM_OUT=0），XON=1 时为 Normal Work。</span></div></div>
+      <div class="case-images"><img src="./t_8b2lane_XON_1.png" alt="t_8b2lane_XON 截图 1"></div>
+    </div>
+    
+    </section>
+
+    <section class="section" id="blockers">
+      <h2>阻塞 / 明日计划 / 笔记</h2>
+      <h3>阻塞 / 待协调</h3>
+      <div class="card" style="padding:18px;">
+        <ul class="blocker-list">
+          <li>CDR ASYNC 对应的信号 rstn_async_L0/L1 行为存疑，待 yongjie 确认 → <strong>yjluo：</strong>只有 01 不會拉 ASYNC，看 1V21 的仿真結果就這樣了，先 Keep 吧</li>
+          <li>HV2M23.v 中，模拟的输入 PON_OPT 为恒零，是否需要修改？ → <strong>鈺文：</strong>当初怕他 unknown 加的，應該可以拿掉，IO Behavior Model 有 Tie 值</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="lightbox" id="lightbox"><img alt="preview"></div>
+<script>
+(function(){
+  const headings = Array.from(document.querySelectorAll('[id]'));
+  const links = Array.from(document.querySelectorAll('#toc-list a'));
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) {
+        links.forEach(a => a.classList.remove('active'));
+        const active = links.find(a => a.getAttribute('href') === '#' + entry.target.id);
+        if(active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-80px 0px -60% 0px', threshold: 0 });
+  headings.forEach(h => observer.observe(h));
+
+  links.forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const id = a.getAttribute('href').slice(1);
+      const el = document.getElementById(id);
+      if(el) el.scrollIntoView({behavior:'smooth'});
+      document.getElementById('toc').classList.remove('open');
+    });
+  });
+
+  const toggle = document.getElementById('mobile-toggle');
+  const toc = document.getElementById('toc');
+  toggle.addEventListener('click', () => toc.classList.toggle('open'));
+
+  const lb = document.getElementById('lightbox');
+  const lbImg = lb.querySelector('img');
+  let scale=1, tx=0, ty=0, dragging=false, sx, sy;
+  function update(){ lbImg.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`; }
+  function reset(){ scale=1; tx=0; ty=0; update(); }
+  document.querySelectorAll('.case-images img').forEach(img => {
+    img.addEventListener('click', e => { e.stopPropagation(); lbImg.src = img.src; reset(); lb.classList.add('show'); });
+  });
+  lb.addEventListener('click', e => { if(e.target === lb) lb.classList.remove('show'); });
+  lbImg.addEventListener('wheel', e => { e.preventDefault(); scale *= e.deltaY < 0 ? 1.15 : 0.87; scale = Math.max(0.5, Math.min(scale, 6)); update(); });
+  lbImg.addEventListener('mousedown', e => { dragging=true; sx=e.clientX-tx; sy=e.clientY-ty; lbImg.classList.add('grabbing'); });
+  window.addEventListener('mousemove', e => { if(!dragging) return; tx=e.clientX-sx; ty=e.clientY-sy; update(); });
+  window.addEventListener('mouseup', () => { dragging=false; lbImg.classList.remove('grabbing'); });
+})();
+</script>
+</body>
+</html>
