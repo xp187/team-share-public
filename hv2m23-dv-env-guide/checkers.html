@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>检查机制 - HV2M23 DV 指南</title>
+<style>
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --fg: #1e293b;
+  --muted: #64748b;
+  --accent: #1d4ed8;
+  --accent-soft: #dbeafe;
+  --line: #e2e8f0;
+  --border: #e2e8f0;
+  --pass: #16a34a;
+  --pass-soft: #dcfce7;
+  --fail: #dc2626;
+  --warn: #d97706;
+  --warn-soft: #fef3c7;
+  --code-bg: #111827;
+  --code-fg: #e5e7eb;
+  --shadow: 0 10px 40px rgba(0,0,0,0.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --text: #f1f5f9;
+    --fg: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a;
+    --line: #334155;
+    --border: #334155;
+    --pass: #4ade80;
+    --pass-soft: #14532d;
+    --fail: #f87171;
+    --warn: #fbbf24;
+    --warn-soft: #78350f;
+    --code-bg: #0b1220;
+    --code-fg: #e5e7eb;
+    --shadow: 0 10px 40px rgba(0,0,0,0.35);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+}
+a { color: var(--accent); }
+.navbar { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--line); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.navbar-inner { max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+.navbar-brand { font-weight: 700; color: var(--accent); white-space: nowrap; font-size: 15px; text-decoration: none; }
+.navbar-links { display: flex; align-items: center; gap: 6px; overflow-x: auto; flex: 1; scrollbar-width: none; }
+.navbar-links::-webkit-scrollbar { display: none; }
+.navbar-links a { padding: 6px 10px; border-radius: 6px; font-size: 14px; color: var(--text); white-space: nowrap; transition: background 0.15s; text-decoration: none; }
+.navbar-links a:hover { background: var(--bg); }
+.navbar-links a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+.container.with-toc { display: flex; gap: 32px; align-items: stretch; }
+.toc-wrapper { width: 260px; flex-shrink: 0; align-self: stretch; }
+.toc { position: sticky; top: 76px; max-height: calc(100vh - 100px); overflow-y: auto; padding: 16px; background: var(--surface); border-radius: 12px; border: 1px solid var(--line); font-size: 14px; box-shadow: var(--shadow); }
+.toc a { display: block; padding: 6px 8px; border-radius: 6px; color: var(--muted); margin: 2px 0; transition: background 0.15s, color 0.15s; text-decoration: none; }
+.toc a:hover { background: var(--bg); color: var(--accent); }
+.toc a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.toc a.toc-h1 { font-weight: 700; color: var(--accent); margin-bottom: 8px; cursor: default; }
+.toc a.toc-h3 { padding-left: 18px; font-size: 13px; }
+.content { flex: 1; min-width: 0; }
+.article { background: var(--surface); border-radius: 20px; padding: 40px 48px; box-shadow: var(--shadow); }
+.hero { text-align: center; margin-bottom: 40px; padding-top: 24px; }
+.hero h1 { margin: 0 0 12px; font-size: 34px; line-height: 1.25; font-weight: 800; }
+.hero .author { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+.hero .lead { font-size: 17px; max-width: 760px; margin: 0 auto; color: var(--text); }
+.hero .badges { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+.section-title { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 40px 0 16px; }
+.chapter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.chapter-card { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; color: var(--text); transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s; text-decoration: none; }
+.chapter-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
+.chapter-card .num { display: inline-block; width: 28px; height: 28px; line-height: 28px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 13px; font-weight: 700; text-align: center; margin-bottom: 10px; }
+.chapter-card .title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+.chapter-card .desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.page-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 48px; }
+.page-nav a { display: block; padding: 16px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; color: var(--text); transition: border-color 0.2s, box-shadow 0.2s; text-decoration: none; }
+.page-nav a:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+.page-nav a.next { text-align: right; margin-left: auto; }
+.page-nav .label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.page-nav .title { font-weight: 600; color: var(--accent); }
+.footer { text-align: center; color: var(--muted); margin-top: 48px; font-size: 13px; padding-bottom: 32px; }
+.section { margin-bottom: 48px; }
+.section:last-child { margin-bottom: 0; }
+.section h2 { font-size: 24px; margin: 0 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent); display: inline-block; font-weight: 700; }
+.section h3 { font-size: 18px; margin: 26px 0 12px; font-weight: 700; padding-left: 12px; border-left: 4px solid var(--accent); }
+.section h4 { font-size: 15.5px; margin: 18px 0 8px; font-weight: 700; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 18px; }
+.article .card { background: var(--bg); }
+.card p { margin: 10px 0; }
+.card ul, .card ol { margin: 8px 0; padding-left: 22px; }
+.card li { margin: 5px 0; }
+.tag { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.proj { background: var(--accent-soft); color: var(--accent); }
+.result.pass { background: var(--pass-soft); color: var(--pass); }
+.result.fail { background: #fee2e2; color: var(--fail); }
+table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--accent-soft); color: var(--accent); font-weight: 700; white-space: nowrap; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; background: var(--accent-soft); color: var(--accent); padding: 2px 6px; border-radius: 6px; word-break: break-all; }
+pre { background: var(--code-bg); color: var(--code-fg); border-radius: 12px; padding: 18px 20px; overflow-x: auto; font-size: 13px; line-height: 1.6; }
+pre code { background: transparent; color: inherit; padding: 0; }
+pre .c { color: #6b7280; }
+.diagram { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 22px 16px; margin: 14px 0 20px; overflow-x: auto; }
+.diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.diagram .cap { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 10px; }
+svg text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans SC", "Microsoft YaHei", monospace; }
+.blocker-list { list-style: none; padding: 0; margin: 0; }
+.blocker-list li { padding: 16px 18px; margin-bottom: 12px; background: var(--warn-soft); border-left: 4px solid var(--warn); border-radius: 10px; color: var(--fg); line-height: 1.7; }
+.blocker-list li:last-child { margin-bottom: 0; }
+.tip-list { list-style: none; padding: 0; margin: 0; }
+.tip-list li { padding: 14px 18px; margin-bottom: 10px; background: var(--pass-soft); border-left: 4px solid var(--pass); border-radius: 10px; line-height: 1.7; }
+.tip-list li:last-child { margin-bottom: 0; }
+.hint-bar { background: var(--warn-soft); border-left: 4px solid var(--warn); border-radius: 10px; padding: 14px 18px; margin: 24px auto; max-width: 760px; font-size: 14.5px; }
+.case-table td { font-size: 13px; }
+.case-table td:nth-child(1) { white-space: nowrap; font-family: ui-monospace, Menlo, Consolas, monospace; }
+@media (max-width: 960px) {
+  .toc-wrapper { display: none; }
+  .container.with-toc { display: block; }
+  .article { padding: 28px 20px; border-radius: 16px; }
+  .page-nav { grid-template-columns: 1fr; }
+  .page-nav a.next { text-align: left; margin-left: 0; }
+  .navbar-inner { padding: 10px 16px; gap: 10px; }
+}
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="navbar-brand" href="./index.html">HV2M23 DV 指南</a>
+    <div class="navbar-links"><a href="./index.html">首页</a><a href="./overview.html">概览</a><a href="./tb-arch.html">TB 架构</a><a href="./stimulus.html">激励与 golden</a><a href="./checkers.html" class="active">检查机制</a><a href="./run.html">运行与回归</a><a href="./cases.html">用例</a><a href="./faq.html">FAQ 与清单</a></div>
+  </div>
+</nav>
+<div class="container with-toc">
+  <aside class="toc-wrapper"><nav class="toc"><a class="toc-h1">检查机制</a>
+<a href="#checkers">比对链总览</a>
+<a class="toc-h3" href="#checkers-1">6 条链结构图</a>
+<a class="toc-h3" href="#checkers-2">checker 结构关系图</a>
+<a class="toc-h3" href="#checkers-3">各级 checker 检查流程</a>
+<a class="toc-h3" href="#checkers-4">各链细节</a>
+<a class="toc-h3" href="#checkers-5">辅助工具</a>
+<a class="toc-h3" href="#checkers-6">开关与判决</a></nav></aside>
+  <main class="content">
+    <article class="article">
+<section class="section" id="checkers">
+      <h2>检查机制（6 条比对链）</h2>
+      <h3 id="checkers-1">比对链总览</h3>
+      <div class="diagram">
+        <svg viewBox="0 0 920 340" width="920" role="img" aria-label="6 条比对链结构图">
+          <defs>
+            <marker id="am8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"></path>
+            </marker>
+          </defs>
+          <text x="60" y="24" font-size="12" font-weight="700" fill="var(--muted)">DUT 观测点</text>
+          <text x="330" y="24" font-size="12" font-weight="700" fill="var(--muted)">monitor → scoreboard</text>
+          <text x="680" y="24" font-size="12" font-weight="700" fill="var(--muted)">golden</text>
+
+          <rect x="20" y="40" width="220" height="40" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="130" y="64" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">CENTER1.PIX_DATA</text>
+          <rect x="290" y="40" width="240" height="40" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="410" y="64" text-anchor="middle" font-size="11.5" fill="var(--fg)">rx_data_merge_mon → sb</text>
+          <rect x="600" y="40" width="300" height="40" rx="10" fill="var(--pass-soft)" stroke="var(--pass)" stroke-width="1.5"/>
+          <text x="750" y="64" text-anchor="middle" font-size="11" fill="var(--fg)">data_merge/frame_N_data_mergeM.txt</text>
+          <line x1="240" y1="60" x2="286" y2="60" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am8)"/>
+          <line x1="530" y1="60" x2="596" y2="60" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am8)"/>
+
+          <rect x="20" y="95" width="220" height="40" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="130" y="119" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">DBR0-5 / DBL0-5</text>
+          <rect x="290" y="95" width="240" height="40" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="410" y="119" text-anchor="middle" font-size="11.5" fill="var(--fg)">dt_mon → dt_sb</text>
+          <rect x="600" y="95" width="300" height="40" rx="10" fill="var(--pass-soft)" stroke="var(--pass)" stroke-width="1.5"/>
+          <text x="750" y="115" text-anchor="middle" font-size="11" fill="var(--fg)">digital/frame_N_digitalMchesel_*.txt</text>
+          <text x="750" y="129" text-anchor="middle" font-size="10" fill="var(--muted)">DPLC_MODE 时改读 DPLC_frameN_idM.ppm</text>
+          <line x1="240" y1="115" x2="286" y2="115" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am8)"/>
+          <line x1="530" y1="115" x2="596" y2="115" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am8)"/>
+
+          <rect x="20" y="150" width="220" height="40" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="130" y="174" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">MACRO_TOP.SIM_OUT</text>
+          <rect x="290" y="150" width="240" height="40" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="410" y="174" text-anchor="middle" font-size="11.5" fill="var(--fg)">ana_mon → ana_scb</text>
+          <rect x="600" y="150" width="300" height="40" rx="10" fill="var(--pass-soft)" stroke="var(--pass)" stroke-width="1.5"/>
+          <text x="750" y="174" text-anchor="middle" font-size="11" fill="var(--fg)">cmodel analog 输出</text>
+          <line x1="240" y1="170" x2="286" y2="170" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am8)"/>
+          <line x1="530" y1="170" x2="596" y2="170" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am8)"/>
+
+          <rect x="20" y="205" width="220" height="40" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+          <text x="130" y="223" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">SD_CHOP / G_CHOP</text>
+          <text x="130" y="237" text-anchor="middle" font-size="10" fill="var(--muted)">chopper  pattern</text>
+          <rect x="290" y="205" width="240" height="40" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+          <text x="410" y="229" text-anchor="middle" font-size="11.5" fill="var(--fg)">ch_mon → ch_sb</text>
+          <rect x="600" y="205" width="300" height="40" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+          <text x="750" y="229" text-anchor="middle" font-size="11" fill="var(--fg)">chopper 期望序列</text>
+          <line x1="240" y1="225" x2="286" y2="225" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am8)"/>
+          <line x1="530" y1="225" x2="596" y2="225" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am8)"/>
+
+          <rect x="20" y="260" width="220" height="40" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="130" y="278" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">DRDOD 输入 / pattern</text>
+          <text x="130" y="292" text-anchor="middle" font-size="10" fill="var(--muted)">OD_k / DRD_PANEL</text>
+          <rect x="290" y="260" width="240" height="40" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="410" y="284" text-anchor="middle" font-size="11.5" fill="var(--fg)">drdod_input_mon → sb</text>
+          <rect x="600" y="260" width="300" height="40" rx="10" fill="var(--pass-soft)" stroke="var(--pass)" stroke-width="1.5"/>
+          <text x="750" y="284" text-anchor="middle" font-size="11" fill="var(--fg)">drdod_process.py golden</text>
+          <line x1="240" y1="280" x2="286" y2="280" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am8)"/>
+          <line x1="530" y1="280" x2="596" y2="280" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am8)"/>
+
+          <rect x="20" y="315" width="220" height="40" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="130" y="333" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">DRDOD 输出 / OD_time</text>
+          <text x="130" y="347" text-anchor="middle" font-size="10" fill="var(--muted)">analog 经 DRDOD 后</text>
+          <rect x="290" y="315" width="240" height="40" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="410" y="339" text-anchor="middle" font-size="11.5" fill="var(--fg)">drdod_output_mon → sb</text>
+          <rect x="600" y="315" width="300" height="40" rx="10" fill="var(--pass-soft)" stroke="var(--pass)" stroke-width="1.5"/>
+          <text x="750" y="339" text-anchor="middle" font-size="11" fill="var(--fg)">drdod_process.py golden</text>
+          <line x1="240" y1="335" x2="286" y2="335" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am8)"/>
+          <line x1="530" y1="335" x2="596" y2="335" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am8)"/>
+        </svg>
+        <div class="cap">图 7：6 条比对链 —— data_merge / digital_top / analog 比像素数据；chopper / drdod_input / drdod_output 比功能行为</div>
+      </div>
+
+      <h3 id="checkers-2">checker 结构关系图</h3>
+      <div class="diagram">
+        <svg viewBox="0 0 940 420" width="940" role="img" aria-label="checker 结构关系图">
+          <defs>
+            <marker id="am21" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"></path>
+            </marker>
+            <marker id="am21g" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--pass)"></path>
+            </marker>
+          </defs>
+
+          <rect x="10" y="10" width="920" height="90" rx="12" fill="none" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="28" y="32" font-size="12.5" font-weight="700" fill="var(--muted)">观测信号 · tb/intf_connect.sv（层次化 assign → ana_data_output_if）</text>
+          <rect x="30" y="44" width="270" height="46" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="165" y="63" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--fg)">data merge 级</text>
+          <text x="165" y="78" text-anchor="middle" font-size="9" fill="var(--muted)">VS / PIX_DATA_START / DCLK_DIV1P5 / PIX_DATA[23:0]</text>
+          <rect x="315" y="44" width="270" height="46" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="450" y="63" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--fg)">digital top 级</text>
+          <text x="450" y="78" text-anchor="middle" font-size="9" fill="var(--muted)">DBR/DBL / SLIN/SRIN / CLKA/CLKB / 寄存器镜像</text>
+          <rect x="600" y="44" width="320" height="46" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="760" y="63" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--fg)">analog / drdod 级</text>
+          <text x="760" y="78" text-anchor="middle" font-size="9" fill="var(--muted)">SIM_OUT[14469:10] / STB_A / BCC_I / DRDOD 状态</text>
+
+          <rect x="10" y="116" width="920" height="220" rx="12" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <text x="28" y="140" font-size="12.5" font-weight="700" fill="var(--accent)">ck_agent · checker_agent.sv（6 对 monitor + scoreboard）</text>
+
+          <rect x="30" y="150" width="270" height="50" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="165" y="170" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">data_merge</text>
+          <text x="165" y="188" text-anchor="middle" font-size="9.5" fill="var(--muted)">@VS 帧起，negedge DCLK 采 PIX_DATA→3B</text>
+          <rect x="315" y="150" width="270" height="50" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="450" y="170" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">digital_top</text>
+          <text x="450" y="188" text-anchor="middle" font-size="9.5" fill="var(--muted)">4 路并行 el/ol/or/er，按 SDC 重排</text>
+          <rect x="600" y="150" width="320" height="50" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="760" y="170" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">analog</text>
+          <text x="760" y="188" text-anchor="middle" font-size="9.5" fill="var(--muted)">STB_A ↓ +#10 采 SIM_OUT，按帧比像素/极性/VBK</text>
+
+          <rect x="30" y="210" width="270" height="50" rx="8" fill="var(--warn-soft)" stroke="var(--warn)"/>
+          <text x="165" y="230" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">chopper</text>
+          <text x="165" y="248" text-anchor="middle" font-size="9.5" fill="var(--muted)">SD_CHOP/G_CHOP 期望序列比对</text>
+          <rect x="315" y="210" width="270" height="50" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="450" y="230" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">drdod_input</text>
+          <text x="450" y="248" text-anchor="middle" font-size="9.5" fill="var(--muted)">pattern 检测 / OD_k / 1pto2p</text>
+          <rect x="600" y="210" width="320" height="50" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="760" y="230" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">drdod_output</text>
+          <text x="760" y="248" text-anchor="middle" font-size="9.5" fill="var(--muted)">DRDOD 输出数据 / OD_time 检测</text>
+
+          <rect x="30" y="270" width="270" height="50" rx="8" fill="var(--pass-soft)" stroke="var(--pass)"/>
+          <text x="165" y="290" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">golden 来源</text>
+          <text x="165" y="308" text-anchor="middle" font-size="9.5" fill="var(--muted)">outResult/{data_merge,digital,analog}/</text>
+          <rect x="315" y="270" width="270" height="50" rx="8" fill="var(--pass-soft)" stroke="var(--pass)"/>
+          <text x="450" y="290" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">DPLC / DRDOD golden</text>
+          <text x="450" y="308" text-anchor="middle" font-size="9.5" fill="var(--muted)">DPLC_frameN_idM.ppm / drdod_process.py</text>
+          <rect x="600" y="270" width="320" height="50" rx="8" fill="var(--warn-soft)" stroke="var(--warn)"/>
+          <text x="760" y="290" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">开关</text>
+          <text x="760" y="308" text-anchor="middle" font-size="9.5" fill="var(--muted)">env_cfg.*_check_on 分别 gate 各 scoreboard</text>
+
+          <rect x="10" y="350" width="920" height="55" rx="12" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="28" y="372" font-size="12" font-weight="700" fill="var(--fg)">判决</text>
+          <text x="28" y="392" font-size="10.5" fill="var(--muted)">全部 uvm_error → report server；base_test.report_phase 统计 err_num；err_num == 0 → PASSED，否则 FAILED</text>
+        </svg>
+        <div class="cap">图 7-1：checker 结构关系 —— 上：观测信号来源；中：ck_agent 内 6 对 mon/sb；下：开关与 pass/fail 判决</div>
+      </div>
+
+      <h3 id="checkers-3">各级 checker 检查流程</h3>
+      <div class="diagram">
+        <svg viewBox="0 0 940 660" width="940" role="img" aria-label="各级 checker 五步检查流程图">
+          <defs>
+            <marker id="am22" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+              <path d="M0,0 L7,3.5 L0,7 z" fill="var(--muted)"></path>
+            </marker>
+          </defs>
+          <text x="208" y="22" font-size="10.5" font-weight="700" fill="var(--muted)">① 采样触发</text>
+          <text x="360" y="22" font-size="10.5" font-weight="700" fill="var(--muted)">② 缓冲 / 计数</text>
+          <text x="512" y="22" font-size="10.5" font-weight="700" fill="var(--muted)">③ 帧齐落盘</text>
+          <text x="664" y="22" font-size="10.5" font-weight="700" fill="var(--muted)">④ 读 golden</text>
+          <text x="816" y="22" font-size="10.5" font-weight="700" fill="var(--muted)">⑤ 比对报错</text>
+
+          <rect x="20" y="50" width="110" height="75" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="75" y="78" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">data_merge</text>
+          <text x="75" y="94" text-anchor="middle" font-size="8.5" fill="var(--muted)">data_merge_scoreboard</text>
+          <text x="75" y="108" text-anchor="middle" font-size="8.5" fill="var(--muted)">CENTER1.PIX_DATA</text>
+          <g font-size="8.5" fill="var(--muted)">
+            <rect x="148" y="50" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="218" y="68" text-anchor="middle">@VS 帧起</text>
+            <text x="218" y="82" text-anchor="middle">PIX_DATA_START</text>
+            <text x="218" y="96" text-anchor="middle">negedge DCLK</text>
+            <text x="218" y="110" text-anchor="middle">采 PIX_DATA[23:0]</text>
+            <rect x="306" y="50" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="376" y="68" text-anchor="middle">analysis_chmod()</text>
+            <text x="376" y="82" text-anchor="middle">sub_pix_cnt</text>
+            <text x="376" y="96" text-anchor="middle">vact 行齐</text>
+            <text x="376" y="110" text-anchor="middle">unlock 清帧复位</text>
+            <rect x="464" y="50" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="534" y="68" text-anchor="middle">write_dump()</text>
+            <text x="534" y="82" text-anchor="middle">write_ppm()</text>
+            <text x="534" y="96" text-anchor="middle">drv_&lt;id&gt;_frame_&lt;c&gt;</text>
+            <rect x="622" y="50" width="140" height="75" rx="8" fill="var(--pass-soft)" stroke="var(--pass)"/>
+            <text x="692" y="68" text-anchor="middle">get_cmodel()</text>
+            <text x="692" y="82" text-anchor="middle">outResult/data_merge/</text>
+            <text x="692" y="96" text-anchor="middle">frame_&lt;N&gt;_data_merge</text>
+            <text x="692" y="110" text-anchor="middle">&lt;id&gt;.txt</text>
+            <rect x="780" y="50" width="140" height="75" rx="8" fill="var(--warn-soft)" stroke="var(--warn)"/>
+            <text x="850" y="68" text-anchor="middle">compare_cmodel()</text>
+            <text x="850" y="82" text-anchor="middle">逐字节 R/G/B 比</text>
+            <text x="850" y="100" text-anchor="middle" font-weight="700" fill="var(--fg)">"data merge error"</text>
+          </g>
+
+          <rect x="20" y="150" width="110" height="75" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="75" y="178" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">digital_top</text>
+          <text x="75" y="194" text-anchor="middle" font-size="8.5" fill="var(--muted)">digital_top_scoreboard</text>
+          <text x="75" y="208" text-anchor="middle" font-size="8.5" fill="var(--muted)">DBR/DBL 四路</text>
+          <g font-size="8.5" fill="var(--muted)">
+            <rect x="148" y="150" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="218" y="168" text-anchor="middle">4 路并行 el/ol/or/er</text>
+            <text x="218" y="182" text-anchor="middle">SLIN/SRIN ↓ 行起</text>
+            <text x="218" y="196" text-anchor="middle">CLKA/CLKB 沿采</text>
+            <rect x="306" y="150" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="376" y="168" text-anchor="middle">write_ol/or/el/er</text>
+            <text x="376" y="182" text-anchor="middle">tr 带寄存器镜像</text>
+            <text x="376" y="196" text-anchor="middle">create_arr() 按 CH_SEL</text>
+            <rect x="464" y="150" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="534" y="168" text-anchor="middle">main_phase</text>
+            <text x="534" y="182" text-anchor="middle">等四路帧号到齐</text>
+            <text x="534" y="196" text-anchor="middle">按 SDC 重排整行</text>
+            <rect x="622" y="150" width="140" height="75" rx="8" fill="var(--pass-soft)" stroke="var(--pass)"/>
+            <text x="692" y="168" text-anchor="middle">get_cmodel_lo/ro/le/re</text>
+            <text x="692" y="182" text-anchor="middle">outResult/digital/</text>
+            <text x="692" y="196" text-anchor="middle">frame_&lt;N&gt;_digital&lt;id&gt;</text>
+            <text x="692" y="210" text-anchor="middle">chesel_{L/R}{odd/even}</text>
+            <rect x="780" y="150" width="140" height="75" rx="8" fill="var(--warn-soft)" stroke="var(--warn)"/>
+            <text x="850" y="168" text-anchor="middle">compare_data()</text>
+            <text x="850" y="186" text-anchor="middle" font-weight="700" fill="var(--fg)">"digital sb error"</text>
+            <text x="850" y="200" text-anchor="middle" font-weight="700" fill="var(--fg)">/ "dt pixel error"</text>
+          </g>
+
+          <rect x="20" y="250" width="110" height="75" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="75" y="278" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">analog</text>
+          <text x="75" y="294" text-anchor="middle" font-size="8.5" fill="var(--muted)">analog_data_output</text>
+          <text x="75" y="308" text-anchor="middle" font-size="8.5" fill="var(--muted)">_scoreboard</text>
+          <g font-size="8.5" fill="var(--muted)">
+            <rect x="148" y="250" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="218" y="268" text-anchor="middle">STB_A ↓ +#10</text>
+            <text x="218" y="282" text-anchor="middle">采 SIM_OUT</text>
+            <text x="218" y="296" text-anchor="middle">vact 行/帧</text>
+            <rect x="306" y="250" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="376" y="268" text-anchor="middle">write_monitor/pol/</text>
+            <text x="376" y="282" text-anchor="middle">vbk/unlock</text>
+            <text x="376" y="296" text-anchor="middle">10bit 切分像素/pol/chop</text>
+            <rect x="464" y="250" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="534" y="268" text-anchor="middle">line_cnt 对齐</text>
+            <text x="534" y="282" text-anchor="middle">按帧写 ppm</text>
+            <text x="534" y="296" text-anchor="middle">analog_check_on 门控</text>
+            <rect x="622" y="250" width="140" height="75" rx="8" fill="var(--pass-soft)" stroke="var(--pass)"/>
+            <text x="692" y="268" text-anchor="middle">get_cmodel()</text>
+            <text x="692" y="282" text-anchor="middle">outResult/analog/</text>
+            <text x="692" y="296" text-anchor="middle">frame_&lt;N&gt;_analog&lt;id&gt;.txt</text>
+            <rect x="780" y="250" width="140" height="75" rx="8" fill="var(--warn-soft)" stroke="var(--warn)"/>
+            <text x="850" y="268" text-anchor="middle">analysis_chopper/pol/vlpmod</text>
+            <text x="850" y="286" text-anchor="middle" font-weight="700" fill="var(--fg)">"analog pixel/pol/</text>
+            <text x="850" y="300" text-anchor="middle" font-weight="700" fill="var(--fg)">vbk/chopper error"</text>
+          </g>
+
+          <rect x="20" y="350" width="110" height="75" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+          <text x="75" y="378" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">chopper</text>
+          <text x="75" y="394" text-anchor="middle" font-size="8.5" fill="var(--muted)">chopper_monitor +</text>
+          <text x="75" y="408" text-anchor="middle" font-size="8.5" fill="var(--muted)">chopper_scoreboard</text>
+          <g font-size="8.5" fill="var(--muted)">
+            <rect x="148" y="350" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="218" y="368" text-anchor="middle">SD_CHOP / G_CHOP</text>
+            <text x="218" y="382" text-anchor="middle">pattern 触发</text>
+            <text x="218" y="396" text-anchor="middle">按帧计数</text>
+            <rect x="306" y="350" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="376" y="368" text-anchor="middle">chopper_monitor</text>
+            <text x="376" y="382" text-anchor="middle">采样 / 计数</text>
+            <text x="376" y="396" text-anchor="middle">同步 analog 帧</text>
+            <rect x="464" y="350" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="534" y="368" text-anchor="middle">生成期望序列</text>
+            <text x="534" y="382" text-anchor="middle">chopper_pattern[i%8]</text>
+            <text x="534" y="396" text-anchor="middle">对齐帧边界</text>
+            <rect x="622" y="350" width="140" height="75" rx="8" fill="var(--pass-soft)" stroke="var(--pass)"/>
+            <text x="692" y="368" text-anchor="middle">env_cfg 期望</text>
+            <text x="692" y="382" text-anchor="middle">SD_CHOP / TP 等</text>
+            <text x="692" y="396" text-anchor="middle">chopper pattern</text>
+            <rect x="780" y="350" width="140" height="75" rx="8" fill="var(--warn-soft)" stroke="var(--warn)"/>
+            <text x="850" y="368" text-anchor="middle">chopper_scoreboard</text>
+            <text x="850" y="386" text-anchor="middle" font-weight="700" fill="var(--fg)">"chopper error"</text>
+          </g>
+
+          <rect x="20" y="450" width="110" height="75" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="75" y="478" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">drdod_input</text>
+          <text x="75" y="494" text-anchor="middle" font-size="8.5" fill="var(--muted)">drdod_input_monitor</text>
+          <text x="75" y="508" text-anchor="middle" font-size="8.5" fill="var(--muted)">+ drdod_input_sb</text>
+          <g font-size="8.5" fill="var(--muted)">
+            <rect x="148" y="450" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="218" y="468" text-anchor="middle">DRDOD 输入信号</text>
+            <text x="218" y="482" text-anchor="middle">pattern 检测</text>
+            <text x="218" y="496" text-anchor="middle">OD_k / DRD_PANEL</text>
+            <rect x="306" y="450" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="376" y="468" text-anchor="middle">drdod_input_monitor</text>
+            <text x="376" y="482" text-anchor="middle">缓冲输入数据</text>
+            <text x="376" y="496" text-anchor="middle">帧号/行号计数</text>
+            <rect x="464" y="450" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="534" y="468" text-anchor="middle">1pto2p / 交叉重整</text>
+            <text x="534" y="482" text-anchor="middle">帧对齐落盘</text>
+            <rect x="622" y="450" width="140" height="75" rx="8" fill="var(--pass-soft)" stroke="var(--pass)"/>
+            <text x="692" y="468" text-anchor="middle">drdod_process.py</text>
+            <text x="692" y="482" text-anchor="middle">outResult/drdod/</text>
+            <text x="692" y="496" text-anchor="middle">input golden</text>
+            <rect x="780" y="450" width="140" height="75" rx="8" fill="var(--warn-soft)" stroke="var(--warn)"/>
+            <text x="850" y="468" text-anchor="middle">drdod_input_scoreboard</text>
+            <text x="850" y="486" text-anchor="middle" font-weight="700" fill="var(--fg)">"drdod input error"</text>
+          </g>
+
+          <rect x="20" y="550" width="110" height="75" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="75" y="578" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">drdod_output</text>
+          <text x="75" y="594" text-anchor="middle" font-size="8.5" fill="var(--muted)">drdod_output_monitor</text>
+          <text x="75" y="608" text-anchor="middle" font-size="8.5" fill="var(--muted)">+ drdod_output_sb</text>
+          <g font-size="8.5" fill="var(--muted)">
+            <rect x="148" y="550" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="218" y="568" text-anchor="middle">DRDOD 输出数据</text>
+            <text x="218" y="582" text-anchor="middle">OD_time 检测</text>
+            <rect x="306" y="550" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="376" y="568" text-anchor="middle">drdod_output_monitor</text>
+            <text x="376" y="582" text-anchor="middle">缓冲输出数据</text>
+            <rect x="464" y="550" width="140" height="75" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+            <text x="534" y="568" text-anchor="middle">output 帧对齐</text>
+            <text x="534" y="582" text-anchor="middle">按 OD_time 分窗口</text>
+            <rect x="622" y="550" width="140" height="75" rx="8" fill="var(--pass-soft)" stroke="var(--pass)"/>
+            <text x="692" y="568" text-anchor="middle">drdod_process.py</text>
+            <text x="692" y="582" text-anchor="middle">outResult/drdod/</text>
+            <text x="692" y="596" text-anchor="middle">output golden</text>
+            <rect x="780" y="550" width="140" height="75" rx="8" fill="var(--warn-soft)" stroke="var(--warn)"/>
+            <text x="850" y="568" text-anchor="middle">drdod_output_scoreboard</text>
+            <text x="850" y="586" text-anchor="middle" font-weight="700" fill="var(--fg)">"drdod output error"</text>
+          </g>
+
+          <line x1="288" y1="87" x2="302" y2="87" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="446" y1="87" x2="460" y2="87" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="604" y1="87" x2="618" y2="87" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="762" y1="87" x2="776" y2="87" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="288" y1="187" x2="302" y2="187" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="446" y1="187" x2="460" y2="187" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="604" y1="187" x2="618" y2="187" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="762" y1="187" x2="776" y2="187" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="288" y1="287" x2="302" y2="287" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="446" y1="287" x2="460" y2="287" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="604" y1="287" x2="618" y2="287" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="762" y1="287" x2="776" y2="287" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="288" y1="387" x2="302" y2="387" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="446" y1="387" x2="460" y2="387" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="604" y1="387" x2="618" y2="387" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="762" y1="387" x2="776" y2="387" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="288" y1="487" x2="302" y2="487" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="446" y1="487" x2="460" y2="487" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="604" y1="487" x2="618" y2="487" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="762" y1="487" x2="776" y2="487" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="288" y1="587" x2="302" y2="587" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="446" y1="587" x2="460" y2="587" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="604" y1="587" x2="618" y2="587" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="762" y1="587" x2="776" y2="587" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am22)"/>
+        </svg>
+        <div class="cap">图 7-2：6 条比对链的五步检查流程（采样触发 → 缓冲计数 → 帧齐落盘 → 读 golden → 比对报错），概念性描述 HV2M23 各链行为</div>
+      </div>
+
+      <h3 id="checkers-4">各链细节</h3>
+      <div class="card">
+        <h4>data_merge（data_merge_scoreboard.sv）</h4>
+        <ul>
+          <li>monitor 采 <code>CENTER1.PIX_DATA</code> 写成 ppm；golden 从 <code>{SIM_TEST_PATH}/outResult/data_merge/frame_N_data_mergeM.txt</code> 读。</li>
+          <li>逐字节比对，不等报 <code>uvm_error("data merge error")</code> 并注明帧/行/像素/RGB。</li>
+        </ul>
+        <h4>digital_top（digital_top_scoreboard.sv）</h4>
+        <ul>
+          <li>比对 DBR/DBL 左右 odd/even 四路，golden 为 <code>outResult/digital/frame_N_digitalMchesel_{Lodd,Leven,Rodd,Reven}.txt</code>。</li>
+          <li><code>DPLC_MODE</code> 时改读 <code>dplc.pl</code> 输出的 <code>DPLC_frameN_idM.ppm</code>。</li>
+        </ul>
+        <h4>analog（analog_data_output_scoreboard.sv）</h4>
+        <ul>
+          <li>采 <code>SIM_OUT[14469:10]</code> 模拟输出，4 个 analysis imp（monitor/pol/vbk/unlock），按帧比像素、极性、VBK、chopper。</li>
+          <li>Disable channel 行为模型期望为 <code>10'h22</code>（HiZ）。</li>
+        </ul>
+        <h4>chopper（chop_monitor / chop_scoreboard）</h4>
+        <ul>
+          <li>根据 <code>SD_CHOP[3:0]</code> 与 <code>G_CHOP[3:0]</code> 产生期望 chopper 序列，与 analog 中分离出的 chop bit 比对。</li>
+        </ul>
+        <h4>drdod_input / drdod_output</h4>
+        <ul>
+          <li><code>drdod_process.py</code> 生成 golden：检测输入 pattern 类别（OD_k）、面板类型（DRD_PANEL）、1pto2p 交叉重整等。</li>
+          <li>drdod_input 检查 pattern 检测与加权选择；drdod_output 检查最终输出数据与 OD_time。</li>
+        </ul>
+        <h4>checksum 说明</h4>
+        <ul>
+          <li>HV2M23 <strong>无独立 checksum checker</strong>（不同于 HK1V11）。寄存器装载正确性由 datapath 用例和 I2C 读写用例间接覆盖。</li>
+        </ul>
+      </div>
+
+      <h3 id="checkers-5">辅助工具</h3>
+      <div class="card">
+        <table>
+          <tr><th>工具 / 脚本</th><th>作用</th></tr>
+          <tr><td><code>script/run_tc.sh</code></td><td>运行单个 testcase，支持 TOP / TOP_COV / TOP_NETLIST / FPGA_TOP / verdi / cov / cov_rpt。</td></tr>
+          <tr><td><code>script/check.py</code></td><td>遍历仿真目录，检查 <code>compile.log</code> 中的 "Error" 与 <code>sim.log</code> 中的 "UVM_ERROR"，输出 <code>compile_result.txt</code> / <code>compare_result.txt</code>。<strong>HV2M23 使用 check.py，不是 HK1V11 的 check_sim_results.sh。</strong></td></tr>
+          <tr><td><code>script/merge_coverage.py</code></td><td>合并所有用例的 <code>simv.vdb</code> 生成统一覆盖率报告；注意其中可能存在硬编码的项目路径，使用前需确认。</td></tr>
+          <tr><td><code>script/produce_checker1.py</code></td><td>checker 生成辅助脚本。</td></tr>
+          <tr><td><code>script/user_def_addon.pl</code></td><td><code>user_def.sv</code> 附加定义生成。</td></tr>
+          <tr><td><code>top/tests/create_new_case.sh</code></td><td>从模板创建新用例。</td></tr>
+          <tr><td><code>top/tests/run_case.py</code></td><td>回归逐 case 运行，可接受用例名或 <code>case_list.txt</code>。</td></tr>
+          <tr><td><code>top/tests/run_parallel.py</code></td><td>并发回归运行。</td></tr>
+          <tr><td><code>top/tests/regression.py</code> / <code>regression_cov.py</code></td><td>回归调度与覆盖率回归脚本。</td></tr>
+          <tr><td><code>top/tests/produce_isp_register*.py</code> / <code>produce_all_register.py</code> / <code>user_def_register*.py</code></td><td>寄存器配置 / user_def 生成辅助。</td></tr>
+          <tr><td><code>top/tests/copy_test.sh</code> / <code>produce.sh</code> / <code>creat_cases.sh</code></td><td>用例复制、产物生成、批量建case 等辅助脚本。</td></tr>
+        </table>
+      </div>
+
+      <h3 id="checkers-6">开关与判决</h3>
+      <div class="card">
+        <table>
+          <tr><th>开关</th><th>说明</th></tr>
+          <tr><td><code>env_cfg.data_merge_check_on</code></td><td>gate data_merge scoreboard</td></tr>
+          <tr><td><code>env_cfg.digital_top_check_on</code></td><td>gate digital_top scoreboard</td></tr>
+          <tr><td><code>env_cfg.analog_check_on</code></td><td>gate analog scoreboard</td></tr>
+          <tr><td><code>env_cfg.chopper_check_on</code></td><td>gate chopper scoreboard</td></tr>
+          <tr><td><code>env_cfg.drdod_input_check_on</code></td><td>gate drdod_input scoreboard</td></tr>
+          <tr><td><code>env_cfg.drdod_output_check_on</code></td><td>gate drdod_output scoreboard</td></tr>
+        </table>
+        <p>所有 scoreboard 的 <code>uvm_error</code> 汇聚到 report server；<code>base_test.report_phase</code> 统计 <code>err_num</code>，为 0 则打印 <code>TEST CASE PASSED</code>，否则 <code>FAILED</code>。</p>
+      </div>
+    </section>
+    </article>
+<div class="page-nav"><a class="prev" href="./stimulus.html"><span class="label">上一章</span><span class="title">激励、寄存器与 golden</span></a><a class="next" href="./run.html"><span class="label">下一章</span><span class="title">仿真运行与回归覆盖率</span></a></div>
+  </main>
+</div>
+<div class="footer">HV2M23 DV_TCON_C 验证环境使用指南 · 2026-07-22</div>
+<script>
+(function(){
+  const headings = Array.from(document.querySelectorAll('.section[id], .section h3[id]'));
+  const links = Array.from(document.querySelectorAll('.toc a'));
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) {
+        links.forEach(a => a.classList.remove('active'));
+        const active = links.find(a => a.getAttribute('href') === '#' + entry.target.id);
+        if(active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-80px 0px -60% 0px', threshold: 0 });
+  headings.forEach(h => observer.observe(h));
+  links.forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const el = document.getElementById(a.getAttribute('href').slice(1));
+      if(el) el.scrollIntoView({behavior:'smooth'});
+    });
+  });
+})();
+</script>
+</body>
+</html>

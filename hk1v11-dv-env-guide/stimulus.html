@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>激励、寄存器与 golden - HK1V11 DV 指南</title>
+<style>
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --fg: #1e293b;
+  --muted: #64748b;
+  --accent: #1d4ed8;
+  --accent-soft: #dbeafe;
+  --line: #e2e8f0;
+  --border: #e2e8f0;
+  --pass: #16a34a;
+  --pass-soft: #dcfce7;
+  --fail: #dc2626;
+  --warn: #d97706;
+  --warn-soft: #fef3c7;
+  --code-bg: #111827;
+  --code-fg: #e5e7eb;
+  --shadow: 0 10px 40px rgba(0,0,0,0.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --text: #f1f5f9;
+    --fg: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a;
+    --line: #334155;
+    --border: #334155;
+    --pass: #4ade80;
+    --pass-soft: #14532d;
+    --fail: #f87171;
+    --warn: #fbbf24;
+    --warn-soft: #78350f;
+    --code-bg: #0b1220;
+    --code-fg: #e5e7eb;
+    --shadow: 0 10px 40px rgba(0,0,0,0.35);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+}
+a { color: var(--accent); }
+.navbar { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--line); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.navbar-inner { max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+.navbar-brand { font-weight: 700; color: var(--accent); white-space: nowrap; font-size: 15px; text-decoration: none; }
+.navbar-links { display: flex; align-items: center; gap: 6px; overflow-x: auto; flex: 1; scrollbar-width: none; }
+.navbar-links::-webkit-scrollbar { display: none; }
+.navbar-links a { padding: 6px 10px; border-radius: 6px; font-size: 14px; color: var(--text); white-space: nowrap; transition: background 0.15s; text-decoration: none; }
+.navbar-links a:hover { background: var(--bg); }
+.navbar-links a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+.container.with-toc { display: flex; gap: 32px; align-items: stretch; }
+.toc-wrapper { width: 260px; flex-shrink: 0; align-self: stretch; }
+.toc { position: sticky; top: 76px; max-height: calc(100vh - 100px); overflow-y: auto; padding: 16px; background: var(--surface); border-radius: 12px; border: 1px solid var(--line); font-size: 14px; box-shadow: var(--shadow); }
+.toc a { display: block; padding: 6px 8px; border-radius: 6px; color: var(--muted); margin: 2px 0; transition: background 0.15s, color 0.15s; text-decoration: none; }
+.toc a:hover { background: var(--bg); color: var(--accent); }
+.toc a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.toc a.toc-h1 { font-weight: 700; color: var(--accent); margin-bottom: 8px; cursor: default; }
+.toc a.toc-h3 { padding-left: 18px; font-size: 13px; }
+.content { flex: 1; min-width: 0; }
+.article { background: var(--surface); border-radius: 20px; padding: 40px 48px; box-shadow: var(--shadow); }
+.hero { text-align: center; margin-bottom: 40px; padding-top: 24px; }
+.hero h1 { margin: 0 0 12px; font-size: 34px; line-height: 1.25; font-weight: 800; }
+.hero .author { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+.hero .lead { font-size: 17px; max-width: 760px; margin: 0 auto; color: var(--text); }
+.hero .badges { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+.section-title { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 40px 0 16px; }
+.chapter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.chapter-card { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; color: var(--text); transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s; text-decoration: none; }
+.chapter-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
+.chapter-card .num { display: inline-block; width: 28px; height: 28px; line-height: 28px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 13px; font-weight: 700; text-align: center; margin-bottom: 10px; }
+.chapter-card .title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+.chapter-card .desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.page-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 48px; }
+.page-nav a { display: block; padding: 16px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; color: var(--text); transition: border-color 0.2s, box-shadow 0.2s; text-decoration: none; }
+.page-nav a:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+.page-nav a.next { text-align: right; margin-left: auto; }
+.page-nav .label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.page-nav .title { font-weight: 600; color: var(--accent); }
+.footer { text-align: center; color: var(--muted); margin-top: 48px; font-size: 13px; padding-bottom: 32px; }
+.section { margin-bottom: 48px; }
+.section:last-child { margin-bottom: 0; }
+.section h2 { font-size: 24px; margin: 0 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent); display: inline-block; font-weight: 700; }
+.section h3 { font-size: 18px; margin: 26px 0 12px; font-weight: 700; padding-left: 12px; border-left: 4px solid var(--accent); }
+.section h4 { font-size: 15.5px; margin: 18px 0 8px; font-weight: 700; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 18px; }
+.article .card { background: var(--bg); }
+.card p { margin: 10px 0; }
+.card ul, .card ol { margin: 8px 0; padding-left: 22px; }
+.card li { margin: 5px 0; }
+.tag { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.proj { background: var(--accent-soft); color: var(--accent); }
+.result.pass { background: var(--pass-soft); color: var(--pass); }
+table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--accent-soft); color: var(--accent); font-weight: 700; white-space: nowrap; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; background: var(--accent-soft); color: var(--accent); padding: 2px 6px; border-radius: 6px; word-break: break-all; }
+pre { background: var(--code-bg); color: var(--code-fg); border-radius: 12px; padding: 18px 20px; overflow-x: auto; font-size: 13px; line-height: 1.6; }
+pre code { background: transparent; color: inherit; padding: 0; }
+pre .c { color: #6b7280; }
+.diagram { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 22px 16px; margin: 14px 0 20px; overflow-x: auto; }
+.diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.diagram .cap { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 10px; }
+svg text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans SC", "Microsoft YaHei", monospace; }
+.blocker-list { list-style: none; padding: 0; margin: 0; }
+.blocker-list li { padding: 16px 18px; margin-bottom: 12px; background: var(--warn-soft); border-left: 4px solid var(--warn); border-radius: 10px; color: var(--fg); line-height: 1.7; }
+.blocker-list li:last-child { margin-bottom: 0; }
+.tip-list { list-style: none; padding: 0; margin: 0; }
+.tip-list li { padding: 14px 18px; margin-bottom: 10px; background: var(--pass-soft); border-left: 4px solid var(--pass); border-radius: 10px; line-height: 1.7; }
+.tip-list li:last-child { margin-bottom: 0; }
+.hint-bar { background: var(--warn-soft); border-left: 4px solid var(--warn); border-radius: 10px; padding: 14px 18px; margin: 24px auto; max-width: 760px; font-size: 14.5px; }
+@media (max-width: 960px) {
+  .toc-wrapper { display: none; }
+  .container.with-toc { display: block; }
+  .article { padding: 28px 20px; border-radius: 16px; }
+  .page-nav { grid-template-columns: 1fr; }
+  .page-nav a.next { text-align: left; margin-left: 0; }
+  .navbar-inner { padding: 10px 16px; gap: 10px; }
+}
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="navbar-brand" href="./index.html">HK1V11 DV 指南</a>
+    <div class="navbar-links"><a href="./index.html">首页</a><a href="./overview.html">概览</a><a href="./tb-arch.html">TB 架构</a><a href="./stimulus.html" class="active">激励与 golden</a><a href="./checkers.html">检查机制</a><a href="./run.html">运行与回归</a><a href="./cases.html">用例</a><a href="./faq.html">FAQ 与清单</a></div>
+  </div>
+</nav>
+<div class="container with-toc">
+  <aside class="toc-wrapper"><nav class="toc"><a class="toc-h1">激励、寄存器与 golden</a>
+<a href="#stimulus">激励与寄存器配置</a>
+<a class="toc-h3" href="#stim-frame">激励帧结构（isptx_sequence.send_isp()）</a>
+<a class="toc-h3" href="#stimulus-1">激励发送流程总图（isptx_sequence）</a>
+<a class="toc-h3" href="#stimulus-2">激励关键 task 速查</a>
+<a class="toc-h3" href="#stim-reg">寄存器三条配置路径</a>
+<a class="toc-h3" href="#stim-flow">寄存器 spec 生成流程</a>
+<a href="#cmodel">golden 与 cmodel</a>
+<a class="toc-h3" href="#cmodel-1">golden 生成流程（仿真中现算）</a>
+<a class="toc-h3" href="#cmodel-2">pic_process 调用参数</a>
+<a class="toc-h3" href="#cmodel-3">dummy 数据机制（convert_9b_to_8b）</a></nav></aside>
+  <main class="content">
+    <article class="article">
+<section class="section" id="stimulus">
+      <h2>激励与寄存器配置</h2>
+      <h3 id="stim-frame">激励帧结构（isptx_sequence.send_isp()）</h3>
+      <div class="diagram">
+        <svg viewBox="0 0 920 150" width="920" role="img" aria-label="激励帧结构图">
+          <defs>
+            <marker id="am4" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"></path>
+            </marker>
+          </defs>
+          <rect x="15" y="45" width="130" height="60" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="80" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">Link Training</text>
+          <text x="80" y="88" text-anchor="middle" font-size="11" fill="var(--muted)">TBK 码</text>
+
+          <rect x="175" y="45" width="80" height="60" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="215" y="80" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">LSP</text>
+
+          <rect x="285" y="45" width="165" height="60" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="367" y="66" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">CTRL_F</text>
+          <text x="367" y="84" text-anchor="middle" font-size="11" fill="var(--muted)">K4 + 60 字节寄存器</text>
+
+          <rect x="480" y="35" width="250" height="80" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <text x="605" y="58" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">行循环 ×N（VBP/VACT/VFP）</text>
+          <text x="605" y="78" text-anchor="middle" font-size="11" fill="var(--fg)">K1 + CTRL_L(5B) + 像素 + K2</text>
+          <text x="605" y="98" text-anchor="middle" font-size="11" fill="var(--muted)">CTRL_L 来自 cfg_frameN.txt</text>
+
+          <rect x="760" y="45" width="145" height="60" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="832" y="66" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">帧尾 CTRL_F</text>
+          <text x="832" y="84" text-anchor="middle" font-size="11" fill="var(--muted)">checksum 观测点</text>
+
+          <line x1="145" y1="75" x2="171" y2="75" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am4)"/>
+          <line x1="255" y1="75" x2="281" y2="75" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am4)"/>
+          <line x1="450" y1="75" x2="476" y2="75" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am4)"/>
+          <line x1="730" y1="75" x2="756" y2="75" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am4)"/>
+        </svg>
+        <div class="cap">图 4：一帧的链路激励结构 —— 寄存器值随 CTRL_F / CTRL_L 包进入 DUT</div>
+      </div>
+
+      <h3 id="stimulus-1">激励发送流程总图（isptx_sequence）</h3>
+      <div class="diagram">
+        <svg viewBox="0 0 940 700" width="940" role="img" aria-label="isptx_sequence 激励发送流程总图">
+          <defs>
+            <marker id="am20" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"></path>
+            </marker>
+            <marker id="am20g" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--pass)"></path>
+            </marker>
+          </defs>
+
+          <rect x="10" y="10" width="920" height="80" rx="12" fill="none" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="28" y="32" font-size="12.5" font-weight="700" fill="var(--muted)">Test / Config Layer</text>
+          <rect x="30" y="44" width="210" height="36" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="135" y="59" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">t_* 用例 test class</text>
+          <text x="135" y="73" text-anchor="middle" font-size="9.5" fill="var(--muted)">env_cfg + 4×*_check_on</text>
+          <rect x="250" y="44" width="210" height="36" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="355" y="59" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">user_def.sv</text>
+          <text x="355" y="73" text-anchor="middle" font-size="9.5" fill="var(--muted)">HACT・VACT・FPS・PORT_NUM・FRAME_NUM</text>
+          <rect x="470" y="44" width="210" height="36" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="575" y="59" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">pattern/frame_N.ppm</text>
+          <text x="575" y="73" text-anchor="middle" font-size="9.5" fill="var(--muted)">P3 文本图像</text>
+          <rect x="690" y="44" width="220" height="36" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="800" y="59" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">cfg_frameN.txt</text>
+          <text x="800" y="73" text-anchor="middle" font-size="9.5" fill="var(--muted)">每帧寄存器值（二进制字符串）</text>
+
+          <rect x="10" y="106" width="600" height="470" rx="12" fill="none" stroke="var(--pass)" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <text x="28" y="130" font-size="12.5" font-weight="700" fill="var(--pass)">发送端 TX · isptx_sequence.sv（8B/10B 主流程）</text>
+
+          <rect x="30" y="142" width="560" height="48" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="45" y="162" font-size="11.5" font-weight="700" fill="var(--fg)">body()（:1064）</text>
+          <text x="45" y="179" font-size="10" fill="var(--muted)">randomize → config_db 取 env_cfg / vif → plusargs SIM_TEST_PATH / FILE_PATH</text>
+
+          <rect x="30" y="202" width="560" height="88" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="45" y="220" font-size="11.5" font-weight="700" fill="var(--fg)">send_isp() FSM（:985）</text>
+          <rect x="45" y="228" width="165" height="52" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+          <text x="127" y="245" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--fg)">TRAIN_SEND</text>
+          <text x="127" y="260" text-anchor="middle" font-size="9" fill="var(--muted)">link_training TBK 逐 bit</text>
+          <text x="127" y="272" text-anchor="middle" font-size="9" fill="var(--muted)">→ PAD_LOCK 后再 4us；500us 超时</text>
+          <rect x="222" y="228" width="200" height="52" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+          <text x="322" y="245" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--fg)">TRAIN_ACTIVE</text>
+          <text x="322" y="260" text-anchor="middle" font-size="9" fill="var(--muted)">LSP → CTRL_F → send_ppm()</text>
+          <text x="322" y="272" text-anchor="middle" font-size="9" fill="var(--muted)">mon_unlock 失锁重训（&gt;3 次放弃）</text>
+          <rect x="434" y="228" width="140" height="52" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="504" y="250" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--fg)">DRV_PPM_DONE</text>
+          <text x="504" y="266" text-anchor="middle" font-size="9" fill="var(--muted)">#300ns 结束</text>
+          <line x1="210" y1="254" x2="218" y2="254" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am20)"/>
+          <line x1="422" y1="254" x2="430" y2="254" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am20)"/>
+
+          <rect x="30" y="302" width="175" height="86" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="117" y="320" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">send_LSP_seq(10)（:240）</text>
+          <text x="117" y="337" text-anchor="middle" font-size="9.5" fill="var(--muted)">K2 → ea~ed 训练字节 ×32 → K3</text>
+          <text x="117" y="351" text-anchor="middle" font-size="9.5" fill="var(--muted)">×10 次；K 极性取 rsp.init_data</text>
+          <text x="117" y="365" text-anchor="middle" font-size="9.5" fill="var(--muted)">（driver 回传线上电平）</text>
+          <rect x="215" y="302" width="185" height="86" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="307" y="320" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">send_CTRLF_seq(0)（:290）</text>
+          <text x="307" y="337" text-anchor="middle" font-size="9.5" fill="var(--muted)">K4 → 60 字节寄存器</text>
+          <text x="307" y="351" text-anchor="middle" font-size="9.5" fill="var(--muted)">get_ctrlF_reg()（:319）</text>
+          <text x="307" y="365" text-anchor="middle" font-size="9.5" fill="var(--muted)">逐字节 scramble → encode_8b10b</text>
+          <rect x="410" y="302" width="180" height="86" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+          <text x="500" y="320" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">寄存器数据来源</text>
+          <text x="500" y="337" text-anchor="middle" font-size="9.5" fill="var(--muted)">env_cfg.get_ctrlF/L_reg()</text>
+          <text x="500" y="351" text-anchor="middle" font-size="9.5" fill="var(--muted)">→ process_line 重读 cfg_frameN.txt</text>
+          <text x="500" y="365" text-anchor="middle" font-size="9.5" fill="var(--muted)">CTRL_F 60B(0x00~0x3F) / CTRL_L 5B</text>
+
+          <rect x="30" y="404" width="560" height="160" rx="10" fill="none" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="4 3"/>
+          <text x="45" y="424" font-size="11.5" font-weight="700" fill="var(--accent)">send_ppm() 逐帧循环 c = 0 .. frame_num-1（:539-983）</text>
+          <rect x="45" y="436" width="165" height="116" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="127" y="453" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--fg)">VBP / VFP 行（:572/:919）</text>
+          <text x="127" y="469" text-anchor="middle" font-size="9" fill="var(--muted)">HBP 0 填充 →</text>
+          <text x="127" y="482" text-anchor="middle" font-size="9" fill="var(--muted)">CTRLL(BKDU=1)（:671）</text>
+          <text x="127" y="495" text-anchor="middle" font-size="9" fill="var(--muted)">→ VBK 字节 → K2 key</text>
+          <text x="127" y="508" text-anchor="middle" font-size="9" fill="var(--muted)">→ HFP 0 填充</text>
+          <text x="127" y="526" text-anchor="middle" font-size="9" fill="var(--muted)">VBK_TEST 时 vbk 逐行++</text>
+          <rect x="225" y="436" width="165" height="116" rx="8" fill="var(--pass-soft)" stroke="var(--pass)"/>
+          <text x="307" y="453" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--fg)">帧间（:634-638）</text>
+          <text x="307" y="469" text-anchor="middle" font-size="9" fill="var(--muted)">get_ppm() 按 lane id 截取（:453）</text>
+          <text x="307" y="482" text-anchor="middle" font-size="9" fill="var(--muted)">→ write_ppm() 存档（:157）</text>
+          <text x="307" y="495" text-anchor="middle" font-size="9" font-weight="700" fill="var(--fg)">→ exec_c(c) 每帧 VACT 前一次</text>
+          <text x="307" y="508" text-anchor="middle" font-size="9" fill="var(--muted)">pixels 无跨帧缓存</text>
+          <text x="307" y="526" text-anchor="middle" font-size="9" fill="var(--muted)">帧末 delete</text>
+          <rect x="405" y="436" width="170" height="116" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="490" y="453" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--fg)">VACT 行（:644-917）</text>
+          <text x="490" y="469" text-anchor="middle" font-size="9" fill="var(--muted)">CTRLL（仅首行 Fsync=1）</text>
+          <text x="490" y="482" text-anchor="middle" font-size="9" fill="var(--muted)">逐字节 scramble→8b10b→ONE_PKT</text>
+          <text x="490" y="495" text-anchor="middle" font-size="9" fill="var(--muted)">行尾 K3（开扰）/ K2 → HFP 0</text>
+          <text x="490" y="508" text-anchor="middle" font-size="9" fill="var(--muted)">末行 send_CTRLF_seq(c+1)（:816）</text>
+          <text x="490" y="526" text-anchor="middle" font-size="9" font-weight="700" fill="var(--fg)">← 帧间寄存器切换点</text>
+          <line x1="210" y1="494" x2="221" y2="494" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am20)"/>
+          <line x1="390" y1="494" x2="401" y2="494" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#am20)"/>
+
+          <rect x="630" y="106" width="300" height="238" rx="12" fill="none" stroke="var(--pass)" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <text x="648" y="130" font-size="12.5" font-weight="700" fill="var(--pass)">golden 生成 · exec_c()（:92-130）</text>
+          <rect x="648" y="142" width="264" height="58" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="780" y="160" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--fg)">pic_process（$system 调用）</text>
+          <text x="780" y="175" text-anchor="middle" font-size="9" fill="var(--muted)">-W -H -P -I frame_c -R outResult -p 1</text>
+          <text x="780" y="188" text-anchor="middle" font-size="9" fill="var(--muted)">-r CH_SEL -X HPOL1 -Y POL2 -O POL -C POLC -S SDC -OW -H4</text>
+          <rect x="648" y="208" width="264" height="44" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="780" y="225" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--fg)">DPLC_MODE=1 → dplc.pl（:123）</text>
+          <text x="780" y="240" text-anchor="middle" font-size="9" fill="var(--muted)">--mode duplicate/average/delta/auto → DPLC_frameN_idM.ppm</text>
+          <rect x="648" y="260" width="264" height="72" rx="8" fill="var(--pass-soft)" stroke="var(--pass)"/>
+          <text x="780" y="278" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--fg)">golden 输出（仿真目录）</text>
+          <text x="780" y="293" text-anchor="middle" font-size="9" fill="var(--muted)">outResult/data_merge/*.txt</text>
+          <text x="780" y="306" text-anchor="middle" font-size="9" fill="var(--muted)">outResult/digital/*_{Lodd,Leven,Rodd,Reven}.txt</text>
+          <text x="780" y="319" text-anchor="middle" font-size="9" fill="var(--muted)">outResult/analog/*.txt</text>
+
+          <rect x="630" y="356" width="300" height="96" rx="10" fill="var(--warn-soft)" stroke="var(--warn)"/>
+          <text x="648" y="376" font-size="11" font-weight="700" fill="var(--fg)">420b 分支（编译宏 CHPI_MODE_420B）</text>
+          <text x="648" y="393" font-size="9.5" fill="var(--muted)">send_420b_lsp / ctrl_f_data / active_line（:1120-1449）</text>
+          <text x="648" y="407" font-size="9.5" fill="var(--muted)">长编码 70b 对齐；IDLE 用 K5~K8 图案</text>
+          <text x="648" y="421" font-size="9.5" font-weight="700" fill="var(--fg)">注意：420b 路径不调 exec_c()</text>
+
+          <rect x="630" y="462" width="300" height="114" rx="10" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="648" y="482" font-size="11" font-weight="700" fill="var(--fg)">多帧与寄存器切换</text>
+          <text x="648" y="499" font-size="9.5" fill="var(--muted)">帧数 env_cfg.frame_num（send_ppm :566）</text>
+          <text x="648" y="513" font-size="9.5" fill="var(--muted)">末行提前发下一帧 CTRL_F（:816，对齐 K4 帧界）</text>
+          <text x="648" y="527" font-size="9.5" fill="var(--muted)">process_line 每次都重读 cfg_frameN.txt（env_cfg:624）</text>
+          <text x="648" y="541" font-size="9.5" fill="var(--muted)">golden 帧号约定 = RTL 帧号 + `DV（frame0 跳过比对）</text>
+
+          <rect x="10" y="592" width="920" height="96" rx="12" fill="none" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="28" y="614" font-size="12.5" font-weight="700" fill="var(--muted)">Transaction / Driver（isptx_agent）</text>
+          <rect x="30" y="624" width="330" height="52" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="195" y="642" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--fg)">isptx_transaction（:16-45）</text>
+          <text x="195" y="657" text-anchor="middle" font-size="9" fill="var(--muted)">id 枚举 + one_pkt[9:0] + k1~k4；rsp.init_data 回传电平</text>
+          <rect x="390" y="624" width="330" height="52" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+          <text x="555" y="642" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--fg)">isptx_driver（:931-1110）</text>
+          <text x="555" y="657" text-anchor="middle" font-size="9" fill="var(--muted)">drv_one_pkt()：LSB-first、每 vif.clk 打 1bit → rxp0/rxn0</text>
+          <rect x="750" y="624" width="170" height="52" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+          <text x="835" y="642" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--fg)">DUT pad</text>
+          <text x="835" y="657" text-anchor="middle" font-size="9" fill="var(--muted)">APAD_RXP0 / APAD_RXN0</text>
+
+          <line x1="320" y1="90" x2="320" y2="138" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am20)"/>
+          <line x1="310" y1="190" x2="310" y2="198" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am20)"/>
+          <line x1="310" y1="290" x2="310" y2="298" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am20)"/>
+          <line x1="310" y1="388" x2="310" y2="400" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am20)"/>
+          <line x1="360" y1="650" x2="386" y2="650" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am20)"/>
+          <line x1="720" y1="650" x2="746" y2="650" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am20)"/>
+          <line x1="310" y1="564" x2="310" y2="620" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am20)"/>
+          <text x="318" y="600" font-size="9" fill="var(--muted)">uvm_do_with(tr, {...})</text>
+          <line x1="394" y1="470" x2="642" y2="300" stroke="var(--pass)" stroke-width="1.8" marker-end="url(#am20g)"/>
+          <text x="470" y="400" font-size="9.5" fill="var(--pass)">$system 调 cmodel</text>
+        </svg>
+        <div class="cap">图 4-1：isptx_sequence 激励发送全流程 —— 上：用例配置层；中：sequence 组帧（FSM → LSP/CTRL_F → 逐帧 VBP/VACT/VFP）；右：exec_c 调 cmodel 生成 golden；下：transaction → driver 逐 bit 打差分 pad</div>
+      </div>
+      <h3 id="stimulus-2">激励关键 task 速查</h3>
+      <div class="card">
+        <table>
+          <tr><th>task / function</th><th>位置</th><th>职责</th></tr>
+          <tr><td><code>body()</code></td><td>isptx_sequence.sv:1064</td><td>取 env_cfg/vif/plusargs，调 send_isp()</td></tr>
+          <tr><td><code>send_isp()</code></td><td>:985</td><td>FSM：link training（TBK）→ 发图；失锁重训（&gt;3 放弃）</td></tr>
+          <tr><td><code>send_LSP_seq(10)</code></td><td>:240</td><td>K2 + ea~ed 训练字节×32 + K3，重复 10 次</td></tr>
+          <tr><td><code>send_CTRLF_seq(f)</code></td><td>:290</td><td>K4 + 60 字节 CTRL_F（get_ctrlF_reg，逐字节 scramble+8b10b）</td></tr>
+          <tr><td><code>send_CTRLL_seq(...)</code></td><td>:382</td><td>K1 + 5 字节 CTRL_L（get_ctrlL_reg，覆盖 Fsync/BKDU 位）</td></tr>
+          <tr><td><code>send_ppm()</code></td><td>:539</td><td>逐帧：VBP/VFP（CTRLL+VBK）、帧间 get_ppm→write_ppm→exec_c、VACT 逐字节像素</td></tr>
+          <tr><td><code>exec_c(c)</code></td><td>:92</td><td>$system 调 pic_process（+DPLC 时 dplc.pl）生成 golden</td></tr>
+          <tr><td><code>encode_8b10b() / scramble()</code></td><td>:178 / :334</td><td>自定义 8b→9b 映射+极性位 / 24bit LFSR 加扰（scram_enble=0 直通）</td></tr>
+          <tr><td><code>drv_one_pkt()</code></td><td>isptx_driver.sv:175</td><td>LSB-first、每 vif.clk 打 1bit 到 rxp0/rxn0；rsp.init_data 回传电平</td></tr>
+          <tr><td><code>get_ctrlF/L_reg()</code></td><td>env_cfg.sv:232 / :192</td><td>process_line 重读 cfg_frameN.txt → 拼 60B / 5B 队列</td></tr>
+        </table>
+      </div>
+
+      <h3 id="stim-reg">寄存器三条配置路径</h3>
+      <div class="diagram">
+        <svg viewBox="0 0 920 240" width="920" role="img" aria-label="寄存器配置路径图">
+          <defs>
+            <marker id="am5" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"></path>
+            </marker>
+          </defs>
+          <text x="20" y="26" font-size="12.5" font-weight="700" fill="var(--pass)">路径 A：链路写入（主力，所有图像用例）</text>
+          <rect x="20" y="40" width="150" height="48" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="95" y="60" text-anchor="middle" font-size="11.5" fill="var(--fg)">cfg_frameN.txt</text>
+          <text x="95" y="76" text-anchor="middle" font-size="10.5" fill="var(--muted)">每帧寄存器值</text>
+          <rect x="205" y="40" width="185" height="48" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="297" y="60" text-anchor="middle" font-size="11.5" fill="var(--fg)">env_cfg.get_ctrlF/L_reg()</text>
+          <text x="297" y="76" text-anchor="middle" font-size="10.5" fill="var(--muted)">autogen 段，脚本生成</text>
+          <rect x="425" y="40" width="160" height="48" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="505" y="60" text-anchor="middle" font-size="11.5" fill="var(--fg)">CTRL_F / CTRL_L 包</text>
+          <text x="505" y="76" text-anchor="middle" font-size="10.5" fill="var(--muted)">随 ISP 数据流</text>
+          <rect x="620" y="40" width="130" height="48" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="685" y="69" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">DUT 寄存器</text>
+          <line x1="170" y1="64" x2="201" y2="64" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am5)"/>
+          <line x1="390" y1="64" x2="421" y2="64" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am5)"/>
+          <line x1="585" y1="64" x2="616" y2="64" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am5)"/>
+
+          <text x="20" y="122" font-size="12.5" font-weight="700" fill="var(--accent)">路径 B：I2C（仅 t_reg_i2c_* 专项）</text>
+          <rect x="20" y="136" width="150" height="48" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="95" y="156" text-anchor="middle" font-size="11.5" fill="var(--fg)">i2c_model BFM</text>
+          <text x="95" y="172" text-anchor="middle" font-size="10.5" fill="var(--muted)">宏 `I2C 层次化调用</text>
+          <rect x="205" y="136" width="185" height="48" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="297" y="156" text-anchor="middle" font-size="11.5" fill="var(--fg)">解锁 devid 7'h62</text>
+          <text x="297" y="172" text-anchor="middle" font-size="10.5" fill="var(--muted)">0xF0=0x5A, 0xF1=0xA5</text>
+          <rect x="425" y="136" width="160" height="48" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="505" y="156" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">读写 devid 7'h70</text>
+          <text x="505" y="172" text-anchor="middle" font-size="10.5" fill="var(--muted)">TEST7/8 = SCL/SDA</text>
+
+          <text x="20" y="212" font-size="12.5" font-weight="700" fill="var(--warn)">路径 C：UVM reg_model（rm.read/write）</text>
+          <rect x="620" y="136" width="240" height="48" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+          <text x="740" y="156" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">uvm_reg → adapter → bcc_agt</text>
+          <text x="740" y="172" text-anchor="middle" font-size="10.5" fill="var(--muted)">从 BCC 口发出</text>
+          <line x1="170" y1="160" x2="201" y2="160" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am5)"/>
+          <line x1="390" y1="160" x2="421" y2="160" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am5)"/>
+        </svg>
+        <div class="cap">图 5：寄存器配置三条路径 —— 图像用例全走路径 A，I2C 专项走路径 B，rm 寄存器模型走路径 C</div>
+      </div>
+
+      <h3 id="stim-flow">寄存器 spec 生成流程</h3>
+      <div class="diagram">
+        <svg viewBox="0 0 920 120" width="920" role="img" aria-label="寄存器 spec 生成流程图">
+          <defs>
+            <marker id="am6" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"></path>
+            </marker>
+          </defs>
+          <rect x="15" y="30" width="190" height="60" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="110" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">HK1V11_Register_*.xlsx</text>
+          <text x="110" y="72" text-anchor="middle" font-size="10.5" fill="var(--muted)">寄存器 spec（手工维护）</text>
+          <rect x="250" y="30" width="150" height="60" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="325" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">excel2csv.py</text>
+          <text x="325" y="72" text-anchor="middle" font-size="10.5" fill="var(--muted)">地址列前向填充修复</text>
+          <rect x="445" y="30" width="170" height="60" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="530" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">reg_csv/ ・ regdir_*/</text>
+          <text x="530" y="72" text-anchor="middle" font-size="10.5" fill="var(--muted)">csv + 带时间戳快照</text>
+          <rect x="660" y="30" width="240" height="60" rx="10" fill="var(--pass-soft)" stroke="var(--pass)" stroke-width="1.5"/>
+          <text x="780" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">produce_rgl.py → reg_model SV</text>
+          <text x="780" y="72" text-anchor="middle" font-size="10.5" fill="var(--muted)">另有 generate_cfg_checks.py 生成链路映射</text>
+          <line x1="205" y1="60" x2="246" y2="60" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am6)"/>
+          <line x1="400" y1="60" x2="441" y2="60" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am6)"/>
+          <line x1="615" y1="60" x2="656" y2="60" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am6)"/>
+        </svg>
+        <div class="cap">图 6：寄存器从 spec 到 UVM reg_model 的生成链</div>
+      </div>
+    </section>
+<section class="section" id="cmodel">
+      <h2>golden 与 cmodel</h2>
+      <h3 id="cmodel-1">golden 生成流程（仿真中现算）</h3>
+      <div class="diagram">
+        <svg viewBox="0 0 920 210" width="920" role="img" aria-label="golden 生成流程图">
+          <defs>
+            <marker id="am7" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"></path>
+            </marker>
+          </defs>
+          <rect x="15" y="60" width="150" height="60" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="90" y="84" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">isptx_sequence</text>
+          <text x="90" y="102" text-anchor="middle" font-size="10.5" fill="var(--muted)">每帧驱动前</text>
+
+          <rect x="210" y="60" width="160" height="60" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="290" y="84" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">exec_c()</text>
+          <text x="290" y="102" text-anchor="middle" font-size="10.5" fill="var(--muted)">$system 调用（行 92-130）</text>
+
+          <rect x="415" y="60" width="180" height="60" rx="10" fill="var(--pass-soft)" stroke="var(--pass)" stroke-width="1.5"/>
+          <text x="505" y="80" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">pic_process</text>
+          <text x="505" y="98" text-anchor="middle" font-size="10.5" fill="var(--muted)">cmodel/pic_process（二进制）</text>
+
+          <rect x="640" y="60" width="265" height="60" rx="10" fill="var(--pass-soft)" stroke="var(--pass)" stroke-width="1.5"/>
+          <text x="772" y="80" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">golden：outResult/</text>
+          <text x="772" y="98" text-anchor="middle" font-size="10.5" fill="var(--muted)">{data_merge, digital, analog}/</text>
+
+          <rect x="415" y="150" width="180" height="48" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+          <text x="505" y="170" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">DPLC_MODE=1 时</text>
+          <text x="505" y="187" text-anchor="middle" font-size="10.5" fill="var(--muted)">再调 dplc.pl</text>
+          <rect x="640" y="150" width="265" height="48" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+          <text x="772" y="170" text-anchor="middle" font-size="11.5" fill="var(--fg)">DPLC_frameN_idM.ppm</text>
+          <text x="772" y="187" text-anchor="middle" font-size="10.5" fill="var(--muted)">digital sb 的 DPLC golden</text>
+
+          <line x1="165" y1="90" x2="206" y2="90" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am7)"/>
+          <line x1="370" y1="90" x2="411" y2="90" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am7)"/>
+          <line x1="595" y1="90" x2="636" y2="90" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am7)"/>
+          <line x1="595" y1="174" x2="636" y2="174" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am7)"/>
+          <line x1="505" y1="120" x2="505" y2="146" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am7)"/>
+        </svg>
+        <div class="cap">图 7：golden 生成链 —— 每帧驱动前由 sequence 现调 cmodel，RTL 与 cmodel 吃同一份输入</div>
+      </div>
+
+      <h3 id="cmodel-2">pic_process 调用参数</h3>
+      <div class="card">
+<pre><code>$DV_TOP_PATH/agents/isprx_env/cmodel/pic_process \
+  -OW &lt;org_w&gt; -W &lt;w&gt; -H &lt;h&gt; -P &lt;port&gt; -I &lt;case&gt;/pattern/frame_N \
+  -R outResult -p &lt;pairNum&gt; -r &lt;rSel&gt; -X &lt;HPOL1&gt; -Y &lt;HPOL2&gt; \
+  -O &lt;POL&gt; -C &lt;POLC&gt; -S &lt;shl&gt; -H4 &lt;H4INV&gt;</code></pre>
+        <ul>
+          <li>cmodel 源码在 <code>cmodel/pic_split_transform/</code>（多工程共用一套源码，按 <code>project.h</code> 宏区分芯片：HK1V11/HV2M23/HV1V21…）。</li>
+          <li>改 cmodel 后需重新编译并同步二进制到 <code>$DV_TOP_PATH/agents/isprx_env/cmodel/</code>。</li>
+          <li>run_tc.sh 约 121 行原本调 cmodel Run.sh 的语句已注释 —— golden 全部由 sequence 现调现用。</li>
+        </ul>
+      </div>
+
+      <h3 id="cmodel-3">dummy 数据机制（convert_9b_to_8b）</h3>
+      <div class="card">
+        <ul>
+          <li>每行像素末尾会插 6 个 dummy byte，由 <code>Common.cpp convert_9b_to_8b()</code> 生成。</li>
+          <li>优先读 <strong>测试用例目录下的 <code>dummy.cfg</code></strong>（pattern/ 的上一级）：仅 <code>-p 1</code> 时生效；需 ≥6 行、每行前 3 字符跳过 + 后 9 位二进制、无空行、LF 换行。</li>
+          <li>文件不存在或 <code>-p</code> 非 1 时用内置默认值（pairNum=1：1×<code>001111110</code>+5×<code>111100001</code>；否则 2+4）。</li>
+          <li>9-bit 串经翻转/DC 平衡逻辑转 8-bit；digital 路径再按最高位 XOR 0x7F。</li>
+        </ul>
+      </div>
+    </section>
+    </article>
+<div class="page-nav"><a class="prev" href="./tb-arch.html"><span class="label">上一章</span><span class="title">TB 架构与 isprx_env</span></a><a class="next" href="./checkers.html"><span class="label">下一章</span><span class="title">检查机制（4 条比对链）</span></a></div>
+  </main>
+</div>
+<div class="footer">HK1V11 DV_TCON_C 验证环境使用指南 · 2026-07-20</div>
+<script>
+(function(){
+  const headings = Array.from(document.querySelectorAll('.section[id], .section h3[id]'));
+  const links = Array.from(document.querySelectorAll('.toc a'));
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) {
+        links.forEach(a => a.classList.remove('active'));
+        const active = links.find(a => a.getAttribute('href') === '#' + entry.target.id);
+        if(active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-80px 0px -60% 0px', threshold: 0 });
+  headings.forEach(h => observer.observe(h));
+  links.forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const el = document.getElementById(a.getAttribute('href').slice(1));
+      if(el) el.scrollIntoView({behavior:'smooth'});
+    });
+  });
+})();
+</script>
+</body>
+</html>

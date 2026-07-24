@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>HV2M23 DV_TCON_C 验证环境使用指南</title>
+<style>
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --fg: #1e293b;
+  --muted: #64748b;
+  --accent: #1d4ed8;
+  --accent-soft: #dbeafe;
+  --line: #e2e8f0;
+  --border: #e2e8f0;
+  --pass: #16a34a;
+  --pass-soft: #dcfce7;
+  --fail: #dc2626;
+  --warn: #d97706;
+  --warn-soft: #fef3c7;
+  --code-bg: #111827;
+  --code-fg: #e5e7eb;
+  --shadow: 0 10px 40px rgba(0,0,0,0.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --text: #f1f5f9;
+    --fg: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a;
+    --line: #334155;
+    --border: #334155;
+    --pass: #4ade80;
+    --pass-soft: #14532d;
+    --fail: #f87171;
+    --warn: #fbbf24;
+    --warn-soft: #78350f;
+    --code-bg: #0b1220;
+    --code-fg: #e5e7eb;
+    --shadow: 0 10px 40px rgba(0,0,0,0.35);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+}
+a { color: var(--accent); }
+.navbar { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--line); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.navbar-inner { max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+.navbar-brand { font-weight: 700; color: var(--accent); white-space: nowrap; font-size: 15px; text-decoration: none; }
+.navbar-links { display: flex; align-items: center; gap: 6px; overflow-x: auto; flex: 1; scrollbar-width: none; }
+.navbar-links::-webkit-scrollbar { display: none; }
+.navbar-links a { padding: 6px 10px; border-radius: 6px; font-size: 14px; color: var(--text); white-space: nowrap; transition: background 0.15s; text-decoration: none; }
+.navbar-links a:hover { background: var(--bg); }
+.navbar-links a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+.container.with-toc { display: flex; gap: 32px; align-items: stretch; }
+.toc-wrapper { width: 260px; flex-shrink: 0; align-self: stretch; }
+.toc { position: sticky; top: 76px; max-height: calc(100vh - 100px); overflow-y: auto; padding: 16px; background: var(--surface); border-radius: 12px; border: 1px solid var(--line); font-size: 14px; box-shadow: var(--shadow); }
+.toc a { display: block; padding: 6px 8px; border-radius: 6px; color: var(--muted); margin: 2px 0; transition: background 0.15s, color 0.15s; text-decoration: none; }
+.toc a:hover { background: var(--bg); color: var(--accent); }
+.toc a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.toc a.toc-h1 { font-weight: 700; color: var(--accent); margin-bottom: 8px; cursor: default; }
+.toc a.toc-h3 { padding-left: 18px; font-size: 13px; }
+.content { flex: 1; min-width: 0; }
+.article { background: var(--surface); border-radius: 20px; padding: 40px 48px; box-shadow: var(--shadow); }
+.hero { text-align: center; margin-bottom: 40px; padding-top: 24px; }
+.hero h1 { margin: 0 0 12px; font-size: 34px; line-height: 1.25; font-weight: 800; }
+.hero .author { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+.hero .lead { font-size: 17px; max-width: 760px; margin: 0 auto; color: var(--text); }
+.hero .badges { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+.section-title { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 40px 0 16px; }
+.chapter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.chapter-card { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; color: var(--text); transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s; text-decoration: none; }
+.chapter-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
+.chapter-card .num { display: inline-block; width: 28px; height: 28px; line-height: 28px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 13px; font-weight: 700; text-align: center; margin-bottom: 10px; }
+.chapter-card .title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+.chapter-card .desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.page-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 48px; }
+.page-nav a { display: block; padding: 16px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; color: var(--text); transition: border-color 0.2s, box-shadow 0.2s; text-decoration: none; }
+.page-nav a:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+.page-nav a.next { text-align: right; margin-left: auto; }
+.page-nav .label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.page-nav .title { font-weight: 600; color: var(--accent); }
+.footer { text-align: center; color: var(--muted); margin-top: 48px; font-size: 13px; padding-bottom: 32px; }
+.section { margin-bottom: 48px; }
+.section:last-child { margin-bottom: 0; }
+.section h2 { font-size: 24px; margin: 0 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent); display: inline-block; font-weight: 700; }
+.section h3 { font-size: 18px; margin: 26px 0 12px; font-weight: 700; padding-left: 12px; border-left: 4px solid var(--accent); }
+.section h4 { font-size: 15.5px; margin: 18px 0 8px; font-weight: 700; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 18px; }
+.article .card { background: var(--bg); }
+.card p { margin: 10px 0; }
+.card ul, .card ol { margin: 8px 0; padding-left: 22px; }
+.card li { margin: 5px 0; }
+.tag { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.proj { background: var(--accent-soft); color: var(--accent); }
+.result.pass { background: var(--pass-soft); color: var(--pass); }
+.result.fail { background: #fee2e2; color: var(--fail); }
+table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--accent-soft); color: var(--accent); font-weight: 700; white-space: nowrap; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; background: var(--accent-soft); color: var(--accent); padding: 2px 6px; border-radius: 6px; word-break: break-all; }
+pre { background: var(--code-bg); color: var(--code-fg); border-radius: 12px; padding: 18px 20px; overflow-x: auto; font-size: 13px; line-height: 1.6; }
+pre code { background: transparent; color: inherit; padding: 0; }
+pre .c { color: #6b7280; }
+.diagram { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 22px 16px; margin: 14px 0 20px; overflow-x: auto; }
+.diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.diagram .cap { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 10px; }
+svg text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans SC", "Microsoft YaHei", monospace; }
+.blocker-list { list-style: none; padding: 0; margin: 0; }
+.blocker-list li { padding: 16px 18px; margin-bottom: 12px; background: var(--warn-soft); border-left: 4px solid var(--warn); border-radius: 10px; color: var(--fg); line-height: 1.7; }
+.blocker-list li:last-child { margin-bottom: 0; }
+.tip-list { list-style: none; padding: 0; margin: 0; }
+.tip-list li { padding: 14px 18px; margin-bottom: 10px; background: var(--pass-soft); border-left: 4px solid var(--pass); border-radius: 10px; line-height: 1.7; }
+.tip-list li:last-child { margin-bottom: 0; }
+.hint-bar { background: var(--warn-soft); border-left: 4px solid var(--warn); border-radius: 10px; padding: 14px 18px; margin: 24px auto; max-width: 760px; font-size: 14.5px; }
+.case-table td { font-size: 13px; }
+.case-table td:nth-child(1) { white-space: nowrap; font-family: ui-monospace, Menlo, Consolas, monospace; }
+@media (max-width: 960px) {
+  .toc-wrapper { display: none; }
+  .container.with-toc { display: block; }
+  .article { padding: 28px 20px; border-radius: 16px; }
+  .page-nav { grid-template-columns: 1fr; }
+  .page-nav a.next { text-align: left; margin-left: 0; }
+  .navbar-inner { padding: 10px 16px; gap: 10px; }
+}
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="navbar-brand" href="./index.html">HV2M23 DV 指南</a>
+    <div class="navbar-links"><a href="./index.html" class="active">首页</a><a href="./overview.html">概览</a><a href="./tb-arch.html">TB 架构</a><a href="./stimulus.html">激励与 golden</a><a href="./checkers.html">检查机制</a><a href="./run.html">运行与回归</a><a href="./cases.html">用例</a><a href="./faq.html">FAQ 与清单</a></div>
+  </div>
+</nav>
+<div class="container with-toc">
+  <main class="content">
+    <section class="hero">
+      <h1>HV2M23 DV_TCON_C 验证环境使用指南</h1>
+      <div class="author">pengxia · 2026-07-22</div>
+      <div class="lead">面向 HV2M23 数字验证工程师的环境参考手册，涵盖 TB 架构、激励与寄存器配置、golden 与 cmodel、检查机制、仿真运行、用例新建、回归覆盖率及常见问题。</div>
+      <div class="badges">
+        <span class="tag proj">HV2M23</span>
+        <span class="tag proj">VCS + UVM-1.1</span>
+        <span class="tag proj">DV_TCON_C</span>
+        <span class="tag result pass">整芯片级 TB</span>
+      </div>
+    </section>
+    <div class="hint-bar">⭐ 推荐阅读顺序：先读「概览」，然后按顶部导航依次阅读 TB 架构、激励与 golden、检查机制、运行与回归、用例，最后查看 FAQ 与清单。</div>
+    <h2 class="section-title">章节索引</h2>
+    <div class="chapter-grid">
+      <a class="chapter-card" href="./overview.html"><span class="num">1</span><div class="title">概览与目录结构</div><div class="desc">环境定位、验证思路总图、关键事实表、目录布局与职责</div></a>
+      <a class="chapter-card" href="./tb-arch.html"><span class="num">2</span><div class="title">TB 架构与 isprx_env</div><div class="desc">TB 顶层框图、chip_tb_top 职责、base_test 各 phase、观测点接线、isprx_env agent</div></a>
+      <a class="chapter-card" href="./stimulus.html"><span class="num">3</span><div class="title">激励、寄存器与 golden</div><div class="desc">激励帧结构、寄存器配置路径、cmodel golden 生成、DPLC / DRDOD 相关激励</div></a>
+      <a class="chapter-card" href="./checkers.html"><span class="num">4</span><div class="title">检查机制（6 条比对链）</div><div class="desc">data_merge / digital_top / analog / chopper / drdod_input / drdod_output 总览</div></a>
+      <a class="chapter-card" href="./run.html"><span class="num">5</span><div class="title">仿真运行与回归覆盖率</div><div class="desc">run_tc.sh 用法、makefile target、批量回归、覆盖率收集与合并</div></a>
+      <a class="chapter-card" href="./cases.html"><span class="num">6</span><div class="title">用例结构与详细目录</div><div class="desc">用例目录解剖、create_new_case.sh、普通/波形用例详细目录与检查点</div></a>
+      <a class="chapter-card" href="./faq.html"><span class="num">7</span><div class="title">FAQ 与新人速查清单</div><div class="desc">环境遗留问题、HV2M23 专用注意点、新人上手速查</div></a>
+    </div>
+  </main>
+</div>
+<div class="footer">HV2M23 DV_TCON_C 验证环境使用指南 · 2026-07-22</div>
+<script>
+(function(){
+  const headings = Array.from(document.querySelectorAll('.section[id], .section h3[id]'));
+  const links = Array.from(document.querySelectorAll('.toc a'));
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) {
+        links.forEach(a => a.classList.remove('active'));
+        const active = links.find(a => a.getAttribute('href') === '#' + entry.target.id);
+        if(active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-80px 0px -60% 0px', threshold: 0 });
+  headings.forEach(h => observer.observe(h));
+  links.forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const el = document.getElementById(a.getAttribute('href').slice(1));
+      if(el) el.scrollIntoView({behavior:'smooth'});
+    });
+  });
+})();
+</script>
+</body>
+</html>

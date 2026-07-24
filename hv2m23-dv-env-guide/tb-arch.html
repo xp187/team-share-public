@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>TB 架构与 isprx_env - HV2M23 DV 指南</title>
+<style>
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --fg: #1e293b;
+  --muted: #64748b;
+  --accent: #1d4ed8;
+  --accent-soft: #dbeafe;
+  --line: #e2e8f0;
+  --border: #e2e8f0;
+  --pass: #16a34a;
+  --pass-soft: #dcfce7;
+  --fail: #dc2626;
+  --warn: #d97706;
+  --warn-soft: #fef3c7;
+  --code-bg: #111827;
+  --code-fg: #e5e7eb;
+  --shadow: 0 10px 40px rgba(0,0,0,0.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --text: #f1f5f9;
+    --fg: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a;
+    --line: #334155;
+    --border: #334155;
+    --pass: #4ade80;
+    --pass-soft: #14532d;
+    --fail: #f87171;
+    --warn: #fbbf24;
+    --warn-soft: #78350f;
+    --code-bg: #0b1220;
+    --code-fg: #e5e7eb;
+    --shadow: 0 10px 40px rgba(0,0,0,0.35);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+}
+a { color: var(--accent); }
+.navbar { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--line); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.navbar-inner { max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+.navbar-brand { font-weight: 700; color: var(--accent); white-space: nowrap; font-size: 15px; text-decoration: none; }
+.navbar-links { display: flex; align-items: center; gap: 6px; overflow-x: auto; flex: 1; scrollbar-width: none; }
+.navbar-links::-webkit-scrollbar { display: none; }
+.navbar-links a { padding: 6px 10px; border-radius: 6px; font-size: 14px; color: var(--text); white-space: nowrap; transition: background 0.15s; text-decoration: none; }
+.navbar-links a:hover { background: var(--bg); }
+.navbar-links a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+.container.with-toc { display: flex; gap: 32px; align-items: stretch; }
+.toc-wrapper { width: 260px; flex-shrink: 0; align-self: stretch; }
+.toc { position: sticky; top: 76px; max-height: calc(100vh - 100px); overflow-y: auto; padding: 16px; background: var(--surface); border-radius: 12px; border: 1px solid var(--line); font-size: 14px; box-shadow: var(--shadow); }
+.toc a { display: block; padding: 6px 8px; border-radius: 6px; color: var(--muted); margin: 2px 0; transition: background 0.15s, color 0.15s; text-decoration: none; }
+.toc a:hover { background: var(--bg); color: var(--accent); }
+.toc a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.toc a.toc-h1 { font-weight: 700; color: var(--accent); margin-bottom: 8px; cursor: default; }
+.toc a.toc-h3 { padding-left: 18px; font-size: 13px; }
+.content { flex: 1; min-width: 0; }
+.article { background: var(--surface); border-radius: 20px; padding: 40px 48px; box-shadow: var(--shadow); }
+.hero { text-align: center; margin-bottom: 40px; padding-top: 24px; }
+.hero h1 { margin: 0 0 12px; font-size: 34px; line-height: 1.25; font-weight: 800; }
+.hero .author { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+.hero .lead { font-size: 17px; max-width: 760px; margin: 0 auto; color: var(--text); }
+.hero .badges { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+.section-title { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 40px 0 16px; }
+.chapter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.chapter-card { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; color: var(--text); transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s; text-decoration: none; }
+.chapter-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
+.chapter-card .num { display: inline-block; width: 28px; height: 28px; line-height: 28px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 13px; font-weight: 700; text-align: center; margin-bottom: 10px; }
+.chapter-card .title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+.chapter-card .desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.page-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 48px; }
+.page-nav a { display: block; padding: 16px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; color: var(--text); transition: border-color 0.2s, box-shadow 0.2s; text-decoration: none; }
+.page-nav a:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+.page-nav a.next { text-align: right; margin-left: auto; }
+.page-nav .label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.page-nav .title { font-weight: 600; color: var(--accent); }
+.footer { text-align: center; color: var(--muted); margin-top: 48px; font-size: 13px; padding-bottom: 32px; }
+.section { margin-bottom: 48px; }
+.section:last-child { margin-bottom: 0; }
+.section h2 { font-size: 24px; margin: 0 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent); display: inline-block; font-weight: 700; }
+.section h3 { font-size: 18px; margin: 26px 0 12px; font-weight: 700; padding-left: 12px; border-left: 4px solid var(--accent); }
+.section h4 { font-size: 15.5px; margin: 18px 0 8px; font-weight: 700; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 18px; }
+.article .card { background: var(--bg); }
+.card p { margin: 10px 0; }
+.card ul, .card ol { margin: 8px 0; padding-left: 22px; }
+.card li { margin: 5px 0; }
+.tag { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.proj { background: var(--accent-soft); color: var(--accent); }
+.result.pass { background: var(--pass-soft); color: var(--pass); }
+.result.fail { background: #fee2e2; color: var(--fail); }
+table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--accent-soft); color: var(--accent); font-weight: 700; white-space: nowrap; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; background: var(--accent-soft); color: var(--accent); padding: 2px 6px; border-radius: 6px; word-break: break-all; }
+pre { background: var(--code-bg); color: var(--code-fg); border-radius: 12px; padding: 18px 20px; overflow-x: auto; font-size: 13px; line-height: 1.6; }
+pre code { background: transparent; color: inherit; padding: 0; }
+pre .c { color: #6b7280; }
+.diagram { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 22px 16px; margin: 14px 0 20px; overflow-x: auto; }
+.diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.diagram .cap { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 10px; }
+svg text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans SC", "Microsoft YaHei", monospace; }
+.blocker-list { list-style: none; padding: 0; margin: 0; }
+.blocker-list li { padding: 16px 18px; margin-bottom: 12px; background: var(--warn-soft); border-left: 4px solid var(--warn); border-radius: 10px; color: var(--fg); line-height: 1.7; }
+.blocker-list li:last-child { margin-bottom: 0; }
+.tip-list { list-style: none; padding: 0; margin: 0; }
+.tip-list li { padding: 14px 18px; margin-bottom: 10px; background: var(--pass-soft); border-left: 4px solid var(--pass); border-radius: 10px; line-height: 1.7; }
+.tip-list li:last-child { margin-bottom: 0; }
+.hint-bar { background: var(--warn-soft); border-left: 4px solid var(--warn); border-radius: 10px; padding: 14px 18px; margin: 24px auto; max-width: 760px; font-size: 14.5px; }
+.case-table td { font-size: 13px; }
+.case-table td:nth-child(1) { white-space: nowrap; font-family: ui-monospace, Menlo, Consolas, monospace; }
+@media (max-width: 960px) {
+  .toc-wrapper { display: none; }
+  .container.with-toc { display: block; }
+  .article { padding: 28px 20px; border-radius: 16px; }
+  .page-nav { grid-template-columns: 1fr; }
+  .page-nav a.next { text-align: left; margin-left: 0; }
+  .navbar-inner { padding: 10px 16px; gap: 10px; }
+}
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="navbar-brand" href="./index.html">HV2M23 DV 指南</a>
+    <div class="navbar-links"><a href="./index.html">首页</a><a href="./overview.html">概览</a><a href="./tb-arch.html" class="active">TB 架构</a><a href="./stimulus.html">激励与 golden</a><a href="./checkers.html">检查机制</a><a href="./run.html">运行与回归</a><a href="./cases.html">用例</a><a href="./faq.html">FAQ 与清单</a></div>
+  </div>
+</nav>
+<div class="container with-toc">
+  <aside class="toc-wrapper"><nav class="toc"><a class="toc-h1">TB 架构与 isprx_env</a>
+<a href="#tb">TB 架构</a>
+<a class="toc-h3" href="#tb-1">TB 整体框图</a>
+<a class="toc-h3" href="#tb-top">chip_tb_top 顶层职责</a>
+<a class="toc-h3" href="#tb-base">base_test 基类各 phase 职责</a>
+<a class="toc-h3" href="#tb-intf">观测点接线（intf_connect.sv）</a>
+<a href="#env">isprx_env 验证环境</a>
+<a class="toc-h3" href="#env-1">组件结构</a>
+<a class="toc-h3" href="#env-2">各 agent 要点</a>
+<a class="toc-h3" href="#env-3">1-lane 与 2-lane 区别</a></nav></aside>
+  <main class="content">
+    <article class="article">
+<section class="section" id="tb">
+      <h2>TB 架构</h2>
+      <h3 id="tb-1">TB 整体框图</h3>
+      <div class="diagram">
+        <svg viewBox="0 0 920 340" width="920" role="img" aria-label="TB 整体框图">
+          <defs>
+            <marker id="am2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"></path>
+            </marker>
+          </defs>
+          <rect x="15" y="15" width="430" height="310" rx="14" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <text x="35" y="40" font-size="13.5" font-weight="700" fill="var(--accent)">chip_tb_top.sv</text>
+
+          <rect x="45" y="60" width="180" height="76" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="135" y="86" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--fg)">u_HV2M23（DUT）</text>
+          <text x="135" y="104" text-anchor="middle" font-size="11" fill="var(--muted)">整芯片，pad 级</text>
+          <text x="135" y="120" text-anchor="middle" font-size="11" fill="var(--muted)">1446 输出通道</text>
+
+          <rect x="255" y="60" width="165" height="52" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="337" y="80" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">i2c_model</text>
+          <text x="337" y="97" text-anchor="middle" font-size="11" fill="var(--muted)">行为级 I2C master BFM</text>
+
+          <rect x="255" y="124" width="165" height="52" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="337" y="142" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">时钟生成</text>
+          <text x="337" y="159" text-anchor="middle" font-size="11" fill="var(--muted)">tx_clk / i2c_clk</text>
+
+          <rect x="255" y="188" width="165" height="52" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="337" y="206" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">waves_dumper</text>
+          <text x="337" y="223" text-anchor="middle" font-size="11" fill="var(--muted)">FSDB 波形</text>
+
+          <rect x="45" y="160" width="180" height="100" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="135" y="182" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">观测 interface</text>
+          <text x="135" y="200" text-anchor="middle" font-size="11" fill="var(--muted)">ana_data_output_if</text>
+          <text x="135" y="218" text-anchor="middle" font-size="11" fill="var(--muted)">intf_connect.sv</text>
+          <text x="135" y="234" text-anchor="middle" font-size="11" fill="var(--muted)">层次化 assign DUT 内部</text>
+
+          <rect x="520" y="15" width="385" height="310" rx="14" fill="none" stroke="var(--pass)" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <text x="540" y="40" font-size="13.5" font-weight="700" fill="var(--pass)">uvm_test_top（base_test.sv）</text>
+
+          <rect x="550" y="58" width="325" height="52" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="712" y="78" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--fg)">source_driver_env sd_env</text>
+          <text x="712" y="95" text-anchor="middle" font-size="11" fill="var(--muted)">多芯片时 sd_env1/2/3</text>
+
+          <rect x="550" y="124" width="155" height="52" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="627" y="142" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">sd_vsqr v_sqr</text>
+          <text x="627" y="159" text-anchor="middle" font-size="11" fill="var(--muted)">virtual sequencer</text>
+
+          <rect x="720" y="124" width="155" height="52" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="797" y="142" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">reg_model rm</text>
+          <text x="797" y="159" text-anchor="middle" font-size="11" fill="var(--muted)">前端走 bcc_agt</text>
+
+          <rect x="550" y="190" width="155" height="52" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="627" y="208" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">digital_coverage</text>
+          <text x="627" y="225" text-anchor="middle" font-size="11" fill="var(--muted)">功能覆盖率组件</text>
+
+          <rect x="720" y="190" width="155" height="52" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="797" y="208" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">reg_dump_utils</text>
+          <text x="797" y="225" text-anchor="middle" font-size="11" fill="var(--muted)">每帧 dump 寄存器</text>
+
+          <rect x="550" y="256" width="325" height="52" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+          <text x="712" y="276" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--fg)">report_phase：统计 UVM_ERROR</text>
+          <text x="712" y="294" text-anchor="middle" font-size="11" fill="var(--muted)">打印 TEST CASE PASSED / FAILED</text>
+
+          <line x1="445" y1="90" x2="544" y2="90" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am2)"/>
+          <text x="494" y="80" text-anchor="middle" font-size="11" fill="var(--muted)">激励 isptx_if</text>
+          <line x1="544" y1="300" x2="451" y2="300" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am2)" transform="translate(0,-14)"/>
+          <text x="494" y="278" text-anchor="middle" font-size="11" fill="var(--muted)">观测 ana_data_output_if</text>
+        </svg>
+        <div class="cap">图 2：TB 顶层结构 —— 左侧 TB 顶层模块（DUT + BFM + 时钟 + 波形），右侧 UVM 组件树</div>
+      </div>
+
+      <h3 id="tb-top">chip_tb_top 顶层职责</h3>
+      <div class="card">
+        <h4>DUT 例化与 pad 连接</h4>
+        <ul>
+          <li>DUT 为整颗 <code>HV2M23</code>（<code>chip_tb_top.u_HV2M23</code>），裸 pad 级端口：高速差分输入 <code>APAD_RXP0/N0</code>、<code>APAD_RXP1/N1</code>（2-lane）、<code>TEST7/TEST8</code> 复用为 I2C 的 SCL/SDA、<code>BCC</code> 等。</li>
+          <li>Digital top 层次路径：<code>chip_tb_top.u_HV2M23.u_HV2M23_digital_top.u_LOGIC_CENTER</code>。</li>
+          <li>Analog macro 路径：<code>chip_tb_top.u_HV2M23.u_MACRO_TOP_2M23</code>，输出 <code>SIM_OUT[14469:10]</code> 共 1446 通道。</li>
+          <li><code>ifdef MULTI_CHIP</code> 时可例化多颗芯片，由 <code>user_def.sv</code> 的 <code>CONNECT_NUM</code> 控制。</li>
+        </ul>
+        <h4>激励接口与 config_db 下发</h4>
+        <ul>
+          <li><code>isptx_if b_if</code>（源端 ISP TX 差分串行数据）、<code>i2c_if</code>、<code>bcc_if</code>、<code>analog_data_output_if</code>，经 uvm_config_db 下发到 <code>uvm_test_top.sd_env.*</code>。</li>
+        </ul>
+        <h4>时钟</h4>
+        <ul>
+          <li><code>tx_clk</code>：按 <code>HTOTAL/VTOTAL_MAX/FPS/PORT_NUM/PAIR_NUM</code> 计算像素率；<code>i2c_clk</code> 周期 2187.5ns。</li>
+        </ul>
+      </div>
+
+      <h3 id="tb-base">base_test 基类各 phase 职责</h3>
+      <div class="card">
+        <table>
+          <tr><th style="width:130px;">phase</th><th>做的事</th></tr>
+          <tr><td>build_phase</td><td>从 plusarg <code>SIM_TEST_PATH</code> 建 <code>outResult/</code>、<code>input_ppm/</code>；创建 <code>sd_env</code>（多芯片 sd_env1/2/3）、<code>sd_vsqr v_sqr</code>、<code>reg_model rm</code>（build+lock+reset）、<code>digital_coverage</code>、<code>reg_dump_utils</code></td></tr>
+          <tr><td>connect_phase</td><td>挂接 sqr 到 v_sqr；<code>rm.default_map.set_sequencer(sd_env.bcc_agt.sqr, reg_sqr_adapter)</code>，auto_predict=1 —— 寄存器模型走 BCC agent 前端</td></tr>
+          <tr><td>main_phase</td><td>fork <code>reg_dump.dump_on_vs_out()</code>：每帧把 RTL 寄存器值 dump 到 <code>reg_address_frame_*.log</code></td></tr>
+          <tr><td>report_phase</td><td>统计 UVM_ERROR 数，打印 <code>TEST CASE PASSED/FAILED</code> —— pass/fail 根本判据</td></tr>
+        </table>
+        <p>另内置层次化测量 task：<code>measure_freq_osc_clk</code>、<code>measure_BWDADBDL_unlock_time</code> 等（直接探 DUT 内部 LOGIC_CENTER 信号）。</p>
+      </div>
+
+      <h3 id="tb-intf">观测点接线（intf_connect.sv）</h3>
+      <div class="card">
+        <p>纯层次化 assign，把 DUT 内部信号引到 <code>ana_data_output_if</code> 供 monitor 采样（<code>ifdef MULTI_CHIP</code> 对 chip1/2/3 各重复一遍）：</p>
+        <table>
+          <tr><th>观测层</th><th>信号</th><th>用途</th></tr>
+          <tr><td>data merge 级</td><td><code>LOGIC_CENTER.CENTER1.VS / PIX_DATA_START / DCLK_DIV1P5 / PIX_DATA</code></td><td>data_merge 比对链</td></tr>
+          <tr><td>digital top 输出</td><td><code>DBR0-5 / DBL0-5</code>（左右各 6 对源极输出）、<code>SLIN/SRIN/CLKA/CLKB</code>、寄存器镜像 <code>R_POL/R_POLC/R_H120V/R_CHSEL/R_SHL</code></td><td>digital_top 比对链 + 极性检查</td></tr>
+          <tr><td>analog</td><td><code>MACRO_TOP.SIM_OUT</code>（模拟源极输出）、<code>LC_MONBLOCK.STB_A</code>、link 状态 <code>BCC_I</code></td><td>analog 比对链 + unlock 检查</td></tr>
+          <tr><td>drdod</td><td>DRDOD 相关内部状态 / OD_k 检测 / 1pto2p</td><td>drdod_input / drdod_output 检查</td></tr>
+        </table>
+      </div>
+    </section>
+<section class="section" id="env">
+      <h2>isprx_env 验证环境</h2>
+      <h3 id="env-1">组件结构</h3>
+      <div class="diagram">
+        <svg viewBox="0 0 920 250" width="920" role="img" aria-label="isprx_env 组件结构图">
+          <defs>
+            <marker id="am3" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"></path>
+            </marker>
+          </defs>
+          <rect x="10" y="10" width="900" height="230" rx="14" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <text x="30" y="36" font-size="13.5" font-weight="700" fill="var(--accent)">source_driver_env（agents/isprx_env/env.sv）</text>
+
+          <rect x="40" y="55" width="200" height="165" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="140" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="var(--fg)">isptx_agt（激励源）</text>
+          <text x="140" y="110" text-anchor="middle" font-size="11.5" fill="var(--fg)">isptx_sequencer sqr</text>
+          <text x="140" y="132" text-anchor="middle" font-size="11.5" fill="var(--fg)">isptx_driver drv</text>
+          <text x="140" y="154" text-anchor="middle" font-size="11.5" fill="var(--fg)">bus_monitor mon</text>
+          <text x="140" y="186" text-anchor="middle" font-size="11" fill="var(--muted)">逐 bit 驱动差分 pad</text>
+
+          <rect x="270" y="55" width="200" height="165" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="370" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="var(--fg)">i2c_agt</text>
+          <text x="370" y="106" text-anchor="middle" font-size="11.5" fill="var(--fg)">driver / monitor / sqr</text>
+          <text x="370" y="128" text-anchor="middle" font-size="11.5" fill="var(--fg)">scoreboard / cov</text>
+          <text x="370" y="160" text-anchor="middle" font-size="11" fill="var(--muted)">I2C slave 接口激励</text>
+          <text x="370" y="182" text-anchor="middle" font-size="11" fill="var(--muted)">devid 0x57/0x70/0x62</text>
+
+          <rect x="500" y="55" width="170" height="165" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="585" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="var(--fg)">bcc_agt</text>
+          <text x="585" y="110" text-anchor="middle" font-size="11.5" fill="var(--fg)">driver + sequencer</text>
+          <text x="585" y="132" text-anchor="middle" font-size="11.5" fill="var(--muted)">（无 monitor）</text>
+          <text x="585" y="166" text-anchor="middle" font-size="11" fill="var(--muted)">兼作 reg_model</text>
+          <text x="585" y="186" text-anchor="middle" font-size="11" fill="var(--muted)">物理前端</text>
+
+          <rect x="700" y="55" width="195" height="165" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+          <text x="797" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="var(--fg)">ck_agent（比对）</text>
+          <text x="797" y="104" text-anchor="middle" font-size="11" fill="var(--fg)">rx_data_merge</text>
+          <text x="797" y="120" text-anchor="middle" font-size="11" fill="var(--fg)">dt_mon</text>
+          <text x="797" y="136" text-anchor="middle" font-size="11" fill="var(--fg)">ana_mon</text>
+          <text x="797" y="152" text-anchor="middle" font-size="11" fill="var(--fg)">ch_mon</text>
+          <text x="797" y="168" text-anchor="middle" font-size="11" fill="var(--fg)">drdod_input/output</text>
+          <text x="797" y="188" text-anchor="middle" font-size="10" fill="var(--muted)">6 对 monitor+scoreboard</text>
+        </svg>
+        <div class="cap">图 3：source_driver_env 内部 agent —— isptx_agt 是激励源，ck_agent 承载全部自动比对</div>
+      </div>
+      <h3 id="env-2">各 agent 要点</h3>
+      <div class="card">
+        <h4>isptx_agt —— 激励源</h4>
+        <ul>
+          <li><code>isptx_sequence</code> 读用例目录 <code>pattern/frame_N.ppm</code> 和 <code>cfg_frameN.txt</code>，组帧后 8B/10B 编码，由 <code>isptx_driver</code> 逐 bit 打到 <code>APAD_RXP0/N0</code>（2-lane 时还有 <code>APAD_RXP1/N1</code>）。</li>
+        </ul>
+        <h4>i2c_agt / i2c_sv —— I2C 激励</h4>
+        <ul>
+          <li><code>agents/i2c_sv/i2c_model.sv</code> 是行为级 I2C master BFM，直接例化在 TB，提供 <code>i2c_write_single(devid,addr,data)</code> / <code>i2c_read_single</code>。</li>
+          <li>寄存器读写流程：先向 devid 7'h62 的 0xF0/0xF1 写 0x5A/0xA5 解锁，再对 devid 7'h70 读写。</li>
+        </ul>
+        <h4>bcc_agt —— BCC 口 + reg_model 前端</h4>
+        <ul>
+          <li><code>adapter.sv</code> 把 uvm_reg_bus_op 转成 <code>bcc_transaction</code>，故 test 里的 <code>rm</code> 寄存器读写实际从 BCC 口发出。</li>
+        </ul>
+        <h4>ck_agent —— 比对中枢</h4>
+        <ul>
+          <li>6 对 monitor+scoreboard 一一对应 6 条比对链：data_merge / digital_top / analog / chopper / drdod_input / drdod_output。</li>
+        </ul>
+      </div>
+      <h3 id="env-3">1-lane 与 2-lane 区别</h3>
+      <div class="card">
+        <table>
+          <tr><th>项目</th><th>ONE_PAIR（1-lane）</th><th>TWO_PAIR（2-lane）</th></tr>
+          <tr><td>差分端口</td><td><code>APAD_RXP0/N0</code></td><td>+<code>APAD_RXP1/N1</code></td></tr>
+          <tr><td>lane delay</td><td>单 lane 内部 align</td><td>支持 lane0/lane1 间 delay skew 测试</td></tr>
+          <tr><td>data_merge 采样</td><td>单 lane 数据</td><td>2-lane 合并，需处理 subpix 顺序</td></tr>
+          <tr><td>analog 输出</td><td>按 1 pair 期望</td><td>数据重组 / 1pto2p / DRDOD 面板格式</td></tr>
+        </table>
+      </div>
+    </section>
+    </article>
+<div class="page-nav"><a class="prev" href="./overview.html"><span class="label">上一章</span><span class="title">概览与目录结构</span></a><a class="next" href="./stimulus.html"><span class="label">下一章</span><span class="title">激励、寄存器与 golden</span></a></div>
+  </main>
+</div>
+<div class="footer">HV2M23 DV_TCON_C 验证环境使用指南 · 2026-07-22</div>
+<script>
+(function(){
+  const headings = Array.from(document.querySelectorAll('.section[id], .section h3[id]'));
+  const links = Array.from(document.querySelectorAll('.toc a'));
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) {
+        links.forEach(a => a.classList.remove('active'));
+        const active = links.find(a => a.getAttribute('href') === '#' + entry.target.id);
+        if(active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-80px 0px -60% 0px', threshold: 0 });
+  headings.forEach(h => observer.observe(h));
+  links.forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const el = document.getElementById(a.getAttribute('href').slice(1));
+      if(el) el.scrollIntoView({behavior:'smooth'});
+    });
+  });
+})();
+</script>
+</body>
+</html>

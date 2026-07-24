@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>仿真运行与回归覆盖率 - HV2M23 DV 指南</title>
+<style>
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --fg: #1e293b;
+  --muted: #64748b;
+  --accent: #1d4ed8;
+  --accent-soft: #dbeafe;
+  --line: #e2e8f0;
+  --border: #e2e8f0;
+  --pass: #16a34a;
+  --pass-soft: #dcfce7;
+  --fail: #dc2626;
+  --warn: #d97706;
+  --warn-soft: #fef3c7;
+  --code-bg: #111827;
+  --code-fg: #e5e7eb;
+  --shadow: 0 10px 40px rgba(0,0,0,0.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --text: #f1f5f9;
+    --fg: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a;
+    --line: #334155;
+    --border: #334155;
+    --pass: #4ade80;
+    --pass-soft: #14532d;
+    --fail: #f87171;
+    --warn: #fbbf24;
+    --warn-soft: #78350f;
+    --code-bg: #0b1220;
+    --code-fg: #e5e7eb;
+    --shadow: 0 10px 40px rgba(0,0,0,0.35);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+}
+a { color: var(--accent); }
+.navbar { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--line); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.navbar-inner { max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+.navbar-brand { font-weight: 700; color: var(--accent); white-space: nowrap; font-size: 15px; text-decoration: none; }
+.navbar-links { display: flex; align-items: center; gap: 6px; overflow-x: auto; flex: 1; scrollbar-width: none; }
+.navbar-links::-webkit-scrollbar { display: none; }
+.navbar-links a { padding: 6px 10px; border-radius: 6px; font-size: 14px; color: var(--text); white-space: nowrap; transition: background 0.15s; text-decoration: none; }
+.navbar-links a:hover { background: var(--bg); }
+.navbar-links a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+.container.with-toc { display: flex; gap: 32px; align-items: stretch; }
+.toc-wrapper { width: 260px; flex-shrink: 0; align-self: stretch; }
+.toc { position: sticky; top: 76px; max-height: calc(100vh - 100px); overflow-y: auto; padding: 16px; background: var(--surface); border-radius: 12px; border: 1px solid var(--line); font-size: 14px; box-shadow: var(--shadow); }
+.toc a { display: block; padding: 6px 8px; border-radius: 6px; color: var(--muted); margin: 2px 0; transition: background 0.15s, color 0.15s; text-decoration: none; }
+.toc a:hover { background: var(--bg); color: var(--accent); }
+.toc a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.toc a.toc-h1 { font-weight: 700; color: var(--accent); margin-bottom: 8px; cursor: default; }
+.toc a.toc-h3 { padding-left: 18px; font-size: 13px; }
+.content { flex: 1; min-width: 0; }
+.article { background: var(--surface); border-radius: 20px; padding: 40px 48px; box-shadow: var(--shadow); }
+.hero { text-align: center; margin-bottom: 40px; padding-top: 24px; }
+.hero h1 { margin: 0 0 12px; font-size: 34px; line-height: 1.25; font-weight: 800; }
+.hero .author { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+.hero .lead { font-size: 17px; max-width: 760px; margin: 0 auto; color: var(--text); }
+.hero .badges { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+.section-title { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 40px 0 16px; }
+.chapter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.chapter-card { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; color: var(--text); transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s; text-decoration: none; }
+.chapter-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
+.chapter-card .num { display: inline-block; width: 28px; height: 28px; line-height: 28px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 13px; font-weight: 700; text-align: center; margin-bottom: 10px; }
+.chapter-card .title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+.chapter-card .desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.page-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 48px; }
+.page-nav a { display: block; padding: 16px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; color: var(--text); transition: border-color 0.2s, box-shadow 0.2s; text-decoration: none; }
+.page-nav a:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+.page-nav a.next { text-align: right; margin-left: auto; }
+.page-nav .label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.page-nav .title { font-weight: 600; color: var(--accent); }
+.footer { text-align: center; color: var(--muted); margin-top: 48px; font-size: 13px; padding-bottom: 32px; }
+.section { margin-bottom: 48px; }
+.section:last-child { margin-bottom: 0; }
+.section h2 { font-size: 24px; margin: 0 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent); display: inline-block; font-weight: 700; }
+.section h3 { font-size: 18px; margin: 26px 0 12px; font-weight: 700; padding-left: 12px; border-left: 4px solid var(--accent); }
+.section h4 { font-size: 15.5px; margin: 18px 0 8px; font-weight: 700; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 18px; }
+.article .card { background: var(--bg); }
+.card p { margin: 10px 0; }
+.card ul, .card ol { margin: 8px 0; padding-left: 22px; }
+.card li { margin: 5px 0; }
+.tag { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.proj { background: var(--accent-soft); color: var(--accent); }
+.result.pass { background: var(--pass-soft); color: var(--pass); }
+.result.fail { background: #fee2e2; color: var(--fail); }
+table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--accent-soft); color: var(--accent); font-weight: 700; white-space: nowrap; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; background: var(--accent-soft); color: var(--accent); padding: 2px 6px; border-radius: 6px; word-break: break-all; }
+pre { background: var(--code-bg); color: var(--code-fg); border-radius: 12px; padding: 18px 20px; overflow-x: auto; font-size: 13px; line-height: 1.6; }
+pre code { background: transparent; color: inherit; padding: 0; }
+pre .c { color: #6b7280; }
+.diagram { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 22px 16px; margin: 14px 0 20px; overflow-x: auto; }
+.diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.diagram .cap { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 10px; }
+svg text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans SC", "Microsoft YaHei", monospace; }
+.blocker-list { list-style: none; padding: 0; margin: 0; }
+.blocker-list li { padding: 16px 18px; margin-bottom: 12px; background: var(--warn-soft); border-left: 4px solid var(--warn); border-radius: 10px; color: var(--fg); line-height: 1.7; }
+.blocker-list li:last-child { margin-bottom: 0; }
+.tip-list { list-style: none; padding: 0; margin: 0; }
+.tip-list li { padding: 14px 18px; margin-bottom: 10px; background: var(--pass-soft); border-left: 4px solid var(--pass); border-radius: 10px; line-height: 1.7; }
+.tip-list li:last-child { margin-bottom: 0; }
+.hint-bar { background: var(--warn-soft); border-left: 4px solid var(--warn); border-radius: 10px; padding: 14px 18px; margin: 24px auto; max-width: 760px; font-size: 14.5px; }
+.case-table td { font-size: 13px; }
+.case-table td:nth-child(1) { white-space: nowrap; font-family: ui-monospace, Menlo, Consolas, monospace; }
+@media (max-width: 960px) {
+  .toc-wrapper { display: none; }
+  .container.with-toc { display: block; }
+  .article { padding: 28px 20px; border-radius: 16px; }
+  .page-nav { grid-template-columns: 1fr; }
+  .page-nav a.next { text-align: left; margin-left: 0; }
+  .navbar-inner { padding: 10px 16px; gap: 10px; }
+}
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="navbar-brand" href="./index.html">HV2M23 DV 指南</a>
+    <div class="navbar-links"><a href="./index.html">首页</a><a href="./overview.html">概览</a><a href="./tb-arch.html">TB 架构</a><a href="./stimulus.html">激励与 golden</a><a href="./checkers.html">检查机制</a><a href="./run.html" class="active">运行与回归</a><a href="./cases.html">用例</a><a href="./faq.html">FAQ 与清单</a></div>
+  </div>
+</nav>
+<div class="container with-toc">
+  <aside class="toc-wrapper"><nav class="toc"><a class="toc-h1">仿真运行与回归覆盖率</a>
+<a href="#run">仿真运行流程</a>
+<a class="toc-h3" href="#run-1">单用例运行流程</a>
+<a class="toc-h3" href="#run-2">run_tc.sh 用法</a>
+<a class="toc-h3" href="#run-3">makefile target</a>
+<a class="toc-h3" href="#run-4">批量回归</a>
+<a href="#regression">回归与覆盖率</a>
+<a class="toc-h3" href="#regression-1">覆盖率收集流程</a>
+<a class="toc-h3" href="#regression-2">当前覆盖率数据</a></nav></aside>
+  <main class="content">
+    <article class="article">
+<section class="section" id="run">
+      <h2>仿真运行流程</h2>
+      <h3 id="run-1">单用例运行流程</h3>
+      <div class="diagram">
+        <svg viewBox="0 0 920 240" width="920" role="img" aria-label="单用例运行流程图">
+          <defs>
+            <marker id="am9" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"></path>
+            </marker>
+          </defs>
+          <rect x="15" y="30" width="150" height="60" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="90" y="54" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">run_tc.sh</text>
+          <text x="90" y="72" text-anchor="middle" font-size="10.5" fill="var(--muted)">TOP / TOP_COV / ...</text>
+
+          <rect x="205" y="30" width="190" height="60" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="300" y="50" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">建仿真目录</text>
+          <text x="300" y="66" text-anchor="middle" font-size="10.5" fill="var(--muted)">$SIM_PATH/TOP_TCON_C/&lt;case&gt;</text>
+          <text x="300" y="80" text-anchor="middle" font-size="10.5" fill="var(--muted)">+ ppm 子目录 + 拷 makefile</text>
+
+          <rect x="435" y="30" width="150" height="60" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="510" y="50" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">make comp</text>
+          <text x="510" y="66" text-anchor="middle" font-size="10.5" fill="var(--muted)">VCS：tb.f + RTL +</text>
+          <text x="510" y="80" text-anchor="middle" font-size="10.5" fill="var(--muted)">用例 test.f/user_def</text>
+
+          <rect x="625" y="30" width="150" height="60" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="700" y="50" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">make run（simv）</text>
+          <text x="700" y="66" text-anchor="middle" font-size="10.5" fill="var(--muted)">+UVM_TESTNAME=&lt;case&gt;</text>
+          <text x="700" y="80" text-anchor="middle" font-size="10.5" fill="var(--muted)">seed=date +%N</text>
+
+          <rect x="625" y="120" width="150" height="52" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+          <text x="700" y="140" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">sim.log</text>
+          <text x="700" y="157" text-anchor="middle" font-size="10.5" fill="var(--muted)">TEST CASE PASSED/FAILED</text>
+
+          <rect x="435" y="120" width="150" height="52" rx="10" fill="var(--pass-soft)" stroke="var(--pass)" stroke-width="1.5"/>
+          <text x="510" y="140" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">check_sim_results.sh</text>
+          <text x="510" y="157" text-anchor="middle" font-size="10.5" fill="var(--muted)">汇总 → sim_report.txt</text>
+
+          <rect x="15" y="120" width="180" height="52" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="105" y="140" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">verdi target</text>
+          <text x="105" y="157" text-anchor="middle" font-size="10.5" fill="var(--muted)">chip_tb_top.vf 波形</text>
+
+          <rect x="205" y="185" width="180" height="45" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="295" y="203" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">TOP_COV 分支</text>
+          <text x="295" y="220" text-anchor="middle" font-size="10.5" fill="var(--muted)">simv.vdb → urg 报告</text>
+
+          <line x1="165" y1="60" x2="201" y2="60" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am9)"/>
+          <line x1="395" y1="60" x2="431" y2="60" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am9)"/>
+          <line x1="585" y1="60" x2="621" y2="60" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am9)"/>
+          <line x1="700" y1="90" x2="700" y2="116" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am9)"/>
+          <line x1="625" y1="146" x2="589" y2="146" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am9)"/>
+          <line x1="435" y1="146" x2="199" y2="146" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am9)"/>
+          <line x1="300" y1="90" x2="300" y2="181" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am9)"/>
+        </svg>
+        <div class="cap">图 8：单用例从 run_tc.sh 到结果汇总 / 波形 / 覆盖率的完整流程</div>
+      </div>
+
+      <h3 id="run-2">run_tc.sh 用法</h3>
+      <div class="card">
+<pre><code><span class="c"># RTL 仿真</span>
+run_tc.sh TOP       t_8b1lane chip_tb_top random clean
+<span class="c"># 带覆盖率</span>
+run_tc.sh TOP_COV   t_8b1lane chip_tb_top random clean
+<span class="c"># 看波形 / 覆盖率</span>
+run_tc.sh TOP     t_8b1lane chip_tb_top verdi
+run_tc.sh TOP_COV t_8b1lane chip_tb_top cov / cov_rpt</code></pre>
+        <p>前置条件：配好 <code>$PROJECT_PATH/$DV_TOP_PATH/$DV_SCRIPT_PATH/$SIM_PATH</code> 环境变量。seed 取 <code>date +%N</code>，随后调 <code>make DEFINE_TOP=true TESTS_NAME=&lt;case&gt; CHIP_TOP_NAME=chip_tb_top SEED=$SEED</code>。</p>
+      </div>
+
+      <h3 id="run-3">makefile target</h3>
+      <div class="card">
+        <table>
+          <tr><th>target</th><th>说明</th></tr>
+          <tr><td><code>all</code>（默认）</td><td>comp + run</td></tr>
+          <tr><td><code>comp</code></td><td>VCS 编译：用例 test.f + user_def.sv + RTL 列表 + tb.f + chip_tb_top；带 <code>-cm line+fsm+tgl+cond+assert+branch -cm_hier hier.cfg</code></td></tr>
+          <tr><td><code>run</code></td><td>simv：<code>+UVM_TESTNAME=&lt;case&gt; +FILE_PATH=&lt;用例目录&gt; +SIM_TEST_PATH=&lt;仿真目录&gt;</code></td></tr>
+          <tr><td><code>verdi / verdi_daidir</code></td><td>波形调试</td></tr>
+          <tr><td><code>cov_dve / cov_verdi / cov_rpt</code></td><td>覆盖率查看 / urg 报告</td></tr>
+          <tr><td><code>clean</code></td><td>清理编译产物</td></tr>
+        </table>
+      </div>
+
+      <h3 id="run-4">批量回归</h3>
+      <div class="card">
+        <ul>
+          <li><code>top/tests/run_case.py</code>：逐 case <code>bsub -Ip run_tc.sh TOP &lt;case&gt; chip_tb_top random clean</code>，可传用例名或 case_list.txt。</li>
+          <li>回归后跑 <code>check_sim_results.sh</code> 汇总 PASS/FAIL/SKIPPED。</li>
+          <li>回归用例清单 <code>case_list.txt</code> 当前 93 个用例。</li>
+        </ul>
+      </div>
+    </section>
+<section class="section" id="regression">
+      <h2>回归与覆盖率</h2>
+      <h3 id="regression-1">覆盖率收集流程</h3>
+      <div class="diagram">
+        <svg viewBox="0 0 920 150" width="920" role="img" aria-label="覆盖率收集流程图">
+          <defs>
+            <marker id="am11" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"></path>
+            </marker>
+          </defs>
+          <rect x="15" y="45" width="170" height="60" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="100" y="70" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">run_tc.sh TOP_COV</text>
+          <text x="100" y="88" text-anchor="middle" font-size="10.5" fill="var(--muted)">-cm line+fsm+tgl+cond+assert+branch</text>
+
+          <rect x="230" y="45" width="200" height="60" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="330" y="70" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">-cm_hier hier.cfg</text>
+          <text x="330" y="88" text-anchor="middle" font-size="10.5" fill="var(--muted)">只收 digital_top 子树，排除 TB</text>
+
+          <rect x="475" y="45" width="180" height="60" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="565" y="70" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">每个用例 simv.vdb</text>
+          <text x="565" y="88" text-anchor="middle" font-size="10.5" fill="var(--muted)">TOP_TCON_C_COV/&lt;case&gt;/</text>
+
+          <rect x="700" y="45" width="205" height="60" rx="10" fill="var(--pass-soft)" stroke="var(--pass)" stroke-width="1.5"/>
+          <text x="802" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">merge_coverage.py（urg）</text>
+          <text x="802" y="84" text-anchor="middle" font-size="10.5" fill="var(--muted)">合并全部 vdb → mergedReport</text>
+
+          <line x1="185" y1="75" x2="226" y2="75" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am11)"/>
+          <line x1="430" y1="75" x2="471" y2="75" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am11)"/>
+          <line x1="655" y1="75" x2="696" y2="75" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am11)"/>
+        </svg>
+        <div class="cap">图 9：覆盖率从单用例收集到合并报告</div>
+      </div>
+      <h3 id="regression-2">当前覆盖率数据</h3>
+      <div class="card">
+        <p>截至 <strong>2026-07-13</strong>，基于回归用例合并后的覆盖率如下：</p>
+        <table>
+          <tr><th>类型</th><th>覆盖率</th></tr>
+          <tr><td>LINE</td><td>98.34%</td></tr>
+          <tr><td>COND</td><td>97.10%</td></tr>
+          <tr><td>TOGGLE</td><td>93.52%</td></tr>
+          <tr><td>FSM</td><td>84.62%</td></tr>
+          <tr><td>BRANCH</td><td>97.05%</td></tr>
+          <tr><td><strong>Score</strong></td><td><strong>94.12%</strong></td></tr>
+        </table>
+        <p>EDA 用例状态：Normal case 226 Pass / 0 Fail；Waveform case 32 Pass。</p>
+      </div>
+    </section>
+    </article>
+<div class="page-nav"><a class="prev" href="./checkers.html"><span class="label">上一章</span><span class="title">检查机制</span></a><a class="next" href="./cases.html"><span class="label">下一章</span><span class="title">用例结构与详细目录</span></a></div>
+  </main>
+</div>
+<div class="footer">HV2M23 DV_TCON_C 验证环境使用指南 · 2026-07-22</div>
+<script>
+(function(){
+  const headings = Array.from(document.querySelectorAll('.section[id], .section h3[id]'));
+  const links = Array.from(document.querySelectorAll('.toc a'));
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) {
+        links.forEach(a => a.classList.remove('active'));
+        const active = links.find(a => a.getAttribute('href') === '#' + entry.target.id);
+        if(active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-80px 0px -60% 0px', threshold: 0 });
+  headings.forEach(h => observer.observe(h));
+  links.forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const el = document.getElementById(a.getAttribute('href').slice(1));
+      if(el) el.scrollIntoView({behavior:'smooth'});
+    });
+  });
+})();
+</script>
+</body>
+</html>

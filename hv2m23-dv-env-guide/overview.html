@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>概览与目录结构 - HV2M23 DV 指南</title>
+<style>
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --fg: #1e293b;
+  --muted: #64748b;
+  --accent: #1d4ed8;
+  --accent-soft: #dbeafe;
+  --line: #e2e8f0;
+  --border: #e2e8f0;
+  --pass: #16a34a;
+  --pass-soft: #dcfce7;
+  --fail: #dc2626;
+  --warn: #d97706;
+  --warn-soft: #fef3c7;
+  --code-bg: #111827;
+  --code-fg: #e5e7eb;
+  --shadow: 0 10px 40px rgba(0,0,0,0.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --text: #f1f5f9;
+    --fg: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a;
+    --line: #334155;
+    --border: #334155;
+    --pass: #4ade80;
+    --pass-soft: #14532d;
+    --fail: #f87171;
+    --warn: #fbbf24;
+    --warn-soft: #78350f;
+    --code-bg: #0b1220;
+    --code-fg: #e5e7eb;
+    --shadow: 0 10px 40px rgba(0,0,0,0.35);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+}
+a { color: var(--accent); }
+.navbar { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--line); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.navbar-inner { max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+.navbar-brand { font-weight: 700; color: var(--accent); white-space: nowrap; font-size: 15px; text-decoration: none; }
+.navbar-links { display: flex; align-items: center; gap: 6px; overflow-x: auto; flex: 1; scrollbar-width: none; }
+.navbar-links::-webkit-scrollbar { display: none; }
+.navbar-links a { padding: 6px 10px; border-radius: 6px; font-size: 14px; color: var(--text); white-space: nowrap; transition: background 0.15s; text-decoration: none; }
+.navbar-links a:hover { background: var(--bg); }
+.navbar-links a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+.container.with-toc { display: flex; gap: 32px; align-items: stretch; }
+.toc-wrapper { width: 260px; flex-shrink: 0; align-self: stretch; }
+.toc { position: sticky; top: 76px; max-height: calc(100vh - 100px); overflow-y: auto; padding: 16px; background: var(--surface); border-radius: 12px; border: 1px solid var(--line); font-size: 14px; box-shadow: var(--shadow); }
+.toc a { display: block; padding: 6px 8px; border-radius: 6px; color: var(--muted); margin: 2px 0; transition: background 0.15s, color 0.15s; text-decoration: none; }
+.toc a:hover { background: var(--bg); color: var(--accent); }
+.toc a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.toc a.toc-h1 { font-weight: 700; color: var(--accent); margin-bottom: 8px; cursor: default; }
+.toc a.toc-h3 { padding-left: 18px; font-size: 13px; }
+.content { flex: 1; min-width: 0; }
+.article { background: var(--surface); border-radius: 20px; padding: 40px 48px; box-shadow: var(--shadow); }
+.hero { text-align: center; margin-bottom: 40px; padding-top: 24px; }
+.hero h1 { margin: 0 0 12px; font-size: 34px; line-height: 1.25; font-weight: 800; }
+.hero .author { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+.hero .lead { font-size: 17px; max-width: 760px; margin: 0 auto; color: var(--text); }
+.hero .badges { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+.section-title { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 40px 0 16px; }
+.chapter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.chapter-card { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; color: var(--text); transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s; text-decoration: none; }
+.chapter-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
+.chapter-card .num { display: inline-block; width: 28px; height: 28px; line-height: 28px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 13px; font-weight: 700; text-align: center; margin-bottom: 10px; }
+.chapter-card .title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+.chapter-card .desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.page-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 48px; }
+.page-nav a { display: block; padding: 16px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; color: var(--text); transition: border-color 0.2s, box-shadow 0.2s; text-decoration: none; }
+.page-nav a:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+.page-nav a.next { text-align: right; margin-left: auto; }
+.page-nav .label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.page-nav .title { font-weight: 600; color: var(--accent); }
+.footer { text-align: center; color: var(--muted); margin-top: 48px; font-size: 13px; padding-bottom: 32px; }
+.section { margin-bottom: 48px; }
+.section:last-child { margin-bottom: 0; }
+.section h2 { font-size: 24px; margin: 0 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent); display: inline-block; font-weight: 700; }
+.section h3 { font-size: 18px; margin: 26px 0 12px; font-weight: 700; padding-left: 12px; border-left: 4px solid var(--accent); }
+.section h4 { font-size: 15.5px; margin: 18px 0 8px; font-weight: 700; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 18px; }
+.article .card { background: var(--bg); }
+.card p { margin: 10px 0; }
+.card ul, .card ol { margin: 8px 0; padding-left: 22px; }
+.card li { margin: 5px 0; }
+.tag { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.proj { background: var(--accent-soft); color: var(--accent); }
+.result.pass { background: var(--pass-soft); color: var(--pass); }
+.result.fail { background: #fee2e2; color: var(--fail); }
+table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--accent-soft); color: var(--accent); font-weight: 700; white-space: nowrap; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; background: var(--accent-soft); color: var(--accent); padding: 2px 6px; border-radius: 6px; word-break: break-all; }
+pre { background: var(--code-bg); color: var(--code-fg); border-radius: 12px; padding: 18px 20px; overflow-x: auto; font-size: 13px; line-height: 1.6; }
+pre code { background: transparent; color: inherit; padding: 0; }
+pre .c { color: #6b7280; }
+.diagram { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 22px 16px; margin: 14px 0 20px; overflow-x: auto; }
+.diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.diagram .cap { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 10px; }
+svg text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans SC", "Microsoft YaHei", monospace; }
+.blocker-list { list-style: none; padding: 0; margin: 0; }
+.blocker-list li { padding: 16px 18px; margin-bottom: 12px; background: var(--warn-soft); border-left: 4px solid var(--warn); border-radius: 10px; color: var(--fg); line-height: 1.7; }
+.blocker-list li:last-child { margin-bottom: 0; }
+.tip-list { list-style: none; padding: 0; margin: 0; }
+.tip-list li { padding: 14px 18px; margin-bottom: 10px; background: var(--pass-soft); border-left: 4px solid var(--pass); border-radius: 10px; line-height: 1.7; }
+.tip-list li:last-child { margin-bottom: 0; }
+.hint-bar { background: var(--warn-soft); border-left: 4px solid var(--warn); border-radius: 10px; padding: 14px 18px; margin: 24px auto; max-width: 760px; font-size: 14.5px; }
+.case-table td { font-size: 13px; }
+.case-table td:nth-child(1) { white-space: nowrap; font-family: ui-monospace, Menlo, Consolas, monospace; }
+@media (max-width: 960px) {
+  .toc-wrapper { display: none; }
+  .container.with-toc { display: block; }
+  .article { padding: 28px 20px; border-radius: 16px; }
+  .page-nav { grid-template-columns: 1fr; }
+  .page-nav a.next { text-align: left; margin-left: 0; }
+  .navbar-inner { padding: 10px 16px; gap: 10px; }
+}
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="navbar-brand" href="./index.html">HV2M23 DV 指南</a>
+    <div class="navbar-links"><a href="./index.html">首页</a><a href="./overview.html" class="active">概览</a><a href="./tb-arch.html">TB 架构</a><a href="./stimulus.html">激励与 golden</a><a href="./checkers.html">检查机制</a><a href="./run.html">运行与回归</a><a href="./cases.html">用例</a><a href="./faq.html">FAQ 与清单</a></div>
+  </div>
+</nav>
+<div class="container with-toc">
+  <aside class="toc-wrapper"><nav class="toc"><a class="toc-h1">概览与目录结构</a>
+<a href="#intro">概览与验证思路</a>
+<a class="toc-h3" href="#intro-1">环境定位</a>
+<a class="toc-h3" href="#intro-2">验证思路：同一输入、两路比对</a>
+<a class="toc-h3" href="#intro-3">HV2M23 关键事实表</a>
+<a href="#structure">目录结构</a>
+<a class="toc-h3" href="#structure-1">顶层布局</a>
+<a class="toc-h3" href="#structure-2">关键目录职责</a>
+<a href="#catalog">用例全景</a>
+<a class="toc-h3" href="#catalog-1">普通用例分类</a>
+<a class="toc-h3" href="#catalog-2">波形用例分类</a></nav></aside>
+  <main class="content">
+    <article class="article">
+<section class="section" id="intro">
+      <h2>概览与验证思路</h2>
+      <h3 id="intro-1">环境定位</h3>
+      <div class="card">
+        <p>本环境是显示驱动芯片 <strong>HV2M23</strong> 的 TCON 方向模块验证环境（DV_TCON_C），DUT 为<strong>整颗芯片</strong>（pad 级）。仿真在 Linux 服务器上执行（VCS + UVM-1.1），本地仅代码副本。</p>
+        <table>
+          <tr><th style="width:140px;">项目</th><th>说明</th></tr>
+          <tr><td>环境根目录</td><td><code>DV_TCON_C/</code>（Linux 服务器路径 <code>/XXW_PRJ01/HV2M23/designer/DD/&lt;user&gt;/HV2M23/DV_TCON_C</code>）</td></tr>
+          <tr><td>仿真器</td><td>VCS + UVM-1.1（<code>script/makefile</code> 中 <code>-ntb_opts uvm-1.1</code>），波形 Verdi/FSDB</td></tr>
+          <tr><td>仿真目录</td><td><code>$SIM_PATH/TOP_TCON_C/&lt;case&gt;/</code>（日志 <code>sim.log</code>、golden <code>outResult/</code>、波形 <code>chip_tb_top.vf</code>）</td></tr>
+          <tr><td>pass/fail 判据</td><td><code>base_test.sv</code> report_phase 统计 UVM_ERROR 数，打印 <code>TEST CASE PASSED/FAILED</code></td></tr>
+          <tr><td>激励入口</td><td>所有用例默认只跑 <code>isptx_sequence</code>（见 base_vseq.sv），用例差异全部在配置文件</td></tr>
+          <tr><td>寄存器配置方式</td><td>随 ISP 链路数据流写入（CTRL_F/CTRL_L 包）；I2C 仅用于寄存器专项用例</td></tr>
+          <tr><td>lane 模式</td><td>支持 1-lane（ONE_PAIR）与 2-lane（TWO_PAIR），cfg_frame 中配置</td></tr>
+        </table>
+      </div>
+      <h3 id="intro-2">验证思路：同一输入、两路比对</h3>
+      <div class="diagram">
+        <svg viewBox="0 0 920 300" width="920" role="img" aria-label="验证思路总图">
+          <defs>
+            <marker id="am1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"></path>
+            </marker>
+          </defs>
+          <rect x="20" y="110" width="160" height="80" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="100" y="140" text-anchor="middle" font-size="13" font-weight="700" fill="var(--fg)">用例输入</text>
+          <text x="100" y="160" text-anchor="middle" font-size="11.5" fill="var(--muted)">pattern/frame_N.ppm</text>
+          <text x="100" y="176" text-anchor="middle" font-size="11.5" fill="var(--muted)">cfg_frameN.txt</text>
+
+          <rect x="260" y="30" width="200" height="70" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="360" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="var(--fg)">UVM 激励链路</text>
+          <text x="360" y="78" text-anchor="middle" font-size="11.5" fill="var(--muted)">isptx_agt（8B/10B 编码）</text>
+
+          <rect x="540" y="30" width="150" height="70" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="615" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="var(--fg)">DUT：HV2M23</text>
+          <text x="615" y="78" text-anchor="middle" font-size="11.5" fill="var(--muted)">整芯片 RTL</text>
+
+          <rect x="750" y="30" width="150" height="70" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="825" y="52" text-anchor="middle" font-size="13" font-weight="700" fill="var(--fg)">monitor 采样</text>
+          <text x="825" y="70" text-anchor="middle" font-size="11.5" fill="var(--muted)">6 个观测点</text>
+          <text x="825" y="86" text-anchor="middle" font-size="11.5" fill="var(--muted)">逐帧写 ppm/txt</text>
+
+          <rect x="260" y="200" width="200" height="70" rx="10" fill="var(--pass-soft)" stroke="var(--pass)" stroke-width="1.5"/>
+          <text x="360" y="228" text-anchor="middle" font-size="13" font-weight="700" fill="var(--fg)">cmodel pic_process</text>
+          <text x="360" y="248" text-anchor="middle" font-size="11.5" fill="var(--muted)">仿真中 $system 逐帧调用</text>
+
+          <rect x="540" y="200" width="150" height="70" rx="10" fill="var(--pass-soft)" stroke="var(--pass)" stroke-width="1.5"/>
+          <text x="615" y="228" text-anchor="middle" font-size="13" font-weight="700" fill="var(--fg)">golden</text>
+          <text x="615" y="248" text-anchor="middle" font-size="10" fill="var(--muted)">outResult/{analog,digital,data_merge}</text>
+
+          <rect x="750" y="140" width="150" height="60" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+          <text x="825" y="164" text-anchor="middle" font-size="13" font-weight="700" fill="var(--fg)">scoreboard</text>
+          <text x="825" y="184" text-anchor="middle" font-size="11.5" fill="var(--muted)">逐帧逐像素比对</text>
+
+          <rect x="750" y="230" width="150" height="50" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="825" y="250" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">UVM_ERROR = 0</text>
+          <text x="825" y="268" text-anchor="middle" font-size="11.5" fill="var(--muted)">→ TEST CASE PASSED</text>
+
+          <line x1="180" y1="130" x2="256" y2="75" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am1)"/>
+          <line x1="180" y1="170" x2="256" y2="225" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am1)"/>
+          <line x1="460" y1="65" x2="536" y2="65" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am1)"/>
+          <line x1="690" y1="65" x2="746" y2="65" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am1)"/>
+          <line x1="460" y1="235" x2="536" y2="235" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am1)"/>
+          <line x1="825" y1="100" x2="825" y2="136" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am1)"/>
+          <line x1="690" y1="235" x2="760" y2="204" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am1)" transform="rotate(0)"/>
+          <line x1="825" y1="200" x2="825" y2="226" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am1)"/>
+        </svg>
+        <div class="cap">图 1：验证数据流总图 —— 同一份 ppm + cfg_frame 同时送给 RTL 链路和 cmodel，输出在 scoreboard 逐帧比对</div>
+      </div>
+
+      <h3 id="intro-3">HV2M23 关键事实表</h3>
+      <div class="card">
+        <table>
+          <tr><th style="width:160px;">项目</th><th>值 / 说明</th></tr>
+          <tr><td>DUT 例化路径</td><td><code>chip_tb_top.u_HV2M23</code></td></tr>
+          <tr><td>Digital top 路径</td><td><code>chip_tb_top.u_HV2M23.u_HV2M23_digital_top.u_LOGIC_CENTER</code></td></tr>
+          <tr><td>Analog macro 路径</td><td><code>chip_tb_top.u_HV2M23.u_MACRO_TOP_2M23</code></td></tr>
+          <tr><td>输出通道数</td><td>1446 路（<code>SIM_OUT[14469:10]</code>）</td></tr>
+          <tr><td>lane 模式</td><td>ONE_PAIR（1-lane）/ TWO_PAIR（2-lane）</td></tr>
+          <tr><td>CHSEL 范围</td><td>0~7（3-bit），对应 1446/1440/1368/1356/1284/1230/1206/1086 channel</td></tr>
+          <tr><td>回归用例数</td><td>93 个（<code>top/tests/case_list.txt</code>）</td></tr>
+          <tr><td>覆盖率（2026-07-13）</td><td>94.12%（LINE 98.34 / COND 97.10 / TOGGLE 93.52 / FSM 84.62 / BRANCH 97.05）</td></tr>
+          <tr><td>EDA 用例状态</td><td>Normal 226 Pass / 0 Fail；Waveform 32 Pass</td></tr>
+          <tr><td>检查链</td><td>data_merge / digital_top / analog / chopper / drdod_input / drdod_output（无独立 checksum checker）</td></tr>
+        </table>
+      </div>
+    </section>
+<section class="section" id="structure">
+      <h2>目录结构</h2>
+      <h3 id="structure-1">顶层布局</h3>
+      <div class="card">
+<pre><code>DV_TCON_C/
+├── script/                      <span class="c"># 仿真入口与脚本</span>
+│   ├── makefile                 <span class="c"># VCS 编译/运行/波形/覆盖率 target</span>
+│   ├── run_tc.sh                <span class="c"># 统一运行入口（建仿真目录、调 make）</span>
+│   ├── merge_coverage.py        <span class="c"># 合并多用例覆盖率（urg）</span>
+│   └── produce_checker1.py
+└── top/
+    ├── agents/
+    │   ├── isprx_env/           <span class="c"># 核心验证环境 source_driver_env（含 cmodel/）</span>
+    │   ├── i2c_sv/              <span class="c"># 行为级 I2C master BFM（i2c_model.sv）</span>
+    │   └── temp_ymzhu_agent.sv
+    ├── tb/
+    │   ├── chip_tb_top.sv       <span class="c"># TB 顶层：例化整颗 HV2M23、接口、时钟</span>
+    │   ├── base_test.sv         <span class="c"># base_test：env/reg_model/覆盖率组件、pass/fail 判定</span>
+    │   ├── intf_connect.sv      <span class="c"># DUT 内部信号 → 观测 interface 的层次化 assign</span>
+    │   └── waves_dumper.sv
+    ├── vseq/
+    │   ├── sd_vsqr.sv           <span class="c"># virtual sequencer</span>
+    │   └── base_vseq.sv         <span class="c"># 默认只 uvm_do_on(isptx_seq)</span>
+    ├── tests/                   <span class="c"># 日常主战场：t_* 用例目录 + 用例管理脚本</span>
+    │   ├── t_8b1lane/           <span class="c"># 基础模板用例</span>
+    │   ├── create_new_case.sh   <span class="c"># 新用例生成（按名字解析参数）</span>
+    │   ├── run_case.py          <span class="c"># 批量回归（bsub）</span>
+    │   ├── check_sim_results.sh <span class="c"># 汇总 PASS/FAIL 到 sim_report.txt</span>
+    │   ├── case_list.txt        <span class="c"># 回归用例清单（93 个）</span>
+    │   └── ppm_mix_*/           <span class="c"># 共享输入图像（用例 pattern/ 多为 symlink）</span>
+    ├── filelist/tb.f            <span class="c"># 环境全部 .sv 文件列表</span>
+    ├── regression/hier.cfg      <span class="c"># VCS -cm_hier：只收 digital_top 子树覆盖率</span>
+    └── HV2M23_Register_*.xlsx   <span class="c"># 寄存器 spec</span></code></pre>
+      </div>
+      <h3 id="structure-2">关键目录职责</h3>
+      <div class="card">
+        <table>
+          <tr><th>目录</th><th>职责</th><th>改动频率</th></tr>
+          <tr><td><code>script/</code></td><td>仿真调度：makefile 与 run_tc.sh 是所有仿真的唯一入口</td><td>低</td></tr>
+          <tr><td><code>top/tb/</code></td><td>TB 骨架：顶层、基类、观测接线，一般不动</td><td>低</td></tr>
+          <tr><td><code>top/agents/isprx_env/</code></td><td>验证环境本体：激励、比对、cmodel、env_cfg 自动生成段</td><td>中（换 spec 时）</td></tr>
+          <tr><td><code>top/tests/</code></td><td>日常主战场：新建/修改用例、回归清单、共享图像</td><td>高</td></tr>
+          <tr><td><code>top/regression/</code></td><td>覆盖率层次配置 hier.cfg</td><td>低</td></tr>
+        </table>
+      </div>
+    </section>
+<section class="section" id="catalog">
+      <h2>用例全景</h2>
+      <h3 id="catalog-1">普通用例分类</h3>
+      <div class="card">
+        <table>
+          <tr><th>大类</th><th>子类/代表字段</th><th>数量级</th></tr>
+          <tr><td>register</td><td>I2C 读写、ISP 写入、unlock reset</td><td>3</td></tr>
+          <tr><td>datapath / basic</td><td>t_8b1lane / t_8b2lane、video format</td><td>~30</td></tr>
+          <tr><td>align</td><td>packpos、lane delay skew</td><td>~10</td></tr>
+          <tr><td>descramble</td><td>8b/24b、off、DSINL</td><td>~10</td></tr>
+          <tr><td>data_mapping</td><td>CHSEL 0~7 × POLC × DOTC × SHL</td><td>~100</td></tr>
+          <tr><td>H120V</td><td>data_mapping 组合 + H120V=1</td><td>~30</td></tr>
+          <tr><td>DBC</td><td>DBC_EN / VBK_ON / W_SEL 组合</td><td>1（寄存器功能）</td></tr>
+          <tr><td>chopper</td><td>SD_CHOP 0~15 × G_CHOP 0~15</td><td>~30</td></tr>
+          <tr><td>DPLC</td><td>1-lane/2-lane × CHSEL × SHL × H120V</td><td>~20</td></tr>
+          <tr><td>DRDOD</td><td>DRD_PANEL 0~7、od_k/od_w/od_gray/od_time</td><td>~20</td></tr>
+          <tr><td>multi_chip</td><td>4 颗 DDIC + E202</td><td>2</td></tr>
+          <tr><td>unlock / UTC / BWDA/BWDB/BWDL</td><td>各种失锁/看门狗阈值</td><td>~40</td></tr>
+          <tr><td>full image</td><td>t_8b1lane_full / t_8b2lane_full</td><td>2</td></tr>
+        </table>
+        <p>普通用例总数：<strong>242</strong>。详细目录见「用例」章。</p>
+      </div>
+      <h3 id="catalog-2">波形用例分类</h3>
+      <div class="card">
+        <table>
+          <tr><th>大类</th><th>代表 case</th><th>数量</th></tr>
+          <tr><td>error_state / abnormal packet</td><td>t_8b1lane_error_state、t_bac_bac、t_pixel_with_prefix、t_pixel_with_setting、t_pixel_with_training_pattern、t_setting_without_eol</td><td>6</td></tr>
+          <tr><td>reset / BWDA/BWDB/BWDL</td><td>t_8b1lane_BWDA/BWDL、t_8b2lane_reset</td><td>3</td></tr>
+          <tr><td>clock</td><td>t_8b2lane_lane1_CLK1X2 / _2</td><td>2</td></tr>
+          <tr><td>IO / LITEST / XON / PON</td><td>t_debugpin、t_LITEST、t_8b1lane_XON、t_8b1lane_PON_OPT_I1</td><td>4</td></tr>
+          <tr><td>WAKE / CS</td><td>t_8b2lane_WAKE_*、t_8b1lane_CS、R_EMI_DLY、R_TPD、R_TPW、VBK、DBC</td><td>~12</td></tr>
+          <tr><td>CDR / BAC</td><td>t_8b1lane_R_BAC、t_8b1lane_MASK_6PIX</td><td>2</td></tr>
+          <tr><td>GAMMA / internal</td><td>t_R_VGMA、t_8b1lane_LENB</td><td>2</td></tr>
+        </table>
+        <p>波形用例总数：<strong>33</strong>。</p>
+      </div>
+    </section>
+    </article>
+<div class="page-nav"><a class="prev" href="./index.html"><span class="label">上一章</span><span class="title">首页</span></a><a class="next" href="./tb-arch.html"><span class="label">下一章</span><span class="title">TB 架构与 isprx_env</span></a></div>
+  </main>
+</div>
+<div class="footer">HV2M23 DV_TCON_C 验证环境使用指南 · 2026-07-22</div>
+<script>
+(function(){
+  const headings = Array.from(document.querySelectorAll('.section[id], .section h3[id]'));
+  const links = Array.from(document.querySelectorAll('.toc a'));
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) {
+        links.forEach(a => a.classList.remove('active'));
+        const active = links.find(a => a.getAttribute('href') === '#' + entry.target.id);
+        if(active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-80px 0px -60% 0px', threshold: 0 });
+  headings.forEach(h => observer.observe(h));
+  links.forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const el = document.getElementById(a.getAttribute('href').slice(1));
+      if(el) el.scrollIntoView({behavior:'smooth'});
+    });
+  });
+})();
+</script>
+</body>
+</html>

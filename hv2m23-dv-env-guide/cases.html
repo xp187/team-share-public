@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>用例结构与详细目录 - HV2M23 DV 指南</title>
+<style>
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --fg: #1e293b;
+  --muted: #64748b;
+  --accent: #1d4ed8;
+  --accent-soft: #dbeafe;
+  --line: #e2e8f0;
+  --border: #e2e8f0;
+  --pass: #16a34a;
+  --pass-soft: #dcfce7;
+  --fail: #dc2626;
+  --warn: #d97706;
+  --warn-soft: #fef3c7;
+  --code-bg: #111827;
+  --code-fg: #e5e7eb;
+  --shadow: 0 10px 40px rgba(0,0,0,0.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --text: #f1f5f9;
+    --fg: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a8a;
+    --line: #334155;
+    --border: #334155;
+    --pass: #4ade80;
+    --pass-soft: #14532d;
+    --fail: #f87171;
+    --warn: #fbbf24;
+    --warn-soft: #78350f;
+    --code-bg: #0b1220;
+    --code-fg: #e5e7eb;
+    --shadow: 0 10px 40px rgba(0,0,0,0.35);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+}
+a { color: var(--accent); }
+.navbar { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--line); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.navbar-inner { max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+.navbar-brand { font-weight: 700; color: var(--accent); white-space: nowrap; font-size: 15px; text-decoration: none; }
+.navbar-links { display: flex; align-items: center; gap: 6px; overflow-x: auto; flex: 1; scrollbar-width: none; }
+.navbar-links::-webkit-scrollbar { display: none; }
+.navbar-links a { padding: 6px 10px; border-radius: 6px; font-size: 14px; color: var(--text); white-space: nowrap; transition: background 0.15s; text-decoration: none; }
+.navbar-links a:hover { background: var(--bg); }
+.navbar-links a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+.container.with-toc { display: flex; gap: 32px; align-items: stretch; }
+.toc-wrapper { width: 260px; flex-shrink: 0; align-self: stretch; }
+.toc { position: sticky; top: 76px; max-height: calc(100vh - 100px); overflow-y: auto; padding: 16px; background: var(--surface); border-radius: 12px; border: 1px solid var(--line); font-size: 14px; box-shadow: var(--shadow); }
+.toc a { display: block; padding: 6px 8px; border-radius: 6px; color: var(--muted); margin: 2px 0; transition: background 0.15s, color 0.15s; text-decoration: none; }
+.toc a:hover { background: var(--bg); color: var(--accent); }
+.toc a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.toc a.toc-h1 { font-weight: 700; color: var(--accent); margin-bottom: 8px; cursor: default; }
+.toc a.toc-h3 { padding-left: 18px; font-size: 13px; }
+.content { flex: 1; min-width: 0; }
+.article { background: var(--surface); border-radius: 20px; padding: 40px 48px; box-shadow: var(--shadow); }
+.hero { text-align: center; margin-bottom: 40px; padding-top: 24px; }
+.hero h1 { margin: 0 0 12px; font-size: 34px; line-height: 1.25; font-weight: 800; }
+.hero .author { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+.hero .lead { font-size: 17px; max-width: 760px; margin: 0 auto; color: var(--text); }
+.hero .badges { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+.section-title { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 40px 0 16px; }
+.chapter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.chapter-card { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; color: var(--text); transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s; text-decoration: none; }
+.chapter-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
+.chapter-card .num { display: inline-block; width: 28px; height: 28px; line-height: 28px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 13px; font-weight: 700; text-align: center; margin-bottom: 10px; }
+.chapter-card .title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+.chapter-card .desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.page-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 48px; }
+.page-nav a { display: block; padding: 16px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; color: var(--text); transition: border-color 0.2s, box-shadow 0.2s; text-decoration: none; }
+.page-nav a:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+.page-nav a.next { text-align: right; margin-left: auto; }
+.page-nav .label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.page-nav .title { font-weight: 600; color: var(--accent); }
+.footer { text-align: center; color: var(--muted); margin-top: 48px; font-size: 13px; padding-bottom: 32px; }
+.section { margin-bottom: 48px; }
+.section:last-child { margin-bottom: 0; }
+.section h2 { font-size: 24px; margin: 0 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent); display: inline-block; font-weight: 700; }
+.section h3 { font-size: 18px; margin: 26px 0 12px; font-weight: 700; padding-left: 12px; border-left: 4px solid var(--accent); }
+.section h4 { font-size: 15.5px; margin: 18px 0 8px; font-weight: 700; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 18px; }
+.article .card { background: var(--bg); }
+.card p { margin: 10px 0; }
+.card ul, .card ol { margin: 8px 0; padding-left: 22px; }
+.card li { margin: 5px 0; }
+.tag { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.proj { background: var(--accent-soft); color: var(--accent); }
+.result.pass { background: var(--pass-soft); color: var(--pass); }
+.result.fail { background: #fee2e2; color: var(--fail); }
+table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--accent-soft); color: var(--accent); font-weight: 700; white-space: nowrap; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; background: var(--accent-soft); color: var(--accent); padding: 2px 6px; border-radius: 6px; word-break: break-all; }
+pre { background: var(--code-bg); color: var(--code-fg); border-radius: 12px; padding: 18px 20px; overflow-x: auto; font-size: 13px; line-height: 1.6; }
+pre code { background: transparent; color: inherit; padding: 0; }
+pre .c { color: #6b7280; }
+.diagram { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 22px 16px; margin: 14px 0 20px; overflow-x: auto; }
+.diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.diagram .cap { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 10px; }
+svg text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans SC", "Microsoft YaHei", monospace; }
+.blocker-list { list-style: none; padding: 0; margin: 0; }
+.blocker-list li { padding: 16px 18px; margin-bottom: 12px; background: var(--warn-soft); border-left: 4px solid var(--warn); border-radius: 10px; color: var(--fg); line-height: 1.7; }
+.blocker-list li:last-child { margin-bottom: 0; }
+.tip-list { list-style: none; padding: 0; margin: 0; }
+.tip-list li { padding: 14px 18px; margin-bottom: 10px; background: var(--pass-soft); border-left: 4px solid var(--pass); border-radius: 10px; line-height: 1.7; }
+.tip-list li:last-child { margin-bottom: 0; }
+.hint-bar { background: var(--warn-soft); border-left: 4px solid var(--warn); border-radius: 10px; padding: 14px 18px; margin: 24px auto; max-width: 760px; font-size: 14.5px; }
+.case-table td { font-size: 13px; }
+.case-table td:nth-child(1) { white-space: nowrap; font-family: ui-monospace, Menlo, Consolas, monospace; }
+@media (max-width: 960px) {
+  .toc-wrapper { display: none; }
+  .container.with-toc { display: block; }
+  .article { padding: 28px 20px; border-radius: 16px; }
+  .page-nav { grid-template-columns: 1fr; }
+  .page-nav a.next { text-align: left; margin-left: 0; }
+  .navbar-inner { padding: 10px 16px; gap: 10px; }
+}
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="navbar-brand" href="./index.html">HV2M23 DV 指南</a>
+    <div class="navbar-links"><a href="./index.html">首页</a><a href="./overview.html">概览</a><a href="./tb-arch.html">TB 架构</a><a href="./stimulus.html">激励与 golden</a><a href="./checkers.html">检查机制</a><a href="./run.html">运行与回归</a><a href="./cases.html" class="active">用例</a><a href="./faq.html">FAQ 与清单</a></div>
+  </div>
+</nav>
+<div class="container with-toc">
+  <aside class="toc-wrapper"><nav class="toc"><a class="toc-h1">用例结构与详细目录</a>
+<a href="#cases">用例目录解剖</a>
+<a class="toc-h3" href="#cases-1">目录结构（以 t_8b1lane 为例）</a>
+<a class="toc-h3" href="#cases-2">新建用例流程</a>
+<a class="toc-h3" href="#cases-3">用例名参数解析规则</a>
+<a href="#catalog">普通用例详细目录</a>
+<a class="toc-h3" href="#cat-register">register</a>
+<a class="toc-h3" href="#cat-basic">datapath / basic / video format</a>
+<a class="toc-h3" href="#cat-align">align / descramble</a>
+<a class="toc-h3" href="#cat-datamap">data_mapping / H120V</a>
+<a class="toc-h3" href="#cat-dbc-chop">DBC / chopper</a>
+<a class="toc-h3" href="#cat-dplc">DPLC</a>
+<a class="toc-h3" href="#cat-drdod">DRDOD</a>
+<a class="toc-h3" href="#cat-multi">multi_chip / full image</a>
+<a class="toc-h3" href="#cat-unlock">unlock / UTC / BWDA/BWDB/BWDL</a>
+<a href="#waveform">波形用例详细目录</a>
+<a class="toc-h3" href="#wf-error">error_state / abnormal packet</a>
+<a class="toc-h3" href="#wf-clock">clock / reset / BWDA/BWDB/BWDL</a>
+<a class="toc-h3" href="#wf-io">IO / LITEST / XON / PON</a>
+<a class="toc-h3" href="#wf-wake">WAKE / CS / DBC / VBK / TPD / TPW</a>
+<a class="toc-h3" href="#wf-cdr">CDR / BAC / MASK_6PIX / R_VGMA / LENB</a></nav></aside>
+  <main class="content">
+    <article class="article">
+<section class="section" id="cases">
+      <h2>用例结构与新建</h2>
+      <h3 id="cases-1">用例目录解剖（以 t_8b1lane 为例）</h3>
+      <div class="card">
+        <table>
+          <tr><th>文件</th><th>作用</th></tr>
+          <tr><td><code>t_8b1lane.sv</code></td><td>test class：创建 <code>isprx_env_cfg</code>，填入 user_def.sv 宏（HACT/HBP/VTOTAL/FPS/PAIR_NUM/FRAME_NUM/CHIP_SEL/DV…），设 6 个 <code>*_check_on</code> 开关，config_db 下发 env_cfg 和 default_sequence</td></tr>
+          <tr><td><code>user_def.sv</code></td><td>本例全部时序/分辨率宏</td></tr>
+          <tr><td><code>cfg_frame0~8.txt</code></td><td>每帧寄存器值（如 <code>CHSEL 001</code>、<code>POLC 0</code>、<code>DOTC 0</code>，值为二进制字符串），由 env_cfg 打包进 CTRL_F/L</td></tr>
+          <tr><td><code>pattern/frame_0..7.ppm</code></td><td>输入图像（P3 格式 PPM），常是指向 <code>ppm_mix_*/</code> 的 symlink</td></tr>
+          <tr><td><code>test_lib.sv / test.f</code></td><td>include 本例 .sv / 编译文件列表（user_def + waves_dumper + incdir）</td></tr>
+          <tr><td><code>waves_dumper.sv</code></td><td>用例级自定义波形抓取</td></tr>
+        </table>
+        <p>各用例的 <code>t_xxx_vseq extends base_vseq</code> 通常只调 <code>super.body()</code> —— 用例差异全在 test class 配置和 cfg_frame/pattern 文件。</p>
+      </div>
+
+      <h3 id="cases-2">新建用例流程</h3>
+      <div class="diagram">
+        <svg viewBox="0 0 920 230" width="920" role="img" aria-label="新建用例流程图">
+          <defs>
+            <marker id="am10" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"></path>
+            </marker>
+          </defs>
+          <rect x="15" y="80" width="185" height="60" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="107" y="104" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">create_new_case.sh</text>
+          <text x="107" y="122" text-anchor="middle" font-size="10.5" fill="var(--muted)">t_H1920V16_..._xxx</text>
+
+          <rect x="245" y="80" width="170" height="60" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="330" y="104" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">复制模板 t_8b1lane</text>
+          <text x="330" y="122" text-anchor="middle" font-size="10.5" fill="var(--muted)">全局替换用例名</text>
+
+          <rect x="460" y="80" width="150" height="60" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="535" y="104" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--fg)">解析用例名</text>
+          <text x="535" y="122" text-anchor="middle" font-size="10.5" fill="var(--muted)">提取参数字段</text>
+
+          <rect x="655" y="20" width="250" height="56" rx="10" fill="var(--pass-soft)" stroke="var(--pass)" stroke-width="1.5"/>
+          <text x="780" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">时序参数 → user_def.sv</text>
+          <text x="780" y="60" text-anchor="middle" font-size="10.5" fill="var(--muted)">H1920/H1800/H1712/...・V16・FPS60/90/120/165・PORT_NUM4/8・PAIR_NUM1/2</text>
+
+          <rect x="655" y="92" width="250" height="56" rx="10" fill="var(--pass-soft)" stroke="var(--pass)" stroke-width="1.5"/>
+          <text x="780" y="114" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">寄存器参数 → cfg_frameN.txt</text>
+          <text x="780" y="132" text-anchor="middle" font-size="10.5" fill="var(--muted)">CHSELn・SDC・POLC・DOTC・SHL・H120V・SD_CHOP・G_CHOP・DPLC_MODE・DRDOD</text>
+
+          <rect x="655" y="164" width="250" height="56" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+          <text x="780" y="186" text-anchor="middle" font-size="11" font-weight="700" fill="var(--fg)">DPLC_MODE / DRDOD 特殊处理</text>
+          <text x="780" y="204" text-anchor="middle" font-size="10.5" fill="var(--muted)">开关对应 checker（analog/drdod）与 golden 来源</text>
+
+          <line x1="200" y1="110" x2="241" y2="110" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am10)"/>
+          <line x1="415" y1="110" x2="456" y2="110" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am10)"/>
+          <line x1="610" y1="96" x2="651" y2="52" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am10)"/>
+          <line x1="610" y1="110" x2="651" y2="118" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am10)"/>
+          <line x1="610" y1="126" x2="651" y2="188" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#am10)"/>
+        </svg>
+        <div class="cap">图 10：create_new_case.sh —— 复制模板后按用例名自动改参数；建完把用例名加入 case_list.txt 即进回归</div>
+      </div>
+
+      <h3 id="cases-3">用例名参数解析规则</h3>
+      <div class="card">
+        <table>
+          <tr><th>名字字段</th><th>作用目标</th><th>说明</th></tr>
+          <tr><td><code>H1920 / H1800 / H1712 / H1640 / H1600 / H1440</code>、<code>V16</code>、<code>FPS60/90/120/165</code>、<code>P4/P8</code>、<code>L1/L2</code></td><td>user_def.sv</td><td>时序与分辨率宏；PORT_NUM=4/8，PAIR_NUM=1/2</td></tr>
+          <tr><td><code>CHSELn / POLC / DOTC / SHL / H120V / SD_CHOPn / G_CHOPn / DPLC_MODE / DRDOD</code></td><td>cfg_frameN.txt</td><td>寄存器字段</td></tr>
+          <tr><td><code>DPLC_MODE 1</code></td><td>test class 开关</td><td>关 digital/data_merge 比对，开 analog_check_on + digital_dplc_check</td></tr>
+          <tr><td><code>DRDOD1</code></td><td>test class 开关</td><td>开 drd_input_check_on / drd_output_check_on</td></tr>
+        </table>
+        <p>用法：<code>cd top/tests &amp;&amp; bash create_new_case.sh &lt;新名&gt;</code>（或传 .txt 批量生成）。</p>
+      </div>
+    </section>
+<section class="section" id="catalog">
+      <h2>普通用例详细目录</h2>
+      <p>普通功能用例共 <strong>242</strong> 条，按 Feature 分类如下。表格列出每个分类下全部用例（含名称、描述、检查点、状态）。</p>
+
+      <h3 id="cat-register">register</h3>
+      <div class="card">
+<table class="case-table">
+<tr><th>用例名</th><th>描述</th><th>检查点</th><th>状态</th></tr>
+<tr><td><code>t_i2c_access_reg</code></td><td>use i2c to read and write register<br>1,<br> 1) read default <br> 2) write 0x55, read back<br> 3) write 0xaa, read back<br>3, check use auto check flow</td><td>通过i2c选择部分寄存器测试其读写功能，并对读出的值进行check<br>自动比对数据</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_isprx_acces_reg</code></td><td>use isp to write register,<br>use i2c to read check</td><td>1，isp写入REG0-REG59，通过i2c后门读取，并进行check<br>2.  自动对比数据</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_i2c_access_reg_unlock_reset</code></td><td>force unlock ,use i2c backdoor read check</td><td>isp给寄存器写入不同于default的值，force unlock ,check 0x21到0x35（除了reg_cr_done_cnt）是否reset回default，要注意此时test_en必须拉低</td><td><span class="tag result pass">PASS</span></td></tr>
+</table>
+      </div>
+
+      <h3 id="cat-basic">datapath / basic / video format</h3>
+      <div class="card">
+<table class="case-table">
+<tr><th>用例名</th><th>描述</th><th>检查点</th><th>状态</th></tr>
+<tr><td><code>t_8b1lane</code></td><td>default video case，等效为 <br>t_H1920_V16_F60_P4_L1_CHSEL1_POLC0_DOTC0_SHL1<br>t_H1920_V16_F60_P4_L2_CHSEL1_POLC0_DOTC0_SHL1</td><td>1.自动检查 三个层级的图像<br>是否符合预期。<br></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_modify_fequency_invbk</code></td><td>继承自1V21，第一帧vbk期间发送长0，触发unlock，更改tx的发送频率，后面的图正常输出<br>根据t_8b2lane_unlock_utc_lane0修改，在UTC触发unlock期间，修改填写freq</td><td>1.utc在预期帧失锁<br>2.lock后输出的pixel<br>3.对应flag的check<br>4.通用的task检查osc clk的频率</td><td><span class="tag result pass">PASS</span></td></tr>
+</table>
+      </div>
+
+      <h3 id="cat-align">align / descramble</h3>
+      <div class="card">
+<table class="case-table">
+<tr><th>用例名</th><th>描述</th><th>检查点</th><th>状态</th></tr>
+<tr><td><code>t_8b1lane_packpos</code></td><td>改变align的不同位置<br>修改项<br>在 DV_TCON_C 下进行运行，修改lock 后第一次发送的 setting 数量为18次，修改 环境变量 每次发送setting 前插入单比特数据，使得setting有效包头数据往后推，保证覆盖到18个bac 包头位置<br><br>检查项<br>1.setting和数据发送时段，是否都包括到了align的18种不同情况</td><td>1.自动检查 三个层级的图像<br>是否符合预期。<br></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_packpos</code></td><td>改变align的不同位置<br>修改项<br>在 DV_TCON_C 下进行运行，保持lane0不变, 改变lane1 delay， 保证覆盖到18个bac 包头位置<br><br>检查项<br>1.setting和数据发送时段，是否都包括到了align的18种不同情况<br>lane1 BAC 位置</td><td>1.自动检查 三个层级的图像<br>是否符合预期。<br></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_delay_01</code></td><td>对RX1N，RX1P差分信号线进行delay， lane1比lane0 慢 36 ui</td><td>1.自动检查 三个层级的图像<br>是否符合预期。</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_delay_01_54ui</code></td><td>对RX1N，RX1P差分信号线进行delay， lane1比lane0 慢 54 ui</td><td>1.自动检查 三个层级的图像<br>是否符合预期。</td><td></td></tr>
+<tr><td><code>t_8b2lane_delay_01_72ui</code></td><td>对RX1N，RX1P差分信号线进行delay， lane1比lane0 慢 72 ui</td><td>1.自动检查 三个层级的图像<br>是否符合预期。</td><td></td></tr>
+<tr><td><code>t_8b2lane_delay_01_search</code></td><td>每行改变delay<br>两层循环，外层为i=0~17， 对lane0进行delay， 使得phy0 align在不同位置。内层为j=i+(0~89)，对lane1进行delay<br>测量phy0 align在不同位置时lane1最大可以到多少。所有条件下，最严格的为最终值。实际芯片，考虑到2phy align的不同位置和jitter等行为，保守减去18ui （1T）<br>数据比对会出错，需要关闭checker</td><td>检查点为：当数据错误时，L0_BUF_CNT_FIX_SEL[7] =1 ，同时DATA0_24_ORG错误</td><td></td></tr>
+<tr><td><code>t_8b2lane_delay_10</code></td><td>对RX0N，RX0P差分信号线进行delay， lane0比lane1 慢 36 ui</td><td>1.自动检查 三个层级的图像<br>是否符合预期。</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_delay_10_54ui</code></td><td>对RX0N，RX0P差分信号线进行delay， lane0比lane1 慢 54 ui</td><td>1.自动检查 三个层级的图像<br>是否符合预期。</td><td></td></tr>
+<tr><td><code>t_8b2lane_delay_10_72ui</code></td><td>对RX0N，RX0P差分信号线进行delay， lane0比lane1 慢 72 ui</td><td>1.自动检查 三个层级的图像<br>是否符合预期。</td><td></td></tr>
+<tr><td><code>t_8b2lane_delay_10_search</code></td><td>每行改变delay<br>两层循环，外层为i=0~17， 对lane1进行delay， 使得phy0 align在不同位置。内层为j=j=i+(0~89)，对lane0进行delay<br>测量phy0 align在不同位置时lane1最大可以到多少。所有条件下，最严格的为最终值。实际芯片，考虑到2phy align的不同位置和jitter等行为，保守减去18ui （1T）<br>数据比对会出错，需要关闭checker</td><td>检查点为：当数据错误时，KEY_RST_18UI_L0_PRE 与H_2ND同cycle，或者KEY_RST_18UI_L0_PRE更晚时，数据出错</td><td></td></tr>
+<tr><td><code>t_8b2lane_descrambleoff</code></td><td>TX send normal RGB flow but set descramble off/per 1/per 3 data package</td><td>1.自动检查 三个层级的图像<br>是否符合预期。<br></td><td></td></tr>
+<tr><td><code>t_8b2lane_descramble8b</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_descramble8b_R_BAC1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_descramble24b</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_descramble24b_R_BAC1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_descrambleoff</code></td><td></td><td></td><td></td></tr>
+<tr><td><code>t_8b1lane_descramble8b</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_descramble24b</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_descramble8b_DSINL</code></td><td>测试不同的DSINL<br>frame: DS = 01, DSINL = 1111<br>frame: DS = 01, DSINL = 1100<br>frame: DS = 10, DSINL = 0111<br>frame: DS = 10, DSINL = 0011<br>frame: DS = 10, DSINL = 0000</td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+</table>
+      </div>
+
+      <h3 id="cat-datamap">data_mapping / H120V</h3>
+      <div class="card">
+<table class="case-table">
+<tr><th>用例名</th><th>描述</th><th>检查点</th><th>状态</th></tr>
+<tr><td><code>t_H1920_V16_F60_P4_L2_CHSEL1_POLC0_DOTC0_SHL1</code></td><td>real case<br>参见sheet “video format”</td><td>1.自动检查 三个层级的图像<br>是否符合预期。</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F90_P4_L2_CHSEL1_POLC0_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_POLC0_DOTC0_SHL1</code></td><td></td><td></td><td></td></tr>
+<tr><td><code>t_H1920_V16_F165_P4_L2_CHSEL1_POLC0_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F60_P4_L1_CHSEL1_POLC0_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F90_P4_L1_CHSEL1_POLC0_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL0_POLC0_DOTC0_SHL1</code></td><td>组合遍历<br>1， channel mode：<br>000 : 1446, <br>001 : 1440,<br>010 : 1368,<br>011 : 1356,<br>100 : 1284,<br>101 : 1230,<br>110 : 1206,<br>111 : 1086.<br>2, 正反扫<br>3, POLC<br>4, DOTC</td><td>1.自动检查 三个层级的图像<br>是否符合预期。</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL0_POLC0_DOTC1_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL0_POLC1_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL0_POLC1_DOTC1_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL0_POLC0_DOTC0_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL0_POLC0_DOTC1_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL0_POLC1_DOTC0_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL0_POLC1_DOTC1_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_POLC0_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_POLC0_DOTC1_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_POLC1_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_POLC1_DOTC1_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_POLC0_DOTC0_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_POLC0_DOTC1_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_POLC1_DOTC0_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_POLC1_DOTC1_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1824_V16_F120_P4_L2_CHSEL2_POLC0_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1824_V16_F120_P4_L2_CHSEL2_POLC0_DOTC1_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1824_V16_F120_P4_L2_CHSEL2_POLC1_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1824_V16_F120_P4_L2_CHSEL2_POLC1_DOTC1_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1824_V16_F120_P4_L2_CHSEL2_POLC0_DOTC0_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1824_V16_F120_P4_L2_CHSEL2_POLC0_DOTC1_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1824_V16_F120_P4_L2_CHSEL2_POLC1_DOTC0_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1824_V16_F120_P4_L2_CHSEL2_POLC1_DOTC1_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1800_V16_F120_P4_L2_CHSEL3_POLC0_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1800_V16_F120_P4_L2_CHSEL3_POLC0_DOTC1_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1800_V16_F120_P4_L2_CHSEL3_POLC1_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1800_V16_F120_P4_L2_CHSEL3_POLC1_DOTC1_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1800_V16_F120_P4_L2_CHSEL3_POLC0_DOTC0_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1800_V16_F120_P4_L2_CHSEL3_POLC0_DOTC1_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1800_V16_F120_P4_L2_CHSEL3_POLC1_DOTC0_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1800_V16_F120_P4_L2_CHSEL3_POLC1_DOTC1_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1712_V16_F120_P4_L2_CHSEL4_POLC0_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1712_V16_F120_P4_L2_CHSEL4_POLC0_DOTC1_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1712_V16_F120_P4_L2_CHSEL4_POLC1_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1712_V16_F120_P4_L2_CHSEL4_POLC1_DOTC1_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1712_V16_F120_P4_L2_CHSEL4_POLC0_DOTC0_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1712_V16_F120_P4_L2_CHSEL4_POLC0_DOTC1_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1712_V16_F120_P4_L2_CHSEL4_POLC1_DOTC0_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1712_V16_F120_P4_L2_CHSEL4_POLC1_DOTC1_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1640_V16_F120_P4_L2_CHSEL5_POLC0_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1640_V16_F120_P4_L2_CHSEL5_POLC0_DOTC1_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1640_V16_F120_P4_L2_CHSEL5_POLC1_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1640_V16_F120_P4_L2_CHSEL5_POLC1_DOTC1_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1640_V16_F120_P4_L2_CHSEL5_POLC0_DOTC0_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1640_V16_F120_P4_L2_CHSEL5_POLC0_DOTC1_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1640_V16_F120_P4_L2_CHSEL5_POLC1_DOTC0_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1640_V16_F120_P4_L2_CHSEL5_POLC1_DOTC1_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1600_V16_F120_P4_L2_CHSEL6_POLC0_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1600_V16_F120_P4_L2_CHSEL6_POLC0_DOTC1_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1600_V16_F120_P4_L2_CHSEL6_POLC1_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1600_V16_F120_P4_L2_CHSEL6_POLC1_DOTC1_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1600_V16_F120_P4_L2_CHSEL6_POLC0_DOTC0_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1600_V16_F120_P4_L2_CHSEL6_POLC0_DOTC1_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1600_V16_F120_P4_L2_CHSEL6_POLC1_DOTC0_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1600_V16_F120_P4_L2_CHSEL6_POLC1_DOTC1_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1440_V16_F120_P4_L2_CHSEL7_POLC0_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1440_V16_F120_P4_L2_CHSEL7_POLC0_DOTC1_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1440_V16_F120_P4_L2_CHSEL7_POLC1_DOTC0_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1440_V16_F120_P4_L2_CHSEL7_POLC1_DOTC1_SHL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1440_V16_F120_P4_L2_CHSEL7_POLC0_DOTC0_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1440_V16_F120_P4_L2_CHSEL7_POLC0_DOTC1_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1440_V16_F120_P4_L2_CHSEL7_POLC1_DOTC0_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1440_V16_F120_P4_L2_CHSEL7_POLC1_DOTC1_SHL0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL0_POLC0_DOTC0_SHL1_H120V1</code></td><td>根据上面的data_mapping,在register中加入H120V=1</td><td>1.自动检查 三个层级的图像<br>是否符合预期。<br>（当前检查analog）</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL0_POLC0_DOTC1_SHL1_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL0_POLC1_DOTC0_SHL1_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL0_POLC1_DOTC1_SHL1_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL0_POLC0_DOTC0_SHL0_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL0_POLC0_DOTC1_SHL0_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL0_POLC1_DOTC0_SHL0_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL0_POLC1_DOTC1_SHL0_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_POLC0_DOTC0_SHL1_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_POLC0_DOTC1_SHL1_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_POLC1_DOTC0_SHL1_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_POLC1_DOTC1_SHL1_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_POLC0_DOTC0_SHL0_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_POLC0_DOTC1_SHL0_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_POLC1_DOTC0_SHL0_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_POLC1_DOTC1_SHL0_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP0_G_CHOP2</code></td><td>chopper 检查</td><td>1.自动检查 三个层级的图像<br>是否符合预期。</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP1_G_CHOP2</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP2_G_CHOP2</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP3_G_CHOP2</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP4_G_CHOP2</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP5_G_CHOP2</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP6_G_CHOP2</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP7_G_CHOP2</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP8_G_CHOP2</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP9_G_CHOP2</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP10_G_CHOP2</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP11_G_CHOP2</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP12_G_CHOP2</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP13_G_CHOP2</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP14_G_CHOP2</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP15_G_CHOP2</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP9_G_CHOP0</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP9_G_CHOP1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP9_G_CHOP2</code></td><td></td><td></td><td></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP9_G_CHOP3</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP9_G_CHOP4</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP9_G_CHOP5</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP9_G_CHOP6</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP9_G_CHOP7</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP9_G_CHOP8</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP9_G_CHOP9</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP9_G_CHOP10</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP9_G_CHOP11</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP9_G_CHOP12</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP9_G_CHOP13</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP9_G_CHOP14</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P4_L2_CHSEL1_SD_CHOP9_G_CHOP15</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+</table>
+      </div>
+
+      <h3 id="cat-dbc-chop">DBC / chopper</h3>
+      <div class="card">
+<p>（无）</p>
+      </div>
+
+      <h3 id="cat-dplc">DPLC</h3>
+      <div class="card">
+<table class="case-table">
+<tr><th>用例名</th><th>描述</th><th>检查点</th><th>状态</th></tr>
+<tr><td><code>t_8b2lane_DPLC</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_DPLC</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P8_L2_CHSEL1_POLC0_DOTC0_SHL1_DPLC1</code></td><td>dplc 测试</td><td>1.自动检查 三个层级的图像<br>是否符合预期。<br>（当前检查analog）</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P8_L2_CHSEL1_POLC0_DOTC0_SHL0_DPLC1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1824_V16_F120_P8_L2_CHSEL2_POLC0_DOTC0_SHL1_DPLC1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1824_V16_F120_P8_L2_CHSEL2_POLC0_DOTC0_SHL0_DPLC1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1800_V16_F120_P8_L2_CHSEL3_POLC0_DOTC0_SHL1_DPLC1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1800_V16_F120_P8_L2_CHSEL3_POLC0_DOTC0_SHL0_DPLC1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1712_V16_F120_P8_L2_CHSEL4_POLC0_DOTC0_SHL1_DPLC1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1712_V16_F120_P8_L2_CHSEL4_POLC0_DOTC0_SHL0_DPLC1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P8_L1_CHSEL1_POLC0_DOTC0_SHL1_DPLC1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P8_L1_CHSEL1_POLC0_DOTC0_SHL0_DPLC1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1824_V16_F120_P8_L1_CHSEL2_POLC0_DOTC0_SHL1_DPLC1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1824_V16_F120_P8_L1_CHSEL2_POLC0_DOTC0_SHL0_DPLC1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1800_V16_F120_P8_L1_CHSEL3_POLC0_DOTC0_SHL1_DPLC1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1800_V16_F120_P8_L1_CHSEL3_POLC0_DOTC0_SHL0_DPLC1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1712_V16_F120_P8_L1_CHSEL4_POLC0_DOTC0_SHL1_DPLC1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1712_V16_F120_P8_L1_CHSEL4_POLC0_DOTC0_SHL0_DPLC1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P8_L2_CHSEL1_POLC0_DOTC0_SHL1_DPLC1_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P8_L2_CHSEL1_POLC0_DOTC0_SHL0_DPLC1_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P8_L1_CHSEL1_POLC0_DOTC0_SHL1_DPLC1_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_H1920_V16_F120_P8_L1_CHSEL1_POLC0_DOTC0_SHL0_DPLC1_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+</table>
+      </div>
+
+      <h3 id="cat-drdod">DRDOD</h3>
+      <div class="card">
+<table class="case-table">
+<tr><th>用例名</th><th>描述</th><th>检查点</th><th>状态</th></tr>
+<tr><td><code>t_H1920_V16_F60_P4_L2_CHSEL1_POLC0_DOTC0_SHL1_DRD</code></td><td></td><td></td><td></td></tr>
+<tr><td><code>t_H1920_V16_F90_P4_L2_CHSEL1_POLC0_DOTC0_SHL1_DRD</code></td><td></td><td></td><td></td></tr>
+<tr><td><code>t_8b2lane_DRD_PANEL0</code></td><td>DRD_PANEL 1 ~7 共7 case，<br>每个case有8帧，分别测试od_k = 1/2/3/4/5/6/1/2<br>DRD_PANEL 1/2 每帧分别OD_w1 = 0~7<br>DRD_PANEL 3/4 每帧分别OD_gray = 0~7<br>DRD_PANEL 5/6/7 每帧分别OD_time = 0~7<br>DRD_PANEL = 0: 1 case</td><td>1.自动检查 三个层级的图像<br>是否符合预期。<br>（当前检查analog）</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_DRD_PANEL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_DRD_PANEL2</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_DRD_PANEL3</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_DRD_PANEL4</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_DRD_PANEL5</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_DRD_PANEL6</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_DRD_PANEL7</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DRD_PANEL0</code></td><td>8b1lane: 8 case</td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DRD_PANEL1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DRD_PANEL2</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DRD_PANEL3</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DRD_PANEL4</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DRD_PANEL5</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DRD_PANEL6</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DRD_PANEL7</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DRD_PANEL3_full</code></td><td>full case: vact = 16-&gt;3000, 测试OD_w1~OD_w6<br>且当vcnt&gt;2400时，OD_w仍=OD_w6</td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DRD_PANEL0_H120V1</code></td><td>8b1lane+H120V</td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DRD_PANEL1_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DRD_PANEL2_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DRD_PANEL3_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DRD_PANEL4_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DRD_PANEL5_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DRD_PANEL6_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DRD_PANEL7_H120V1</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_drdod_disable_2lane_BOE1_off</code></td><td>OD 关闭，验证直通输出<br>1.define drdod，od_k=0<br>2.drdod checker,analog报错<br>3.在普通模式下发送drdod pattern -&gt;cmodel不工作-&gt;analog 检查报错（只在od_k=0时会调用cmodel生成的图）<br><br></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_drdod_panel_off_2lane_panel0_R</code></td><td>无面板，验证 pattern 不匹配<br>1.define drdod<br>2.drdod_panel=0 ,od_k=1<br>3.drdod check，analog check都过<br>4.代码最新修改已支持panel=0情况（只要检测到sub_pixel不为0，就加权，不管panel类型），所以这个case的场景应该会被t_8b2lane_DRD_PANEL0覆盖</td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_drdod_1pto2p_2lane_HKC1_R</code></td><td>数据交叉重整通路<br>1.define drdod<br>2.drdod_panel=1 ,od_k=1<br>3.force isp_1pto2p =1<br></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_drdod_dplc_mode_2lane_BOE1_off</code></td><td>DPLC_MODE 强制拉高 DRDOD_EN<br>1.define drdod<br>2.drdod_panel=111 ,od_k=0 dplc_mode =1<br></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_drdod_no_match_2lane_panel0_R</code></td><td>输入不匹配任何模板的 pattern → 验证输出=输入<br>1.define drdod<br>2.drdod_panel=1 ,od_k=1</td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_drdod_en_toggle_2lane_HKC1_R</code></td><td>运行时动态开关 OD_en，验证状态机恢复<br>1.define drdod<br>2.drdod_panel=1<br>3.frame 0、1 od_k=0 ,frame2 od_k=1,,frame3 od_k=0, frame3 od_k=1</td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_drdod_multiframe_2lane_HKC1_R</code></td><td>验证跨帧的 VS 同步和行为一致性；当前统一 FRAME_NUM=5，后续可扩展为长跑<br>1.define drdod frame_num 10<br>2.drdod_panel=1 ,od_k=1<br>3.等效于10 帧的drdod normal case</td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+</table>
+      </div>
+
+      <h3 id="cat-multi">multi_chip / full image</h3>
+      <div class="card">
+<table class="case-table">
+<tr><th>用例名</th><th>描述</th><th>检查点</th><th>状态</th></tr>
+<tr><td><code>t_8b1lane_multi</code></td><td>tcon驱动4颗DDIC+E202<br>chip0: default<br>1: DOTC=1<br>2: POLC=1<br>3: SHL=0</td><td>1.自动检查 多个driver芯片，三个层级的图像是否符合预期。</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_multi</code></td><td>tcon驱动4颗DDIC+E202<br>chip0: default<br>1: DOTC=1<br>2: POLC=1<br>3: SHL=0</td><td>1.自动检查 多个driver芯片，三个层级的图像是否符合预期。</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_full</code></td><td></td><td>1.自动检查 三个层级的图像<br>是否符合预期。</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_full</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+</table>
+      </div>
+
+      <h3 id="cat-unlock">unlock / UTC / BWDA/BWDB/BWDL</h3>
+      <div class="card">
+<table class="case-table">
+<tr><th>用例名</th><th>描述</th><th>检查点</th><th>状态</th></tr>
+<tr><td><code>t_8b1lane_unlock_bwda</code></td><td>bwda: LOCK to BAC, 32ms</td><td>1.unlock触发的时间，在bwda没触发前，lock为高<br>2.对应flag的check<br>3.通用的task检查osc clk的频率</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_bwdb</code></td><td>bwdb: BAC to BAC, 8ms</td><td>1.unlock触发的时间，在bwdb没触发前，lock为高<br>2.对应flag的check<br>3.通用的task检查osc clk的频率</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_bwdl</code></td><td>bwdl: reset to LOCK, 32ms</td><td>1.lock keep low</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc</code></td><td></td><td>1.utc在预期帧失锁<br>2.lock后输出的pixel<br>3.对应flag的check<br>4.通用的task检查osc clk的频率</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_0000</code></td><td>先构造error数据cnt=utc_num-1, 不触发utc，再构造error数据cnt=utc_num, 触发utc</td><td>utc_num=2</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_0001</code></td><td></td><td>utc_num=2</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_0010</code></td><td></td><td>utc_num=4</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_0011</code></td><td></td><td>utc_num=6</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_0100</code></td><td></td><td>utc_num=8</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_0101</code></td><td></td><td>utc_num=10</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_0110</code></td><td></td><td>utc_num=12</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_0111</code></td><td></td><td>utc_num=14</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_1000</code></td><td></td><td>utc_num=16</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_1001</code></td><td></td><td>utc_num=18</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_1010</code></td><td></td><td>utc_num=20</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_1011</code></td><td></td><td>utc_num=22</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_1100</code></td><td></td><td>utc_num=24</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_1101</code></td><td></td><td>utc_num=26</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_1110</code></td><td></td><td>utc_num=28</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_1111</code></td><td></td><td>utc_num=30</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_frm_0</code></td><td></td><td>utc_num=15</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_frm_1</code></td><td></td><td>utc_num=31</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_unlock_utc_lane0</code></td><td></td><td>1.utc在预期帧失锁<br>2.lock后输出的pixel<br>3.对应flag的check<br>4.通用的task检查osc clk的频率</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_unlock_utc_lane1</code></td><td></td><td>1.utc在预期帧失锁<br>2.lock后输出的pixel<br>3.对应flag的check<br>4.通用的task检查osc clk的频率</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_frm_0_lane0</code></td><td></td><td>utc失锁计数阈值</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_frm_0_lane1</code></td><td></td><td>utc失锁计数阈值</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_frm_1_lane0</code></td><td></td><td>utc失锁计数阈值</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_unlock_utc_frm_1_lane1</code></td><td></td><td>utc失锁计数阈值</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_unlock_bwda_lane0</code></td><td></td><td>1.unlock触发的时间，在bwda没触发前，lock为高<br>2.对应flag的check<br>3.通用的task检查osc clk的频率</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_unlock_bwdb_lane0</code></td><td></td><td>1.unlock触发的时间，在bwdb没触发前，lock为高<br>2.对应flag的check<br>3.通用的task检查osc clk的频率</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_unlock_bwdl_lane0</code></td><td></td><td>1.lock keep low</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_unlock_bwda_lane1</code></td><td></td><td>1.unlock触发的时间，在bwda没触发前，lock为高<br>2.对应flag的check<br>3.通用的task检查osc clk的频率</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_unlock_bwdb_lane1</code></td><td></td><td>1.unlock触发的时间，在bwdb没触发前，lock为高<br>2.对应flag的check<br>3.通用的task检查osc clk的频率</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_unlock_bwdl_lane1</code></td><td></td><td>1.lock keep low</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_reset</code></td><td>继承自1V21，测试所有复位寄存器，check对应的复位信号，复位完成后，重新下发task可以正常执行。<br>根据t_8b2lane_unlock_utc_lane0修改，在3帧结束后，force XPONRST_I, release</td><td>1.lock后输出的pixel<br>2.对应的寄存器值， 该复位的值是否复位</td><td><span class="tag result pass">PASS</span></td></tr>
+</table>
+      </div>
+    </section>
+<section class="section" id="waveform">
+      <h2>波形用例详细目录</h2>
+      <p>波形/异常用例共 <strong>33</strong> 条，全部列出。主要依赖波形 + 特定 force/注入逻辑验证异常场景与 IO 行为。</p>
+
+      <h3 id="wf-error">error_state / abnormal packet</h3>
+      <div class="card">
+<table class="case-table">
+<tr><th>用例名</th><th>描述</th><th>检查点</th><th>状态</th></tr>
+<tr><td><code>t_8b1lane_error_state</code></td><td>TX send  a wrong data pack after a BAC pack <br>BAC+POL中的POL出错<br>unlock 不发生<br>frame0: 正常<br>frame1：no POL<br>frame2~4：正常</td><td>1.output signal<br>2.状态回来后输出的pixel</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_error_state</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_bac_bac</code></td><td>修改项：<br>force tcon.u_pif_tx_top.u_p2p_tx_top.u_isptx_top.u_isptx_dummy_data.reg_isp_dummy_data_en = 1&#x27;b1 ;<br>tcon.u_pif_tx_top.u_p2p_tx_top.u_isptx_top.u_isptx_dummy_data.reg_isp_dummy_data_r = 10&#x27;h290 ;<br>reg_isp_dummy_data_g =  10&#x27;h290 ;<br>reg_isp_dummy_data_b =  10&#x27;h290 ;<br><br>set rx_cfg.bac_bac=1,<br>修改TCON_C 的hblank的last dummy data= 3c，目前在frame2前的setting后blank行和frame 2第一行的BAC<br>(也可以改case，force RTL)</td><td>  1）检查图像是否正确；<br>  2）检查插入时刻波形是否检测到连续包头。</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_pixel_with_prefix<br>（有的项目为t_prefix_in_rgb）</code></td><td>修改项： <br>修改 pattern 中传输的 数据 <br>第20行改为 30 31 50--&gt; bac<br>第30行改为 15 47 80--&gt; pol<br>第40行改为 128 144 110--&gt; bkpol<br>set rx_cfg.inject_bac_pol=1<br>在每帧line1时，data 100和101位置时，发送BAC+POL, （也可以调整task在特定位置发）<br>(也可以改case，force RTL)</td><td>1.输出的pixel<br>2.在pixel数据发送中间，出错的行不再发出去。接受到新的BAC+POL后，DATA_NUM_CNT被复位，导致在下一个正常行的BAC+POL来时，count未被减到能触发TP<br></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_prefix_in_rgb<br>（同上）</code></td><td>修改项： <br>pixel中插入rgb的字头bac+pol<br>修改项：<br>  1）在t_prefix_in_rgb.sv 中在 第一帧数据第一行的中间分别插入插入 bac+pol 包头，并持续一周期后release。<br>检查项：<br>  1）检查sim.log是否fail；<br>  2）检查图像是否正确；<br>  3）检查插入时刻波形是否拉高该包头。</td><td>1.重新发送setting后输出的pixel<br>2.对应的寄存器值</td><td></td></tr>
+<tr><td><code>t_pixel_with_setting<br>（原名t_setting_with_prefix_in_config）</code></td><td>pixel中插入setting的字头bac+setting<br>修改项：<br>  1）修改t_setting_with_prefix_in_config.sv，  wait(.LINK_STATUS)<br>wait(.POL_EN_P) #20ns后 时钟上升沿 force .tx_data_in_0 = 9&#x27;b000011110(BAC) ,<br>下个上升沿force .tx_data_in_0 = 9&#x27;b110000001(SET) 下个上升沿release<br>set rx_cfg.inject_bac_pol=1<br>在每帧line1时，data 100和101位置时，发送BAC+POL, （也可以调整task在特定位置发）<br>(也可以改case，force RTL)</td><td>1.输出的pixel<br>2.在pixel数据发送中间，出错的行不再发出去。接受到新的BAC+SET后，DATA_NUM_CNT被复位，导致在下一个正常行的BAC+POL来时，count未被减到能触发TP<br></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_pixel_with_training_pattern</code></td><td>修改项：<br>1）修改t_pixel_with_training_pattern.sv ，在检测到lock信号50us后，force TCON内状态机 .state_next = 4&#x27;d2 (即BLANK状态，发送training 数据);2us 后release;<br>set rx_cfg.inject_training_code=1<br>在每帧line1时，TCON在数据阶段改为发送tbk, （也可以调整task在特定位置发）<br>(也可以改case，force RTL)<br><br></td><td>1.输出的pixel<br>2.在pixel数据发送中间，发送完一段时间Training code，数据是否不输出到图像。  LC_CSPIF_L0l里的tbk_flag拉高，表示在不合适的位置检测到training code，<br>现象：digtial_ppm以及merge_ppm：将traing code作为普通数据输出，显示为一条白色横线；在macro_ppm ：输出正常，按照上一行数据输出</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_setting_without_eol</code></td><td>修改项：<br>del  EOL <br>set rx_cfg.setting_without_eol=1<br>在每帧第一次setting行时，将EOL换为BKPOL，其它setting行不变<br>(也可以改case，force RTL)</td><td>1.输出的pixel</td><td><span class="tag result pass">PASS</span></td></tr>
+</table>
+      </div>
+
+      <h3 id="wf-clock">clock / reset / BWDA/BWDB/BWDL</h3>
+      <div class="card">
+<table class="case-table">
+<tr><th>用例名</th><th>描述</th><th>检查点</th><th>状态</th></tr>
+<tr><td><code>t_8b1lane_BWDL</code></td><td>检查BWDA/BWDL reset 全局</td><td>检查BWDA/BWDL 触发后 reset 全局</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_BWDA</code></td><td></td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_lane1_CLK1X2</code></td><td>在仿真过程中，clk_lane_L1突然倍频。（仿真中在400us）</td><td>检查是否触发BWDB和UTC，触发unlock<br>1，WD_CNT一直再增加，触发BWDB</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_lane1_CLK1X2_2</code></td><td>在仿真过程中，clk_lane_L1和clk_lane1_od_L1突然倍频。（仿真中在400us）</td><td>检查是否触发BWDB和UTC，触发unlock<br>1. UTC check使能打开<br></td><td><span class="tag result pass">PASS</span></td></tr>
+</table>
+      </div>
+
+      <h3 id="wf-io">IO / LITEST / XON / PON</h3>
+      <div class="card">
+<table class="case-table">
+<tr><th>用例名</th><th>描述</th><th>检查点</th><th>状态</th></tr>
+<tr><td><code>t_debugpin</code></td><td>检查testo功能</td><td>1.自动检查testo pin是否符合预期的值</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_LITEST</code></td><td>NEW:<br>检查受LITEST 控制逻辑与Spec是否一致<br>在 t_LITEST.sv 中 复位结束后 #100us 后force chip_tb_top.u_HV2M23.LITEST = 1&#x27;b1 ; #500us 后release</td><td>检查<br>1，HV2M23_digital_top 的信号为1<br>POFF_DRA_CH<br>POFF_DRA_BIAS<br>POFF_BGR<br>POFF_POR<br>reg_lane_pd_L0<br>reg_lane_pd_L1<br>2，DRD CLK不打<br></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_XON</code></td><td>仿真过程中将XON拉低，后拉高</td><td>1.拉低前自动check数据<br>2.拉低后检查sim_out输出是否为0，包括data chopper polarity<br>3.拉高后自动check数据</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_PON_OPT_I1</code></td><td>上电就把PON_OPT_I置1</td><td>1.自动check数据<br>2.CS_AGND不再拉高，DRA_CS依旧拉高，上电后sim_out为10’h88 (charge share)</td><td><span class="tag result pass">PASS</span></td></tr>
+</table>
+      </div>
+
+      <h3 id="wf-wake">WAKE / CS / DBC / VBK / TPD / TPW</h3>
+      <div class="card">
+<table class="case-table">
+<tr><th>用例名</th><th>描述</th><th>检查点</th><th>状态</th></tr>
+<tr><td><code>t_8b2lane_WAKE_I</code></td><td>WAKE_CS_SEL 10(default) WAKE_PD_OPT 10(default)  修改TEST7，将wake信号传入digital,  wake 1-&gt;wake 0-&gt; wake 1</td><td>1.WAKE_I信号(1-&gt;0-&gt;1)<br>2.reg_lane_pd拉高（CDR lane_PD），<br>3.sim_out为10’h22 (HiZ) 4.POFF_DRA_CH,POFF_DRA_BIAS,POFF_DRA_CH0_1446R/L拉高(SD off，channel=1440时，721-726L恒为1)</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_WAKE_CS_SEL0</code></td><td>WAKE_CS_SEL 00 WAKE_PD_OPT 10(default)  修改TEST7，将wake信号传入digital,  wake 1-&gt;wake 0-&gt; wake 1</td><td>1.WAKE_I信号(1-&gt;0-&gt;1)<br>2.reg_lane_pd拉高(CDR lane_PD)，<br>3.sim_out为10’h00 (AGND)<br>4.POFF_DRA_CH,POFF_DRA_BIAS,POFF_DRA_CH0_1446R/L拉高(SD off，channel=1440时，721-726L恒为1),<br>5.CS_AGND拉高</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_WAKE_CS_SEL1</code></td><td>WAKE_CS_SEL 01 WAKE_PD_OPT 10(default)  修改TEST7，将wake信号传入digital,  wake 1-&gt;wake 0-&gt; wake 2</td><td>1.WAKE_I信号(1-&gt;0-&gt;1)<br>2.reg_lane_pd拉高（CDR lane_PD）<br>3.sim_out为10’hAA (HAVDD),<br>4.POFF_DRA_CH,POFF_DRA_BIAS,POFF_DRA_CH0_1446R/L拉高(SD off，channel=1440时，721-726L恒为1),<br>5.CS_HVDDA拉高</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_WAKE_CS_SEL3</code></td><td>WAKE_CS_SEL 11 WAKE_PD_OPT 10(default)  修改TEST7，将wake信号传入digital,  wake 1-&gt;wake 0-&gt; wake 1</td><td>1.WAKE_I信号(1-&gt;0-&gt;1)<br>2.reg_lane_pd拉高（CDR lane_PD），<br>3.sim_out为10’h22 (HiZ)<br>4.POFF_DRA_CH,POFF_DRA_BIAS,POFF_DRA_CH0_1446R/L拉高(SD off，channel=1440时，721-726L恒为1)</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_WAKE_PD_OPT0</code></td><td>WAKE_CS_SEL 10(default) WAKE_PD_OPT 00  修改TEST7，将wake信号传入digital,  wake 1-&gt;wake 0-&gt; wake 1</td><td>1.WAKE_I信号(1-&gt;0-&gt;1)<br>2.reg_lane_pd不变（no CDR lane_PD）<br>3.sim_out保持wake拉低前的值,<br>4.POFF_DRA_CH,POFF_DRA_BIAS,POFF_DRA_CH0_1446R/L不变( no SD off，channel=1440时，721-726L恒为1)</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_WAKE_PD_OPT1</code></td><td>WAKE_CS_SEL 10(default) WAKE_PD_OPT 01  修改TEST7，将wake信号传入digital,  wake 1-&gt;wake 0-&gt; wake 1</td><td>1.WAKE_I信号(1-&gt;0-&gt;1)<br>2.reg_lane_pd不变（no CDR lane_PD）<br>3.sim_out保持wake拉低前的值(no SD off)<br>4.POFF_DRA_CH,POFF_DRA_BIAS,POFF_DRA_CH0_1446R/L不变( no SD off，channel=1440时，721-726L恒为1)</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b2lane_WAKE_PD_OPT3</code></td><td>WAKE_CS_SEL 10(default) WAKE_PD_OPT 11  修改TEST7，将wake信号传入digital,  wake 1-&gt;wake 0-&gt; wake 1</td><td>1.WAKE_I信号(1-&gt;0-&gt;1)<br>2.reg_lane_pd不拉高（no CDR lane_PD），<br>3.sim_out为10’h22 (HiZ)<br>4.POFF_DRA_CH,POFF_DRA_BIAS,POFF_DRA_CH0_1446R/L拉高(SD off，channel=1440时，721-726L恒为1)</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_R_TPW</code></td><td>NEW:<br>1，由TCON发送R_TPW<br>cfg_frame0.txt = &#x27;h64 （default）<br>cfg_frame1.txt = &#x27;h2<br>cfg_frame2.txt = &#x27;h6e<br>cfg_frame3.txt = &#x27;hfe<br>cfg_frame4.txt = &#x27;h0<br>2， 在case里面使用clock测量POL1A/B的低电平宽度，与register比较<br></td><td>1.输出的pixel <br>2.自动检查POL1A/B的低电平宽度 （也可以是STB_A高电平）<br>3. TRW=0需要看波形</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_R_TPD</code></td><td>NEW:<br>1，由TCON发送R_TPD<br>cfg_frame0.txt = &#x27;h14 （default）<br>cfg_frame1.txt = &#x27;h2<br>cfg_frame2.txt = &#x27;h18<br>cfg_frame3.txt = &#x27;hfe<br>cfg_frame4.txt = &#x27;h0<br>2， 在case里面使用clock测量TP_delay_regression的高电平宽度，与register比较<br></td><td>1.输出的pixel（register不合适时，数据有错）<br>2.自动检查TP_delay_regression的高电平宽度<br></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_CS</code></td><td>寄存器功能测试<br>在各个frame中，改变register CS的值，根据register定义，观察信号digital_top.DRA_CS</td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_DBC</code></td><td>寄存器功能测试<br>在各个frame中，改变register DBC*的值，根据register定义，观察信号digital_top.DBC<br>frame0: DBC_EN=0, DBC_VBK_ON=0,DBW_W_SEL=00: DBC使能，VBK期间off，观察DBC宽度<br>frame1: DBC_EN=0, DBC_VBK_ON=0,DBW_W_SEL=01: DBC使能，VBK期间off，观察DBC宽度<br>frame2: DBC_EN=0, DBC_VBK_ON=1,DBW_W_SEL=10: DBC使能，VBK期间on，观察DBC宽度<br>frame3: DBC_EN=0, DBC_VBK_ON=1,DBW_W_SEL=11: DBC使能，VBK期间on，观察DBC宽度<br>frame4: DBC_EN=1, DBC_VBK_ON=0,DBW_W_SEL=00: DBC off</td><td>观察DBC宽度</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_VBK</code></td><td>寄存器功能测试<br>在各个frame中，改变register VBK的值，根据register定义，观察信号<br>LC_CSPIF_L0.DATA_24_ORG<br>HV2M23_digital_top.DBR0~5<br>MACRO_TOP_2M23.SIM_OUT[19:10], [29:20], [39:30]<br>frame0: VBK=00<br>frame1: VBK=0f<br>frame2: VBK=80<br>frame3: VBK=f0<br>frame4: VBK=ff</td><td>1，观察blank line期间，VBK数据<br>2，观察setting 行数据，不是VBK<br>3，setting下一行，VBK数据</td><td><span class="tag result pass">PASS</span></td></tr>
+</table>
+      </div>
+
+      <h3 id="wf-cdr">CDR / BAC / MASK_6PIX / R_VGMA / LENB</h3>
+      <div class="card">
+<table class="case-table">
+<tr><th>用例名</th><th>描述</th><th>检查点</th><th>状态</th></tr>
+<tr><td><code>t_8b1lane_R_BAC</code></td><td>NEW:<br>修改项：<br>1.将R_BAC寄存器通过TCON设置成1。<br>2.通过设置Htotal值将每行一条lane 的PKT数量设置成基数<br>3.通过hbk_inject_dummy 参数在第二帧（frame1），每一行增加5个UI的数据<br></td><td>检查项<br>1.在第一帧frame0时，正常<br>2.在第二帧后，因为Align的位置每行+5, 因为R_BAC=1，R_BAC锁住Align位置继而无法解出BAC+POL，无法接触数据。只有碰巧在第9行时，delay=9*5=45ui，符合+9-9变化，可以解出BAC+POL，稳定解析出数据。且align位置移动9。第18行类似。</td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_MASK_6PIX</code></td><td>（from HV1V22)<br>CASE会触发UNLOCK<br>修改项：<br>1.frame0, 将MASK_6PIX寄存器通过TCON设置成1。<br>2.frame1, 将MASK_6PIX寄存器通过TCON设置成0。(以前的项目有的为：在100us后通过I2C将MASK_6PIX设置成0）<br>3.将每行最后六个有效数据设置（force）成0.(最后三个RX_CLK的数据)<br>检查项：<br>1.在MASK_6PIX设置成1 后确定ST_T的EN时间与Data_End 相差三个RX_CLK即六个subpix 的data，在0的时候重合。<br>2.在MASK_6PIX设置成1时最后六个数据为0 不会触发UTC失锁（spec要求最后6个数据不检查）。设置成0的时候立刻触发UTC。</td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_R_VGMA</code></td><td>NEW:<br>由TCON发送R_VGMA1~R_VGMA18。（cfg_frame.txt)<br>12+2VGMA,其中2个绑点电压由其他计算得到；<br>需与Analog确认</td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_R_EMI_DLY</code></td><td>寄存器功能测试<br>在各个frame中，改变register R_EMI_DLY的值，根据register定义，观察信号LC_CSPIF_L0.STB_A STB_B STB_C</td><td></td><td><span class="tag result pass">PASS</span></td></tr>
+<tr><td><code>t_8b1lane_LENB</code></td><td>检查遮行功能<br><br>在正常行中force cr_done，一段时间后在release</td><td>检查遮行功能<br>此功能常开，需要unlock触发<br>检查relock 后 遮LENB,直到下一有<br>效Data行到来</td><td><span class="tag result pass">PASS</span></td></tr>
+</table>
+      </div>
+    </section>
+    </article>
+<div class="page-nav"><a class="prev" href="./run.html"><span class="label">上一章</span><span class="title">仿真运行与回归覆盖率</span></a><a class="next" href="./faq.html"><span class="label">下一章</span><span class="title">FAQ 与新人速查清单</span></a></div>
+  </main>
+</div>
+<div class="footer">HV2M23 DV_TCON_C 验证环境使用指南 · 2026-07-22</div>
+<script>
+(function(){
+  const headings = Array.from(document.querySelectorAll('.section[id], .section h3[id]'));
+  const links = Array.from(document.querySelectorAll('.toc a'));
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) {
+        links.forEach(a => a.classList.remove('active'));
+        const active = links.find(a => a.getAttribute('href') === '#' + entry.target.id);
+        if(active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-80px 0px -60% 0px', threshold: 0 });
+  headings.forEach(h => observer.observe(h));
+  links.forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const el = document.getElementById(a.getAttribute('href').slice(1));
+      if(el) el.scrollIntoView({behavior:'smooth'});
+    });
+  });
+})();
+</script>
+</body>
+</html>
