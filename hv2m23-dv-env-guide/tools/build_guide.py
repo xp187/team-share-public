@@ -32,6 +32,7 @@ NAV_ITEMS = [
     ("checkers.html", "检查机制"),
     ("plan.html", "验证计划"),
     ("run.html", "运行与回归"),
+    ("scripts.html", "脚本指南"),
     ("cases.html", "Case 计划索引"),
     ("portability.html", "复用与移植"),
     ("faq.html", "FAQ"),
@@ -556,13 +557,16 @@ body {
 }
 a { color: var(--blue); }
 .topbar {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 20;
   border-bottom: 1px solid var(--line);
   background: color-mix(in srgb, var(--surface) 94%, transparent);
   backdrop-filter: blur(12px);
 }
+body { padding-top: 57px; }
 .topbar-inner {
   width: 100%;
   max-width: 1240px;
@@ -627,6 +631,11 @@ table { width: 100%; border-collapse: collapse; margin: 12px 0 22px; background:
 .register-table th:nth-child(10), .register-table td:nth-child(10) { width: 180px; }
 .register-case-links { max-height: 220px; overflow-y: auto; }
 .register-case-links a { display: block; margin: 4px 0; }
+.script-table { min-width: 1100px !important; table-layout: fixed; }
+.script-table th:nth-child(1), .script-table td:nth-child(1) { width: 205px; }
+.script-table th:nth-child(2), .script-table td:nth-child(2) { width: 360px; }
+.script-table th:nth-child(3), .script-table td:nth-child(3) { width: 190px; }
+.script-table td:first-child code { white-space: nowrap; }
 details > summary { cursor: pointer; color: var(--blue); font-weight: 650; margin: 10px 0; }
 th, td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: 10px 12px; }
 th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
@@ -654,6 +663,7 @@ input, select { width: 100%; min-height: 38px; border: 1px solid var(--line); ba
 .empty { padding: 40px; text-align: center; color: var(--muted); border: 1px dashed var(--line); }
 .footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
 @media (max-width: 840px) {
+  body { padding-top: 99px; }
   .topbar-inner { align-items: flex-start; flex-direction: column; gap: 6px; }
   .topbar-inner, .nav { min-width: 0; }
   .nav { align-self: stretch; max-width: 100%; }
@@ -959,16 +969,26 @@ def build_svgs() -> None:
       <path class="arrow" d="M400 829 H460 M900 829 H960"/><path class="arrow" d="M487 682 V735 H230 V805"/>
     """
     checker_position = """
-      <rect class="blue" x="25" y="75" width="150" height="90" rx="8"/><text class="ink" x="100" y="105" text-anchor="middle">RX/decode</text><text class="small" x="100" y="132" text-anchor="middle">DUT input</text>
-      <rect class="green" x="215" y="55" width="170" height="130" rx="8"/><text class="ink" x="300" y="87" text-anchor="middle">Data Merge</text><text class="small" x="300" y="114" text-anchor="middle">2 streams</text><text class="small" x="300" y="136" text-anchor="middle">merge/mapping</text><text class="small" x="300" y="158" text-anchor="middle">monitor -> scb</text>
-      <rect class="green" x="425" y="55" width="170" height="130" rx="8"/><text class="ink" x="510" y="87" text-anchor="middle">Digital Top</text><text class="small" x="510" y="114" text-anchor="middle">OL/EL/OR/ER</text><text class="small" x="510" y="136" text-anchor="middle">4 streams</text><text class="small" x="510" y="158" text-anchor="middle">monitor -> scb</text>
-      <rect class="green" x="635" y="55" width="170" height="130" rx="8"/><text class="ink" x="720" y="87" text-anchor="middle">Chopper</text><text class="small" x="720" y="114" text-anchor="middle">D port connected</text><text class="small" x="720" y="136" text-anchor="middle">G port unconnected</text><text class="small" x="720" y="158" text-anchor="middle">monitor -> scb</text>
-      <rect class="green" x="845" y="55" width="190" height="130" rx="8"/><text class="ink" x="940" y="87" text-anchor="middle">Analog/control</text><text class="small" x="940" y="114" text-anchor="middle">pixel/POL/chop</text><text class="small" x="940" y="136" text-anchor="middle">unlock/VBK</text><text class="small" x="940" y="158" text-anchor="middle">5 paths</text>
-      <path class="arrow-green" d="M175 120 H215 M385 120 H425 M595 120 H635 M805 120 H845"/>
-      <rect class="purple" x="425" y="270" width="170" height="95" rx="8"/><text class="ink" x="510" y="300" text-anchor="middle">DRD input</text><text class="small" x="510" y="327" text-anchor="middle">panel/input pattern</text><text class="small" x="510" y="349" text-anchor="middle">independent path</text>
-      <rect class="purple" x="680" y="270" width="170" height="95" rx="8"/><text class="ink" x="765" y="300" text-anchor="middle">DRD output</text><text class="small" x="765" y="327" text-anchor="middle">output/bypass</text><text class="small" x="765" y="349" text-anchor="middle">independent path</text>
-      <path class="arrow-purple" d="M510 185 V270 M595 317 H680 M765 270 V220 H940 V185"/>
-      <text class="small" x="530" y="420" text-anchor="middle">Parallel DUT taps: debug by the earliest failing stage.</text>
+      <rect class="blue dash" x="25" y="25" width="1350" height="315" rx="14"/><text class="ink" x="50" y="55">DUT: u_HV2M23 functional data path</text>
+      <rect class="box" x="55" y="95" width="170" height="100" rx="8"/><text class="ink" x="140" y="125" text-anchor="middle">ISPTX RX / decode</text><text class="small" x="140" y="151" text-anchor="middle">APAD_RXP/RXN</text><text class="small" x="140" y="174" text-anchor="middle">packet + pixel decode</text>
+      <rect class="green" x="275" y="95" width="180" height="100" rx="8"/><text class="ink" x="365" y="125" text-anchor="middle">Data Merge</text><text class="small" x="365" y="151" text-anchor="middle">pair merge / mapping</text><text class="small" x="365" y="174" text-anchor="middle">DATAI_L0 / DATAI_L1</text>
+      <rect class="green" x="505" y="95" width="190" height="100" rx="8"/><text class="ink" x="600" y="125" text-anchor="middle">Digital Top</text><text class="small" x="600" y="151" text-anchor="middle">odd/even + left/right</text><text class="small" x="600" y="174" text-anchor="middle">OL / EL / OR / ER</text>
+      <rect class="amber" x="745" y="95" width="180" height="100" rx="8"/><text class="ink" x="835" y="125" text-anchor="middle">Chopper</text><text class="small" x="835" y="151" text-anchor="middle">DRA/GMA chop control</text><text class="small" x="835" y="174" text-anchor="middle">D connected; G open</text>
+      <rect class="purple" x="975" y="95" width="180" height="100" rx="8"/><text class="ink" x="1065" y="125" text-anchor="middle">Macro / Analog</text><text class="small" x="1065" y="151" text-anchor="middle">source-driver output</text><text class="small" x="1065" y="174" text-anchor="middle">pixel + control</text>
+      <rect class="box" x="1205" y="95" width="140" height="100" rx="8"/><text class="ink" x="1275" y="125" text-anchor="middle">Panel side</text><text class="small" x="1275" y="151" text-anchor="middle">SIM_OUT</text><text class="small" x="1275" y="174" text-anchor="middle">final channels</text>
+      <path class="arrow" d="M225 145 H275 M455 145 H505 M695 145 H745 M925 145 H975 M1155 145 H1205"/>
+      <rect class="purple" x="525" y="240" width="170" height="70" rx="8"/><text class="ink" x="610" y="268" text-anchor="middle">DRD processing</text><text class="small" x="610" y="292" text-anchor="middle">input -> OD -> output/bypass</text>
+      <path class="arrow-purple" d="M505 170 H485 V275 H525 M695 275 H955 V170 H975"/>
+
+      <text class="ink" x="50" y="390">UVM checker taps outside DUT (parallel observation; no checker is inserted into the RTL path)</text>
+      <rect class="green dash" x="250" y="420" width="230" height="175" rx="10"/><text class="ink" x="365" y="450" text-anchor="middle">Data Merge checker</text><text class="small" x="365" y="478" text-anchor="middle">data_merge_intf</text><text class="small" x="365" y="502" text-anchor="middle">monitor: 2 analysis ports</text><text class="small" x="365" y="526" text-anchor="middle">scoreboard: outResult/data_merge</text><text class="small" x="365" y="550" text-anchor="middle">earliest main-path checkpoint</text><text class="small" x="365" y="574" text-anchor="middle">gate: data_merge_check_on</text>
+      <rect class="green dash" x="500" y="420" width="230" height="175" rx="10"/><text class="ink" x="615" y="450" text-anchor="middle">Digital Top checker</text><text class="small" x="615" y="478" text-anchor="middle">digital_top_intf</text><text class="small" x="615" y="502" text-anchor="middle">monitor: OL/EL/OR/ER</text><text class="small" x="615" y="526" text-anchor="middle">scoreboard: 4 golden streams</text><text class="small" x="615" y="550" text-anchor="middle">split/mapping checkpoint</text><text class="small" x="615" y="574" text-anchor="middle">gate: digital_top_check_on</text>
+      <rect class="amber dash" x="750" y="420" width="210" height="175" rx="10"/><text class="ink" x="855" y="450" text-anchor="middle">Chopper checker</text><text class="small" x="855" y="478" text-anchor="middle">chopper_intf</text><text class="small" x="855" y="502" text-anchor="middle">D analysis port connected</text><text class="small" x="855" y="526" text-anchor="middle">G port declared, not connected</text><text class="small" x="855" y="550" text-anchor="middle">pattern compare</text><text class="small" x="855" y="574" text-anchor="middle">gate: chopper_check_on</text>
+      <rect class="purple dash" x="980" y="420" width="275" height="175" rx="10"/><text class="ink" x="1117" y="450" text-anchor="middle">Analog / control checker</text><text class="small" x="1117" y="478" text-anchor="middle">analog_data_output_if</text><text class="small" x="1117" y="502" text-anchor="middle">pixel / POL / chop / unlock / VBK</text><text class="small" x="1117" y="526" text-anchor="middle">normal / DPLC / DRDOD golden</text><text class="small" x="1117" y="550" text-anchor="middle">closest final-output checkpoint</text><text class="small" x="1117" y="574" text-anchor="middle">gate: analog_check_on</text>
+      <path class="arrow-green dash" d="M365 195 V420 M600 195 V420 M835 195 V420 M1065 195 V420"/>
+      <rect class="purple dash" x="390" y="640" width="450" height="95" rx="10"/><text class="ink" x="615" y="670" text-anchor="middle">DRD input checker</text><text class="small" x="615" y="696" text-anchor="middle">samples DRD input; validates panel/pattern construction</text><text class="small" x="615" y="718" text-anchor="middle">gate: drd_input_check_on</text>
+      <rect class="purple dash" x="880" y="640" width="450" height="95" rx="10"/><text class="ink" x="1105" y="670" text-anchor="middle">DRD output checker</text><text class="small" x="1105" y="696" text-anchor="middle">samples DRD output; validates OD and bypass input/output</text><text class="small" x="1105" y="718" text-anchor="middle">gate: drd_output_check_on</text>
+      <path class="arrow-purple dash" d="M565 310 V360 H1280 V620 H615 V640 M655 310 V370 H1350 V630 H1105 V640"/>
     """
     golden_flow = """
       <rect class="blue" x="30" y="125" width="180" height="105" rx="8"/><text class="ink" x="120" y="155" text-anchor="middle">Frame inputs</text><text class="small" x="120" y="180" text-anchor="middle">pattern/frame_N.ppm</text><text class="small" x="120" y="202" text-anchor="middle">rx_cfg / frame / id</text>
@@ -1000,7 +1020,7 @@ def build_svgs() -> None:
         "debug-flow.svg": svg_document(1050, 450, debug_flow, "HV2M23 checker failure triage flow"),
         "isptx-driver-flow.svg": svg_document(1200, 380, isptx_driver_flow, "ISPTX sequence to DUT driver flow"),
         "isptx-sequence-detail.svg": svg_document(1400, 900, isptx_sequence_detail, "Detailed ISPTX sequence source flow"),
-        "checker-position.svg": svg_document(1060, 450, checker_position, "Checker positions in the DUT data path"),
+        "checker-position.svg": svg_document(1400, 770, checker_position, "Checker positions around the DUT data path"),
         "golden-flow.svg": svg_document(1060, 370, golden_flow, "C model golden generation and checker loading"),
         "special-modes.svg": svg_document(850, 420, special_modes, "DPLC and DRDOD special processing"),
     }
@@ -1242,13 +1262,77 @@ run_tc.sh TOP &lt;case_name&gt; chip_tb_top verdi</code></pre>
 python regression.py
 # Coverage variant
 python regression_cov.py</code></pre>
-      <p><code>regression.py</code> 从 <code>case_list.txt</code> 读取 testcase，并生成 <code>bsub -Ip run_tc.sh TOP ... random clean</code> 命令。</p>
+      <p><code>regression.py</code> 与 <code>regression_cov.py</code> 当前从脚本内的 <code>test_names</code> 数组取得 testcase，并生成 <code>bsub -Ip run_tc.sh ... random clean</code> 命令。运行前必须检查数组中的启用项；它们不会自动读取 <code>case_list.txt</code>。</p>
       <h2>提交回归前</h2><ul><li>case 名称与目录、主 .sv class、test_lib include 一致。</li><li>cfg_frame 数量覆盖 FRAME_NUM，或明确依赖复用规则。</li><li>checker 开关与验证目标一致，不能只依赖波形人工判断。</li><li>golden 命令在仿真目录生成预期文件，日志没有 file-open error。</li></ul>
     """
 
     run_body += """
       <h2>结果目录建议保留内容</h2><div class="grid-2"><section class="panel"><h3>复现必需</h3><ul><li>完整命令、seed、case 名和源码 revision。</li><li>compile/run log 与第一个 UVM error 上下文。</li><li>本次生成的 golden 和 actual dump。</li></ul></section><section class="panel"><h3>调试必需</h3><ul><li>波形数据库及保存范围。</li><li>cfg frame、setting packet、关键寄存器 dump。</li><li>checker 开关与模型命令行。</li></ul></section></div>
       <h2>回归清单治理</h2><p>当前 <code>case_list.txt</code> 的唯一名称与实际目录存在差异。新增清单项前应自动检查目录存在、主 class 可编译、输入文件齐全，并把不存在的名称单独报告，避免“提交了回归但实际没有运行目标”的假覆盖。</p>
+    """
+
+    scripts_body = """
+      <div class="note"><strong>环境前提：</strong>以下仿真脚本面向 Linux/LSF 服务器，依赖 <code>DV_PATH</code>、<code>DV_TOP_PATH</code>、<code>DV_SCRIPT_PATH</code>、<code>SIM_PATH</code>、VCS/Verdi/URG 和 <code>bsub</code>。命令应在项目环境初始化完成后执行；Windows 本机仅适合运行网页生成器。</div>
+      <h2>脚本总览</h2>
+      <div class="table-scroll"><table class="script-table"><tr><th>脚本</th><th>主要用途</th><th>建议运行目录</th><th>关键输入/产物</th></tr>
+      <tr><td><code>script/run_tc.sh</code></td><td>单 case 编译、仿真、波形和 coverage 的统一入口。</td><td><code>$DV_TCON_C/script</code></td><td>位置参数；输出到 <code>$SIM_PATH/&lt;level&gt;_TCON_C/&lt;case&gt;</code></td></tr>
+      <tr><td><code>top/tests/regression.py</code></td><td>普通回归；遍历脚本内 <code>test_names</code>。</td><td><code>$DV_TCON_C/top/tests</code></td><td>硬编码 case 数组；提交 LSF job</td></tr>
+      <tr><td><code>top/tests/regression_cov.py</code></td><td>Coverage 回归；case 范围同样由脚本数组控制。</td><td><code>$DV_TCON_C/top/tests</code></td><td><code>TOP_COV</code> job、各 case <code>simv.vdb</code></td></tr>
+      <tr><td><code>top/tests/run_case.py</code></td><td>按一个 case 名或当前目录批量启动匹配目录。</td><td><code>$DV_TCON_C/top/tests</code></td><td>可选 case 名；启动 xterm + bsub</td></tr>
+      <tr><td><code>script/check.py</code></td><td>递归汇总 compile.log 与 sim.log。</td><td>某次回归结果根目录</td><td><code>compile_result.txt</code>、<code>compare_result.txt</code></td></tr>
+      <tr><td><code>script/merge_coverage.py</code></td><td>搜索各 <code>t_*/simv.vdb</code> 并调用 URG 合并。</td><td>Coverage 回归结果根目录</td><td><code>merged12.3.vdb</code>、<code>mergedReport</code>、<code>merge.log</code></td></tr>
+      <tr><td><code>script/user_def_addon.pl</code></td><td>用 addon 中同名 define 覆盖基础 <code>user_def.sv</code>。</td><td>任意目录</td><td>两个 SV 输入；合并文本写到 stdout</td></tr>
+      <tr><td><code>script/produce_checker1.py</code></td><td>从 CSV 生成 checker bind、interface、transaction 和 monitor 骨架。</td><td>目标 checker 目录</td><td><code>cfg.csv</code>；生成多个 <code>.sv/.svh</code></td></tr>
+      <tr><td><code>tools/build_guide.py</code></td><td>读取 Excel 与源码，重建本指南和 SVG。</td><td>指南仓库根目录</td><td>275 条 case、HTML、CSS/JS 和 SVG</td></tr></table></div>
+
+      <h2>run_tc.sh：单 Case、波形与 Coverage</h2>
+      <pre><code>cd $DV_TCON_C/script
+# Show built-in help
+run_tc.sh -h
+
+# Compile and run one RTL case with a random seed
+run_tc.sh TOP &lt;case_name&gt; chip_tb_top random clean
+
+# Open the existing run in Verdi
+run_tc.sh TOP &lt;case_name&gt; chip_tb_top verdi
+
+# Coverage run, interactive analysis, and HTML report
+run_tc.sh TOP_COV &lt;case_name&gt; chip_tb_top random clean
+run_tc.sh TOP_COV &lt;case_name&gt; chip_tb_top cov
+run_tc.sh TOP_COV &lt;case_name&gt; chip_tb_top cov_rpt</code></pre>
+      <table><tr><th>位置</th><th>含义</th><th>常用值</th></tr><tr><td>1</td><td>验证层级</td><td><code>TOP</code>、<code>TOP_DUMP</code>、<code>TOP_COV</code>、<code>TOP_NETLIST</code>、<code>FPGA_TOP</code></td></tr><tr><td>2</td><td>testcase 目录/名称</td><td><code>t_*</code></td></tr><tr><td>3</td><td>TB top</td><td><code>chip_tb_top</code></td></tr><tr><td>4</td><td>动作或 seed 入口</td><td><code>random</code>、<code>verdi</code>、<code>cov</code>、<code>cov_rpt</code></td></tr><tr><td>5</td><td>清理旧结果</td><td><code>clean</code></td></tr><tr><td>6</td><td>可选运行控制</td><td><code>norunc</code></td></tr></table>
+      <div class="note"><strong>注意：</strong><code>run_tc.sh</code> 会清理目标仿真目录内的 PPM、outResult 和部分旧结果。先确认 <code>SIM_PATH</code>、验证层级和 case 名正确，不要在有需保留调试产物时直接使用 <code>clean</code>。</div>
+
+      <h2>Regression：维护和启动</h2>
+      <ol class="steps"><li>打开 <code>regression.py</code> 或 <code>regression_cov.py</code>，只保留本轮要运行的 <code>test_names</code> 条目。</li><li>确认每个名称在 <code>top/tests</code> 下存在同名目录，且 case 资产完整。</li><li>在 <code>top/tests</code> 目录运行脚本，检查生成的 bsub 命令是否使用预期的 TOP/TOP_COV。</li><li>job 完成后进入结果根目录运行 <code>check.py</code>；Coverage 回归再运行 <code>merge_coverage.py</code>。</li></ol>
+      <pre><code>cd $DV_TCON_C/top/tests
+python regression.py
+# or
+python regression_cov.py
+
+cd $SIM_PATH/TOP_TCON_C
+python check.py
+
+cd $SIM_PATH/TOP_COV_TCON_C
+python check.py
+python merge_coverage.py</code></pre>
+      <p><code>check.py</code> 将包含 <code>Error</code> 的 compile.log 判为编译失败；对 sim.log，它把 <code>UVM_ERROR</code> 数量大于 1 判为 compare fail。这个规则来自当前脚本实现，不等价于通用 UVM pass/fail 标准，遇到异常统计时应回看原始日志。</p>
+
+      <h2>user_def_addon.pl：合并宏定义</h2>
+      <pre><code>perl $DV_TCON_C/script/user_def_addon.pl \
+  base_user_def.sv user_def_addon.sv &gt; merged_user_def.sv</code></pre>
+      <p>输出保持基础文件中的 define 顺序；addon 中同名 define 覆盖原值，新 define 追加到末尾。脚本只处理形如 <code>`define NAME VALUE</code> 的单行定义，并移除 <code>//</code> 后的行内注释。</p>
+
+      <h2>produce_checker1.py：生成 Checker 骨架</h2>
+      <pre><code>cd $DV_TCON_C/script
+python produce_checker1.py cfg.csv</code></pre>
+      <p><code>cfg.csv</code> 描述 checker 名称、RTL module、bind instance、DUT hierarchy、端口、transaction 字段和 analysis_port。脚本会在当前目录写入 bind <code>.svh</code>、interface、transaction 和 monitor 文件。生成物是骨架，仍需人工实现采样 task、scoreboard、golden 加载并在 <code>checker_agent</code> 中连接；运行前建议在干净分支或临时目录预览输出，避免覆盖手工代码。</p>
+
+      <h2>网页指南生成器</h2>
+      <pre><code>cd E:/project/team-share-public/hv2m23-dv-env-guide
+python -m py_compile tools/build_guide.py
+python -B tools/build_guide.py</code></pre>
+      <p>生成器以 HV2M23 EDA Excel 为 case 主清单，扫描 <code>E:/DV_TCON_C/top/tests</code> 补充源码证据，并重建全部页面和图。修改页面内容、导航、CSS 或 SVG 时应修改生成器，再执行重建；不要只编辑生成出的 HTML。</p>
     """
 
     case_types = sorted({str(item["caseType"]) for item in cases})
@@ -1386,7 +1470,8 @@ artifacts/          # run-id/frame-id scoped golden and actual outputs</code></p
         "stimulus.html": page("stimulus.html", "激励、配置与 Golden", "从 testcase 资产到寄存器包、pixel stream 和三类模型输出的逐帧执行路径。", stimulus_body),
         "checkers.html": page("checkers.html", "Checker 与失败定位", "按 Data Merge、Digital Top、Chopper/Analog 和 DRDOD 独立路径说明实际 monitor/scoreboard。", checkers_body),
         "plan.html": page("plan.html", "Excel 验证计划总览", "整理主清单中的计划状态、寄存器验证映射、环境变更、coverage 和 video format。", plan_body),
-        "run.html": page("run.html", "运行、回归与 Case 生命周期", "使用仓库中的 run_tc.sh、regression.py 和 case_list.txt，建立可复现的运行闭环。", run_body),
+        "run.html": page("run.html", "运行、回归与 Case 生命周期", "使用仓库中的 run_tc.sh 和 regression.py，建立可复现的运行闭环。", run_body),
+        "scripts.html": page("scripts.html", "脚本使用指南", "按用途整理仿真、回归、结果检查、coverage、checker 生成和网页维护脚本的输入、命令、产物与风险。", scripts_body),
         "cases.html": page("cases.html", "Testcase 验证计划索引", "以 HV2M23 EDA Excel 为主清单，整合验证目标、check 点、状态与可关联的源码证据。", cases_body),
         "portability.html": page("portability.html", "环境复用与下一项目移植", "把稳定平台机制与芯片适配内容分层，给出可执行的移植阶段、风险点和验收门槛。", portability_body),
         "faq.html": page("faq.html", "FAQ 与新人检查表", "集中解释 CHSEL/CHIP_SEL、checker 开关、配置帧复用和文档刷新方式。", faq_body),

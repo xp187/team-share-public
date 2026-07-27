@@ -9,12 +9,12 @@
           <link rel="stylesheet" href="assets/guide.css?v=20260727">
         </head>
         <body>
-          <header class="topbar"><div class="topbar-inner"><a class="brand" href="index.html"><span>HV2M23</span> DV Guide</a><nav class="nav"><a href="index.html" class="">首页</a><a href="overview.html" class="">概览</a><a href="tb-arch.html" class="">TB 架构</a><a href="stimulus.html" class="">激励与 Golden</a><a href="checkers.html" class="">检查机制</a><a href="plan.html" class="">验证计划</a><a href="run.html" class="active">运行与回归</a><a href="cases.html" class="">Case 计划索引</a><a href="portability.html" class="">复用与移植</a><a href="faq.html" class="">FAQ</a></nav></div></header>
+          <header class="topbar"><div class="topbar-inner"><a class="brand" href="index.html"><span>HV2M23</span> DV Guide</a><nav class="nav"><a href="index.html" class="">首页</a><a href="overview.html" class="">概览</a><a href="tb-arch.html" class="">TB 架构</a><a href="stimulus.html" class="">激励与 Golden</a><a href="checkers.html" class="">检查机制</a><a href="plan.html" class="">验证计划</a><a href="run.html" class="active">运行与回归</a><a href="scripts.html" class="">脚本指南</a><a href="cases.html" class="">Case 计划索引</a><a href="portability.html" class="">复用与移植</a><a href="faq.html" class="">FAQ</a></nav></div></header>
           <main class="layout">
             <header class="page-head">
               <div class="eyebrow">HV2M23 / DV_TCON_C</div>
               <h1>运行、回归与 Case 生命周期</h1>
-              <p class="lead">使用仓库中的 run_tc.sh、regression.py 和 case_list.txt，建立可复现的运行闭环。</p>
+              <p class="lead">使用仓库中的 run_tc.sh 和 regression.py，建立可复现的运行闭环。</p>
               <div class="source-stamp">Source baseline: E:\DV_TCON_C · audited 2026-07-27</div>
             </header>
             <div class="content-grid">
@@ -29,7 +29,7 @@ run_tc.sh TOP &lt;case_name&gt; chip_tb_top verdi</code></pre>
 python regression.py
 # Coverage variant
 python regression_cov.py</code></pre>
-      <p><code>regression.py</code> 从 <code>case_list.txt</code> 读取 testcase，并生成 <code>bsub -Ip run_tc.sh TOP ... random clean</code> 命令。</p>
+      <p><code>regression.py</code> 与 <code>regression_cov.py</code> 当前从脚本内的 <code>test_names</code> 数组取得 testcase，并生成 <code>bsub -Ip run_tc.sh ... random clean</code> 命令。运行前必须检查数组中的启用项；它们不会自动读取 <code>case_list.txt</code>。</p>
       <h2 id="section-3">提交回归前</h2><ul><li>case 名称与目录、主 .sv class、test_lib include 一致。</li><li>cfg_frame 数量覆盖 FRAME_NUM，或明确依赖复用规则。</li><li>checker 开关与验证目标一致，不能只依赖波形人工判断。</li><li>golden 命令在仿真目录生成预期文件，日志没有 file-open error。</li></ul>
 
       <h2 id="section-4">结果目录建议保留内容</h2><div class="grid-2"><section class="panel"><h3>复现必需</h3><ul><li>完整命令、seed、case 名和源码 revision。</li><li>compile/run log 与第一个 UVM error 上下文。</li><li>本次生成的 golden 和 actual dump。</li></ul></section><section class="panel"><h3>调试必需</h3><ul><li>波形数据库及保存范围。</li><li>cfg frame、setting packet、关键寄存器 dump。</li><li>checker 开关与模型命令行。</li></ul></section></div>

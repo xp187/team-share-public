@@ -48,13 +48,16 @@ body {
 }
 a { color: var(--blue); }
 .topbar {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 20;
   border-bottom: 1px solid var(--line);
   background: color-mix(in srgb, var(--surface) 94%, transparent);
   backdrop-filter: blur(12px);
 }
+body { padding-top: 57px; }
 .topbar-inner {
   width: 100%;
   max-width: 1240px;
@@ -119,6 +122,11 @@ table { width: 100%; border-collapse: collapse; margin: 12px 0 22px; background:
 .register-table th:nth-child(10), .register-table td:nth-child(10) { width: 180px; }
 .register-case-links { max-height: 220px; overflow-y: auto; }
 .register-case-links a { display: block; margin: 4px 0; }
+.script-table { min-width: 1100px !important; table-layout: fixed; }
+.script-table th:nth-child(1), .script-table td:nth-child(1) { width: 205px; }
+.script-table th:nth-child(2), .script-table td:nth-child(2) { width: 360px; }
+.script-table th:nth-child(3), .script-table td:nth-child(3) { width: 190px; }
+.script-table td:first-child code { white-space: nowrap; }
 details > summary { cursor: pointer; color: var(--blue); font-weight: 650; margin: 10px 0; }
 th, td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: 10px 12px; }
 th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
@@ -146,6 +154,7 @@ input, select { width: 100%; min-height: 38px; border: 1px solid var(--line); ba
 .empty { padding: 40px; text-align: center; color: var(--muted); border: 1px dashed var(--line); }
 .footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
 @media (max-width: 840px) {
+  body { padding-top: 99px; }
   .topbar-inner { align-items: flex-start; flex-direction: column; gap: 6px; }
   .topbar-inner, .nav { min-width: 0; }
   .nav { align-self: stretch; max-width: 100%; }
