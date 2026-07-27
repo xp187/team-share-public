@@ -17,11 +17,27 @@
               <p class="lead">从 testcase 资产到寄存器包、pixel stream 和三类模型输出的逐帧执行路径。</p>
               <div class="source-stamp">Source baseline: E:\DV_TCON_C · audited 2026-07-27</div>
             </header>
-
+            <div class="content-grid">
+              <aside class="section-nav"><strong>本页目录</strong><a href="#section-1">每帧执行顺序</a><a href="#section-2">ISPTX Sequence 到 DUT 的具体链路</a><a href="#section-3">帧内协议与失锁恢复</a><a href="#section-4">当前源码中的模型命令</a><a href="#section-5">CModel 生成 Golden 与 Checker 调用</a><a href="#section-6">DPLC 与 DRDOD 特殊处理</a><a href="#section-7">Case 资产清单</a><a href="#section-8">Golden 产物核对</a></aside>
+              <div class="page-content">
       <figure class="figure"><img src="assets/verification-flow.svg" alt="激励与 golden 共用同一份 env_cfg：寄存器配置、图像模型和 packet 发送在每帧对齐。"><figcaption class="caption">激励与 golden 共用同一份 env_cfg：寄存器配置、图像模型和 packet 发送在每帧对齐。</figcaption></figure>
-      <h2>每帧执行顺序</h2>
+      <h2 id="section-1">每帧执行顺序</h2>
       <ol class="steps"><li><strong>读取 case 资产。</strong> <code>user_def.sv</code> 决定静态宏，<code>cfg_frameN.txt</code> 由 env_cfg 的 <code>process_cfg()</code> 解析。</li><li><strong>生成寄存器 payload。</strong> <code>get_reg()</code> 将当前 frame 配置打包，<code>send_register()</code> 发送 setting line。</li><li><strong>运行 golden。</strong> sequence 调用 <code>pic_process</code>；DRDOD 调用 <code>drdod_process.py</code>；DPLC 调用当前环境内的 <code>dplc.pl</code>。</li><li><strong>发送 pixel stream。</strong> 从 <code>pattern/frame_N.ppm</code> 读取 P3 数据，按协议插入 blank、setting 与异常注入。</li><li><strong>采样与比较。</strong> monitor 输出 transaction/PPM，scoreboard 按 frame 和输出通道加载 golden。</li></ol>
-      <h2>当前源码中的模型命令</h2>
+      <h2 id="section-2">ISPTX Sequence 到 DUT 的具体链路</h2>
+      <table><tr><th>阶段</th><th>实际动作</th><th>源码位置</th></tr>
+      <tr><td>启动 sequence</td><td><code>base_vseq</code> 将 <code>isptx_sequence[_1..3]</code> 启动在对应 <code>p_isptx_sqrN</code>；<code>body()</code> 取得 rx_cfg、vif、SIM_TEST_PATH 和 FILE_PATH 后调用 <code>send_isp()</code>。</td><td><code>base_vseq.sv</code><br><code>isptx_sequence_1.sv:1104</code></td></tr>
+      <tr><td>链路训练</td><td><code>send_isp()</code> 先发送 LANE_NUM transaction；1 lane 使用 TYPE_TRAINING，2 lane 使用 TYPE_TRAINING_TWO，并与 33 ms timeout 并行。</td><td><code>isptx_sequence_1.sv:1028</code></td></tr>
+      <tr><td>逐帧组包</td><td>TRAIN_ACTIVE 调用 <code>send_ppm()</code>。每帧按 VBP setting/blank、VACT 的 HBP/BAC+POL/pixel/EOL/HFP、VFP 顺序创建 transaction；unlock monitor 与发送线程并行。</td><td><code>isptx_sequence_1.sv:423</code></td></tr>
+      <tr><td>sequencer/driver</td><td>agent 将 driver <code>seq_item_port</code> 接到 sequencer export。driver 用 <code>get_next_item()</code> 取 transaction，按 id 分派 task，完成后调用 <code>item_done()</code>。</td><td><code>isptx_agent.sv</code><br><code>isptx_driver.sv</code></td></tr>
+      <tr><td>bit-level 驱动</td><td>单 lane pixel 驱动 lane0，双 lane pixel 并行驱动 lane0/lane1。每个 9-bit symbol 在 9 个时钟上驱动差分 <code>rxpN/rxnN</code>；定向 case 可切到 <code>tx_clk_modify</code>。</td><td><code>convert_one_bit()</code><br><code>convert_sec_bit()</code></td></tr></table>
+      <div class="note"><strong>transaction 不是整帧：</strong><code>isptx_transaction.id</code> 区分 LANE_NUM、TRAINING、REGISTER、HBK、BAC、POL、EOL、PIXEL 和异常 dummy。sequence 决定协议顺序与内容，driver 负责转换为引脚时序。</div>
+      <h2 id="section-3">帧内协议与失锁恢复</h2><pre><code>TRAIN_SEND -> TYPE_TRAINING / TYPE_TRAINING_TWO -> wait LOCK
+TRAIN_ACTIVE -> setting in VBP
+             -> [HBP -> BAC+POL -> pixel -> EOL -> HFP] x VACT
+             -> VFP
+             || monitor PAD_LOCK_LEFT_IO == 0
+unlock -> TRAIN_SEND; frames done -> DRV_PPM_DONE</code></pre>
+      <h2 id="section-4">当前源码中的模型命令</h2>
       <pre><code>pic_process ... -W HACT -H VACT -P PORT_NUM -r subpix_reg \
   -D DOTC -O pol -C POLC -S SHL -HV H120V -L DPLC_MODE
 
@@ -31,12 +47,18 @@ drdod_process.py ... --drd_panel DRD_PANEL --od_k OD_k \
 dplc.pl --input ... --mode ... --ave_r ... --ave_g ... \
   --ave_b ... --delta ... --ave_last ...</code></pre>
       <span class="source">Source: top/agents/isprx_env/isptx_agent/isptx_sequence.sv</span>
+      <h2 id="section-5">CModel 生成 Golden 与 Checker 调用</h2>
+      <ol class="steps"><li><strong>输入一致。</strong>sequence 使用当前 frame 的 <code>pattern/frame_N.ppm</code> 和同一份 rx_cfg 构造模型命令。</li><li><strong>普通 golden。</strong><code>pic_process</code> 输出到单芯片 <code>outResult</code> 或多芯片 <code>outResult1</code>，包含 Data Merge、Digital Top 和 Analog 层结果。</li><li><strong>特殊 golden。</strong>DPLC 生成 <code>DPLC_frameN_idM.ppm</code>；DRDOD 从 <code>input_ppm/drv_M_frame_N.ppm</code> 生成 <code>drdod_out_frameN.ppm</code>。</li><li><strong>checker 加载。</strong>scoreboard 不调用 C API，而是读取模型文件。Analog scoreboard 的 <code>get_cmodel()</code> 按 OD_k、DPLC_MODE 和普通模式选择输入。</li><li><strong>逐层比较。</strong>monitor transaction 形成 actual queue/PPM，scoreboard 按 frame/id、行和 subpixel 比较并报告 UVM error。</li></ol>
+      <table><tr><th>模式</th><th>Golden 文件</th><th>Analog checker 行为</th></tr><tr><td>普通</td><td><code>outResult/analog/frame_N_analogM.txt</code><br>多芯片为 <code>outResultM/...</code></td><td>逐行解析空格分隔 subpixel，形成 model frame queue。</td></tr><tr><td>DPLC</td><td><code>DPLC_frameN_idM.ppm</code></td><td>读取 P3 PPM；关闭 channel 填 8'h22，SHL=0 时反转行。</td></tr><tr><td>DRDOD</td><td><code>drdod_out_frameN.ppm</code></td><td>读取 VACT*2 行；关闭 channel 填 8'h22，再与 analog DUT 输出比较。</td></tr></table>
+      <h2 id="section-6">DPLC 与 DRDOD 特殊处理</h2>
+      <div class="grid-2"><section class="panel"><h3>DPLC</h3><ul><li><code>DPLC_MODE==1</code> 时运行 dplc.pl；当前源码把 mode 固定为 duplicate，并传 AVE_R/G/B、AVE_DELTA 和 AVE_LAST。</li><li>load_ppm 后调整 subpix_num；特定 subpix_reg=011、2 lane 路径会重排奇偶行和 pair 数据。</li><li>write_ppm 在 DPLC 模式交错写入两组 RGB，checker 改读 DPLC PPM。</li><li>Analog compare 对 subpix_reg=0 的 DPLC 分支存在 120 点偏移。</li></ul></section><section class="panel"><h3>DRDOD</h3><ul><li><code>OD_k != 0</code> 时由 <code>drdod_generate_pixel_data()</code> 按 DRD_PANEL、PAIR_NUM、CYCLIC/NOMATCH 直接构造 8-bit 数据并做 8B9B encode。</li><li>送入 DUT 的 decoded 数据写到 input_ppm，供 drdod_process.py 生成 golden。</li><li>Analog checker 行数由 VACT 变为 VACT*2，并读取 DRDOD PPM。</li><li>DRD input/output monitor 与 scoreboard 是独立检查链，验证 panel gate、输入模式和 output/bypass。</li></ul></section></div>
 
       <figure class="figure"><img src="assets/frame-sequence.svg" alt="逐帧时序：配置、模型、setting/pixel packet 与 scoreboard 必须共享同一个 frame 上下文。"><figcaption class="caption">逐帧时序：配置、模型、setting/pixel packet 与 scoreboard 必须共享同一个 frame 上下文。</figcaption></figure>
-      <h2>Case 资产清单</h2>
+      <h2 id="section-7">Case 资产清单</h2>
       <table><tr><th>资产</th><th>用途</th><th>常见错误</th></tr><tr><td><code>user_def.sv</code></td><td>静态尺寸、pair/port、帧数和功能宏</td><td>从其他 case 复制后未同步 HACT/VACT 或 CHIP_SEL</td></tr><tr><td><code>cfg_frame*.txt</code></td><td>每帧寄存器字段</td><td>文件数与 FRAME_NUM/复用规则不一致</td></tr><tr><td><code>pattern/frame_N.ppm</code></td><td>像素输入</td><td>宽高、P3 header、通道排列不匹配</td></tr><tr><td>test class</td><td>checker 开关、force、I2C 和异常注入</td><td>关闭 checker 后只看波形，没有自动判定</td></tr></table>
-      <h2>Golden 产物核对</h2><ul><li>先从日志确认实际执行的命令行和参数，不凭文档猜测。</li><li>确认输出文件的修改时间属于本次 seed，防止读到旧产物。</li><li>确认 frame、pair、odd/even、left/right 命名与 scoreboard 加载路径一致。</li><li>模型报错或输出为空应直接使 case fail，不能继续比较空文件。</li></ul>
-
+      <h2 id="section-8">Golden 产物核对</h2><ul><li>先从日志确认实际执行的命令行和参数，不凭文档猜测。</li><li>确认输出文件的修改时间属于本次 seed，防止读到旧产物。</li><li>确认 frame、pair、odd/even、left/right 命名与 scoreboard 加载路径一致。</li><li>模型报错或输出为空应直接使 case fail，不能继续比较空文件。</li></ul>
+    </div>
+            </div>
             <footer class="footer">HV2M23 DV_TCON_C 验证环境使用指南 · 源码审计版 2026-07-27</footer>
           </main>
         </body>

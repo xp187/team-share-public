@@ -17,22 +17,25 @@
               <p class="lead">使用仓库中的 run_tc.sh、regression.py 和 case_list.txt，建立可复现的运行闭环。</p>
               <div class="source-stamp">Source baseline: E:\DV_TCON_C · audited 2026-07-27</div>
             </header>
-
+            <div class="content-grid">
+              <aside class="section-nav"><strong>本页目录</strong><a href="#section-1">单 Case</a><a href="#section-2">回归</a><a href="#section-3">提交回归前</a><a href="#section-4">结果目录建议保留内容</a><a href="#section-5">回归清单治理</a></aside>
+              <div class="page-content">
       <figure class="figure"><img src="assets/case-lifecycle.svg" alt="Case 从模板到回归的推荐闭环。"><figcaption class="caption">Case 从模板到回归的推荐闭环。</figcaption></figure>
-      <h2>单 Case</h2><pre><code>cd $DV_TCON_C/script
+      <h2 id="section-1">单 Case</h2><pre><code>cd $DV_TCON_C/script
 run_tc.sh TOP &lt;case_name&gt; chip_tb_top random clean
 run_tc.sh TOP &lt;case_name&gt; chip_tb_top verdi</code></pre>
       <p class="source">Source: script/run_tc.sh help and top/tests/run_case.py</p>
-      <h2>回归</h2><pre><code>cd $DV_TCON_C/top/tests
+      <h2 id="section-2">回归</h2><pre><code>cd $DV_TCON_C/top/tests
 python regression.py
 # Coverage variant
 python regression_cov.py</code></pre>
       <p><code>regression.py</code> 从 <code>case_list.txt</code> 读取 testcase，并生成 <code>bsub -Ip run_tc.sh TOP ... random clean</code> 命令。</p>
-      <h2>提交回归前</h2><ul><li>case 名称与目录、主 .sv class、test_lib include 一致。</li><li>cfg_frame 数量覆盖 FRAME_NUM，或明确依赖复用规则。</li><li>checker 开关与验证目标一致，不能只依赖波形人工判断。</li><li>golden 命令在仿真目录生成预期文件，日志没有 file-open error。</li></ul>
+      <h2 id="section-3">提交回归前</h2><ul><li>case 名称与目录、主 .sv class、test_lib include 一致。</li><li>cfg_frame 数量覆盖 FRAME_NUM，或明确依赖复用规则。</li><li>checker 开关与验证目标一致，不能只依赖波形人工判断。</li><li>golden 命令在仿真目录生成预期文件，日志没有 file-open error。</li></ul>
 
-      <h2>结果目录建议保留内容</h2><div class="grid-2"><section class="panel"><h3>复现必需</h3><ul><li>完整命令、seed、case 名和源码 revision。</li><li>compile/run log 与第一个 UVM error 上下文。</li><li>本次生成的 golden 和 actual dump。</li></ul></section><section class="panel"><h3>调试必需</h3><ul><li>波形数据库及保存范围。</li><li>cfg frame、setting packet、关键寄存器 dump。</li><li>checker 开关与模型命令行。</li></ul></section></div>
-      <h2>回归清单治理</h2><p>当前 <code>case_list.txt</code> 的唯一名称与实际目录存在差异。新增清单项前应自动检查目录存在、主 class 可编译、输入文件齐全，并把不存在的名称单独报告，避免“提交了回归但实际没有运行目标”的假覆盖。</p>
-
+      <h2 id="section-4">结果目录建议保留内容</h2><div class="grid-2"><section class="panel"><h3>复现必需</h3><ul><li>完整命令、seed、case 名和源码 revision。</li><li>compile/run log 与第一个 UVM error 上下文。</li><li>本次生成的 golden 和 actual dump。</li></ul></section><section class="panel"><h3>调试必需</h3><ul><li>波形数据库及保存范围。</li><li>cfg frame、setting packet、关键寄存器 dump。</li><li>checker 开关与模型命令行。</li></ul></section></div>
+      <h2 id="section-5">回归清单治理</h2><p>当前 <code>case_list.txt</code> 的唯一名称与实际目录存在差异。新增清单项前应自动检查目录存在、主 class 可编译、输入文件齐全，并把不存在的名称单独报告，避免“提交了回归但实际没有运行目标”的假覆盖。</p>
+    </div>
+            </div>
             <footer class="footer">HV2M23 DV_TCON_C 验证环境使用指南 · 源码审计版 2026-07-27</footer>
           </main>
         </body>
