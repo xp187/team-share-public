@@ -286,7 +286,7 @@ def link_register_cases(
         "SHL CASE": "SHL", "CHSEL CASE": "CHSEL",
         "DOTC CASE": "DOTC", "POLC CASE": "POLC",
         "H120V CASE": "H120V", "DRDOD CASE": "DRD",
-        "SD_CHOP CASE": "chopper", "G_CHOP CASE": "chopper",
+        "SD_CHOP CASE": "SD_CHOP", "G_CHOP CASE": "G_CHOP",
         "DPLC CASE": "DPLC", "UTC CASE": "utc",
     }
     case_to_registers: dict[str, list[dict[str, str]]] = {
@@ -578,11 +578,14 @@ a { color: var(--blue); }
 .nav a { color: var(--muted); padding: 6px 9px; text-decoration: none; white-space: nowrap; border-radius: 5px; font-size: 13px; }
 .nav a:hover, .nav a.active { background: var(--blue-soft); color: var(--blue); }
 .layout { width: 100%; max-width: 1240px; margin: auto; padding: 30px 20px 64px; }
-.content-grid { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 30px; align-items: start; }
+.content-grid { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; }
 .page-content { min-width: 0; }
-.section-nav { position: sticky; top: 72px; max-height: calc(100vh - 92px); overflow-y: auto; border-left: 2px solid var(--line); padding: 4px 0 4px 12px; }
-.section-nav strong { display: block; margin-bottom: 8px; font-size: 12px; color: var(--muted); }
+.section-nav { position: fixed; z-index: 30; left: 12px; top: 86px; width: 40px; max-height: 54px; overflow: hidden; border: 1px solid var(--line); border-left: 3px solid var(--blue); border-radius: 5px; padding: 10px 7px; background: var(--surface); box-shadow: var(--shadow); transition: width 160ms ease, max-height 160ms ease; }
+.section-nav:hover, .section-nav:focus-within { width: 220px; max-height: calc(100vh - 106px); overflow-y: auto; }
+.section-nav strong { display: block; width: 24px; margin: 0 auto 8px; font-size: 12px; color: var(--blue); line-height: 1.3; text-align: center; }
+.section-nav:hover strong, .section-nav:focus-within strong { width: auto; text-align: left; margin: 0 7px 8px; }
 .section-nav a { display: block; padding: 5px 7px; color: var(--muted); text-decoration: none; font-size: 12px; line-height: 1.35; border-radius: 4px; }
+.section-nav:not(:hover):not(:focus-within) a { opacity: 0; pointer-events: none; }
 .section-nav a:hover { color: var(--blue); background: var(--blue-soft); }
 h2[id] { scroll-margin-top: 76px; }
 .page-head { margin-bottom: 28px; border-bottom: 1px solid var(--line); padding-bottom: 22px; }
@@ -660,6 +663,10 @@ input, select { width: 100%; min-height: 38px; border: 1px solid var(--line); ba
   .case-controls { top: 93px; grid-template-columns: 1fr; }
   .content-grid { grid-template-columns: 1fr; gap: 12px; }
   .section-nav { position: static; max-height: 150px; border: 1px solid var(--line); padding: 10px; background: var(--surface); }
+  .section-nav { width: auto; max-height: 150px; overflow-y: auto; }
+  .section-nav:hover, .section-nav:focus-within { width: auto; }
+  .section-nav strong, .section-nav:hover strong { width: auto; text-align: left; margin: 0 7px 8px; }
+  .section-nav:not(:hover):not(:focus-within) a { opacity: 1; pointer-events: auto; }
   .section-nav a { display: inline-block; margin: 2px; }
   h1 { font-size: 29px; }
   .figure { margin-left: -14px; margin-right: -14px; border-left: 0; border-right: 0; }
@@ -908,6 +915,49 @@ def build_svgs() -> None:
       <path class="arrow" d="M395 249 V282 H655 V310"/><path class="arrow" d="M655 249 V310"/><path class="arrow" d="M915 249 V282 H655 V310"/>
       <g transform="translate(40 402)"><path class="arrow-orange" d="M0 8 H28"/><text class="small" x="36" y="12">triage sequence</text><path class="arrow-purple dash" d="M180 8 H208"/><text class="small" x="216" y="12">decision branch</text><path class="arrow" d="M370 8 H398"/><text class="small" x="406" y="12">fix and reproduce</text></g>
     """
+    isptx_driver_flow = """
+      <rect class="blue" x="30" y="70" width="170" height="105" rx="8"/><text class="ink" x="115" y="100" text-anchor="middle">base_vseq</text><text class="small" x="115" y="125" text-anchor="middle">start sequence on sqrN</text><text class="small" x="115" y="147" text-anchor="middle">CONNECT_NUM</text>
+      <rect class="purple" x="245" y="45" width="220" height="155" rx="8"/><text class="ink" x="355" y="75" text-anchor="middle">isptx_sequence</text><text class="small" x="355" y="100" text-anchor="middle">TRAIN_SEND / ACTIVE</text><text class="small" x="355" y="122" text-anchor="middle">setting + blank + pixel</text><text class="small" x="355" y="144" text-anchor="middle">small typed transactions</text><text class="small" x="355" y="166" text-anchor="middle">unlock -> retrain</text>
+      <rect class="box" x="510" y="70" width="165" height="105" rx="8"/><text class="ink" x="592" y="100" text-anchor="middle">sequencer</text><text class="small" x="592" y="125" text-anchor="middle">request arbitration</text><text class="small" x="592" y="147" text-anchor="middle">seq_item_export</text>
+      <rect class="amber" x="720" y="45" width="220" height="155" rx="8"/><text class="ink" x="830" y="75" text-anchor="middle">isptx_driver</text><text class="small" x="830" y="100" text-anchor="middle">get_next_item / item_done</text><text class="small" x="830" y="122" text-anchor="middle">dispatch by id</text><text class="small" x="830" y="144" text-anchor="middle">9 clocks per symbol</text><text class="small" x="830" y="166" text-anchor="middle">lane0/lane1 parallel</text>
+      <rect class="green" x="985" y="70" width="175" height="105" rx="8"/><text class="ink" x="1072" y="100" text-anchor="middle">DUT link input</text><text class="small" x="1072" y="125" text-anchor="middle">rxp0/rxn0</text><text class="small" x="1072" y="147" text-anchor="middle">rxp1/rxn1</text>
+      <path class="arrow" d="M200 122 H245 M465 122 H510 M675 122 H720 M940 122 H985"/>
+      <rect class="box" x="245" y="260" width="695" height="80" rx="8"/><text class="ink" x="592" y="288" text-anchor="middle">Frame protocol</text><text class="small" x="592" y="313" text-anchor="middle">VBP setting -> HBP -> BAC+POL -> pixel -> EOL -> HFP -> VFP</text><text class="small" x="592" y="333" text-anchor="middle">LANE / TRAINING / REGISTER / HBK / BAC / POL / EOL / PIXEL / DUMMY</text>
+      <path class="arrow-orange dash" d="M355 200 V260 M830 200 V260"/>
+    """
+    checker_position = """
+      <rect class="blue" x="25" y="75" width="150" height="90" rx="8"/><text class="ink" x="100" y="105" text-anchor="middle">RX/decode</text><text class="small" x="100" y="132" text-anchor="middle">DUT input</text>
+      <rect class="green" x="215" y="55" width="170" height="130" rx="8"/><text class="ink" x="300" y="87" text-anchor="middle">Data Merge</text><text class="small" x="300" y="114" text-anchor="middle">2 streams</text><text class="small" x="300" y="136" text-anchor="middle">merge/mapping</text><text class="small" x="300" y="158" text-anchor="middle">monitor -> scb</text>
+      <rect class="green" x="425" y="55" width="170" height="130" rx="8"/><text class="ink" x="510" y="87" text-anchor="middle">Digital Top</text><text class="small" x="510" y="114" text-anchor="middle">OL/EL/OR/ER</text><text class="small" x="510" y="136" text-anchor="middle">4 streams</text><text class="small" x="510" y="158" text-anchor="middle">monitor -> scb</text>
+      <rect class="green" x="635" y="55" width="170" height="130" rx="8"/><text class="ink" x="720" y="87" text-anchor="middle">Chopper</text><text class="small" x="720" y="114" text-anchor="middle">D port connected</text><text class="small" x="720" y="136" text-anchor="middle">G port unconnected</text><text class="small" x="720" y="158" text-anchor="middle">monitor -> scb</text>
+      <rect class="green" x="845" y="55" width="190" height="130" rx="8"/><text class="ink" x="940" y="87" text-anchor="middle">Analog/control</text><text class="small" x="940" y="114" text-anchor="middle">pixel/POL/chop</text><text class="small" x="940" y="136" text-anchor="middle">unlock/VBK</text><text class="small" x="940" y="158" text-anchor="middle">5 paths</text>
+      <path class="arrow-green" d="M175 120 H215 M385 120 H425 M595 120 H635 M805 120 H845"/>
+      <rect class="purple" x="425" y="270" width="170" height="95" rx="8"/><text class="ink" x="510" y="300" text-anchor="middle">DRD input</text><text class="small" x="510" y="327" text-anchor="middle">panel/input pattern</text><text class="small" x="510" y="349" text-anchor="middle">independent path</text>
+      <rect class="purple" x="680" y="270" width="170" height="95" rx="8"/><text class="ink" x="765" y="300" text-anchor="middle">DRD output</text><text class="small" x="765" y="327" text-anchor="middle">output/bypass</text><text class="small" x="765" y="349" text-anchor="middle">independent path</text>
+      <path class="arrow-purple" d="M510 185 V270 M595 317 H680 M765 270 V220 H940 V185"/>
+      <text class="small" x="530" y="420" text-anchor="middle">Parallel DUT taps: debug by the earliest failing stage.</text>
+    """
+    golden_flow = """
+      <rect class="blue" x="30" y="125" width="180" height="105" rx="8"/><text class="ink" x="120" y="155" text-anchor="middle">Frame inputs</text><text class="small" x="120" y="180" text-anchor="middle">pattern/frame_N.ppm</text><text class="small" x="120" y="202" text-anchor="middle">rx_cfg / frame / id</text>
+      <rect class="purple" x="270" y="35" width="220" height="80" rx="8"/><text class="ink" x="380" y="65" text-anchor="middle">pic_process</text><text class="small" x="380" y="90" text-anchor="middle">outResult text</text>
+      <rect class="purple" x="270" y="145" width="220" height="80" rx="8"/><text class="ink" x="380" y="175" text-anchor="middle">dplc.pl</text><text class="small" x="380" y="200" text-anchor="middle">DPLC_frameN_idM.ppm</text>
+      <rect class="purple" x="270" y="255" width="220" height="80" rx="8"/><text class="ink" x="380" y="285" text-anchor="middle">drdod_process.py</text><text class="small" x="380" y="310" text-anchor="middle">drdod_out_frameN.ppm</text>
+      <path class="arrow" d="M210 160 H240 V75 H270 M210 177 H270 M210 195 H240 V295 H270"/>
+      <rect class="green" x="555" y="75" width="235" height="220" rx="8"/><text class="ink" x="672" y="108" text-anchor="middle">Scoreboard loader</text><text class="small" x="672" y="140" text-anchor="middle">OD_k -> DRDOD PPM</text><text class="small" x="672" y="166" text-anchor="middle">DPLC_MODE -> DPLC PPM</text><text class="small" x="672" y="192" text-anchor="middle">else -> outResult text</text><text class="small" x="672" y="230" text-anchor="middle">frame/id + channel/SHL</text><text class="small" x="672" y="256" text-anchor="middle">build model queues</text><text class="small" x="672" y="278" text-anchor="middle">no C API call</text>
+      <path class="arrow-green" d="M490 75 H555 M490 185 H530 V160 H555 M490 295 H530 V245 H555"/>
+      <rect class="amber" x="850" y="75" width="175" height="95" rx="8"/><text class="ink" x="937" y="105" text-anchor="middle">Monitor actual</text><text class="small" x="937" y="132" text-anchor="middle">DUT queues / PPM</text>
+      <rect class="box" x="850" y="225" width="175" height="95" rx="8"/><text class="ink" x="937" y="255" text-anchor="middle">Compare</text><text class="small" x="937" y="282" text-anchor="middle">frame/line/subpixel</text><text class="small" x="937" y="304" text-anchor="middle">uvm_error</text>
+      <path class="arrow" d="M790 185 H820 V272 H850 M937 170 V225"/>
+    """
+    special_modes = """
+      <rect class="blue" x="30" y="65" width="170" height="90" rx="8"/><text class="ink" x="115" y="95" text-anchor="middle">Mode select</text><text class="small" x="115" y="122" text-anchor="middle">DPLC_MODE / OD_k</text>
+      <rect class="purple" x="260" y="35" width="245" height="160" rx="8"/><text class="ink" x="382" y="65" text-anchor="middle">DPLC</text><text class="small" x="382" y="92" text-anchor="middle">load PPM + subpix adjust</text><text class="small" x="382" y="114" text-anchor="middle">011/2-lane remap</text><text class="small" x="382" y="136" text-anchor="middle">interleaved RGB golden</text><text class="small" x="382" y="158" text-anchor="middle">120-point offset branch</text><text class="small" x="382" y="180" text-anchor="middle">VACT compare</text>
+      <rect class="purple" x="570" y="35" width="245" height="160" rx="8"/><text class="ink" x="692" y="65" text-anchor="middle">DRDOD</text><text class="small" x="692" y="92" text-anchor="middle">direct 8-bit generation</text><text class="small" x="692" y="114" text-anchor="middle">panel/cyclic/nomatch</text><text class="small" x="692" y="136" text-anchor="middle">8B9B to DUT</text><text class="small" x="692" y="158" text-anchor="middle">DRDOD golden PPM</text><text class="small" x="692" y="180" text-anchor="middle">VACT*2 compare</text>
+      <path class="arrow" d="M200 100 H260 M200 125 H230 V115 H570"/>
+      <rect class="green" x="260" y="270" width="245" height="95" rx="8"/><text class="ink" x="382" y="300" text-anchor="middle">Analog DPLC branch</text><text class="small" x="382" y="327" text-anchor="middle">channel fill + SHL handling</text>
+      <rect class="green" x="570" y="245" width="245" height="145" rx="8"/><text class="ink" x="692" y="275" text-anchor="middle">DRD checks</text><text class="small" x="692" y="302" text-anchor="middle">Analog PPM pixels</text><text class="small" x="692" y="324" text-anchor="middle">DRD input pattern</text><text class="small" x="692" y="346" text-anchor="middle">DRD output/bypass</text><text class="small" x="692" y="368" text-anchor="middle">independent paths</text>
+      <path class="arrow-green" d="M382 195 V270 M692 195 V245"/>
+    """
     diagrams = {
         "architecture.svg": svg_document(1200, 720, architecture, "HV2M23 UVM verification environment architecture"),
         "verification-flow.svg": svg_document(1200, 840, flow, "HV2M23 end-to-end verification execution flow"),
@@ -915,6 +965,10 @@ def build_svgs() -> None:
         "case-lifecycle.svg": svg_document(970, 220, lifecycle, "HV2M23 testcase lifecycle"),
         "frame-sequence.svg": svg_document(980, 490, frame_sequence, "HV2M23 per-frame verification sequence"),
         "debug-flow.svg": svg_document(1050, 450, debug_flow, "HV2M23 checker failure triage flow"),
+        "isptx-driver-flow.svg": svg_document(1200, 380, isptx_driver_flow, "ISPTX sequence to DUT driver flow"),
+        "checker-position.svg": svg_document(1060, 450, checker_position, "Checker positions in the DUT data path"),
+        "golden-flow.svg": svg_document(1060, 370, golden_flow, "C model golden generation and checker loading"),
+        "special-modes.svg": svg_document(850, 420, special_modes, "DPLC and DRDOD special processing"),
     }
     for name, content in diagrams.items():
         (ASSET_DIR / name).write_text(content, encoding="utf-8")
@@ -1070,6 +1124,7 @@ def build_pages(
       {figure('verification-flow.svg', '激励与 golden 共用同一份 env_cfg：寄存器配置、图像模型和 packet 发送在每帧对齐。')}
       <h2>每帧执行顺序</h2>
       <ol class="steps"><li><strong>读取 case 资产。</strong> <code>user_def.sv</code> 决定静态宏，<code>cfg_frameN.txt</code> 由 env_cfg 的 <code>process_cfg()</code> 解析。</li><li><strong>生成寄存器 payload。</strong> <code>get_reg()</code> 将当前 frame 配置打包，<code>send_register()</code> 发送 setting line。</li><li><strong>运行 golden。</strong> sequence 调用 <code>pic_process</code>；DRDOD 调用 <code>drdod_process.py</code>；DPLC 调用当前环境内的 <code>dplc.pl</code>。</li><li><strong>发送 pixel stream。</strong> 从 <code>pattern/frame_N.ppm</code> 读取 P3 数据，按协议插入 blank、setting 与异常注入。</li><li><strong>采样与比较。</strong> monitor 输出 transaction/PPM，scoreboard 按 frame 和输出通道加载 golden。</li></ol>
+      {figure('isptx-driver-flow.svg', 'ISPTX sequence 到 DUT：sequence 负责协议和 transaction，driver 负责逐 bit 引脚时序。')}
       <h2>ISPTX Sequence 到 DUT 的具体链路</h2>
       <table><tr><th>阶段</th><th>实际动作</th><th>源码位置</th></tr>
       <tr><td>启动 sequence</td><td><code>base_vseq</code> 将 <code>isptx_sequence[_1..3]</code> 启动在对应 <code>p_isptx_sqrN</code>；<code>body()</code> 取得 rx_cfg、vif、SIM_TEST_PATH 和 FILE_PATH 后调用 <code>send_isp()</code>。</td><td><code>base_vseq.sv</code><br><code>isptx_sequence_1.sv:1104</code></td></tr>
@@ -1094,9 +1149,11 @@ drdod_process.py ... --drd_panel DRD_PANEL --od_k OD_k \\
 dplc.pl --input ... --mode ... --ave_r ... --ave_g ... \\
   --ave_b ... --delta ... --ave_last ...</code></pre>
       <span class="source">Source: top/agents/isprx_env/isptx_agent/isptx_sequence.sv</span>
+      {figure('golden-flow.svg', 'Golden 数据流：普通、DPLC、DRDOD 模型生成文件，scoreboard 按配置选择并加载。')}
       <h2>CModel 生成 Golden 与 Checker 调用</h2>
       <ol class="steps"><li><strong>输入一致。</strong>sequence 使用当前 frame 的 <code>pattern/frame_N.ppm</code> 和同一份 rx_cfg 构造模型命令。</li><li><strong>普通 golden。</strong><code>pic_process</code> 输出到单芯片 <code>outResult</code> 或多芯片 <code>outResult1</code>，包含 Data Merge、Digital Top 和 Analog 层结果。</li><li><strong>特殊 golden。</strong>DPLC 生成 <code>DPLC_frameN_idM.ppm</code>；DRDOD 从 <code>input_ppm/drv_M_frame_N.ppm</code> 生成 <code>drdod_out_frameN.ppm</code>。</li><li><strong>checker 加载。</strong>scoreboard 不调用 C API，而是读取模型文件。Analog scoreboard 的 <code>get_cmodel()</code> 按 OD_k、DPLC_MODE 和普通模式选择输入。</li><li><strong>逐层比较。</strong>monitor transaction 形成 actual queue/PPM，scoreboard 按 frame/id、行和 subpixel 比较并报告 UVM error。</li></ol>
       <table><tr><th>模式</th><th>Golden 文件</th><th>Analog checker 行为</th></tr><tr><td>普通</td><td><code>outResult/analog/frame_N_analogM.txt</code><br>多芯片为 <code>outResultM/...</code></td><td>逐行解析空格分隔 subpixel，形成 model frame queue。</td></tr><tr><td>DPLC</td><td><code>DPLC_frameN_idM.ppm</code></td><td>读取 P3 PPM；关闭 channel 填 8'h22，SHL=0 时反转行。</td></tr><tr><td>DRDOD</td><td><code>drdod_out_frameN.ppm</code></td><td>读取 VACT*2 行；关闭 channel 填 8'h22，再与 analog DUT 输出比较。</td></tr></table>
+      {figure('special-modes.svg', 'DPLC 与 DRDOD 使用不同的数据构造、模型文件和 checker 分支。')}
       <h2>DPLC 与 DRDOD 特殊处理</h2>
       <div class="grid-2"><section class="panel"><h3>DPLC</h3><ul><li><code>DPLC_MODE==1</code> 时运行 dplc.pl；当前源码把 mode 固定为 duplicate，并传 AVE_R/G/B、AVE_DELTA 和 AVE_LAST。</li><li>load_ppm 后调整 subpix_num；特定 subpix_reg=011、2 lane 路径会重排奇偶行和 pair 数据。</li><li>write_ppm 在 DPLC 模式交错写入两组 RGB，checker 改读 DPLC PPM。</li><li>Analog compare 对 subpix_reg=0 的 DPLC 分支存在 120 点偏移。</li></ul></section><section class="panel"><h3>DRDOD</h3><ul><li><code>OD_k != 0</code> 时由 <code>drdod_generate_pixel_data()</code> 按 DRD_PANEL、PAIR_NUM、CYCLIC/NOMATCH 直接构造 8-bit 数据并做 8B9B encode。</li><li>送入 DUT 的 decoded 数据写到 input_ppm，供 drdod_process.py 生成 golden。</li><li>Analog checker 行数由 VACT 变为 VACT*2，并读取 DRDOD PPM。</li><li>DRD input/output monitor 与 scoreboard 是独立检查链，验证 panel gate、输入模式和 output/bypass。</li></ul></section></div>
     """
@@ -1112,6 +1169,7 @@ dplc.pl --input ... --mode ... --ave_r ... --ave_g ... \\
       {figure('checker-flow.svg', 'Checker 数据流：monitor analysis_port 连接 scoreboard，golden 来源依层级而异。')}
       <div class="note"><strong>组件创建方式：</strong><code>checker_agent.build_phase</code> 无条件创建 Data Merge、Digital Top、Chopper、Analog、DRD input 和 DRD output 的全部 monitor/scoreboard。各 <code>*_check_on</code> 在组件内部控制采样、文件读取或比较，不控制 factory create。</div>
       <div class="note"><strong>源码审计发现：</strong><code>digital_top_monitor.sv:31</code> 在 transaction 非空判断中使用 <code>env_cfg.data_merge_check_on</code>，而 scoreboard 比较使用 <code>digital_top_check_on</code>。关闭 Data Merge、只打开 Digital Top 时应确认该条件是否会影响预期采样。</div>
+      {figure('checker-position.svg', 'Checker 在 DUT 数据通路中的 tap：主链逐层检查，DRD input/output 为并行独立路径。')}
       <h2>Checker 在 DUT 数据通路中的位置</h2>
       <table><tr><th>顺序</th><th>检查位置</th><th>观察对象</th><th>与其他组件的关系</th></tr><tr><td>1</td><td>Data Merge</td><td><code>data_merge_intf</code> 暴露的 merge 输出，两路数据流。</td><td>最靠近数字数据合并结果；它先失败通常说明输入解包、pair 合并或映射已错，后级失败可能是连锁结果。</td></tr><tr><td>2</td><td>Digital Top</td><td><code>digital_top_intf</code> 的 OL/EL/OR/ER 四路拆分输出。</td><td>位于 merge 后、chopper/analog 前；负责 odd/even 和 left/right 分流正确性。</td></tr><tr><td>3</td><td>Chopper</td><td><code>chopper_intf</code> 的 chopper dump 数据。</td><td>检查 digital 输出经过 chopper 处理后的中间结果；当前只连接 D port，G port 虽声明但未接 scoreboard。</td></tr><tr><td>4</td><td>Analog/control</td><td><code>analog_data_output_if</code> 的最终 pixel、POL、chopper、unlock、VBK。</td><td>最接近 source-driver 宏输出端；汇总最终图像与五类控制事件，并读取普通/DPLC/DRDOD golden。</td></tr><tr><td>并行支路</td><td>DRD input</td><td>DRD 模块输入侧 transaction。</td><td>验证 DRD_PANEL、OD 输入模式和 cyclic/nomatch pattern，帮助区分输入构造错误与 DRD 运算错误。</td></tr><tr><td>并行支路</td><td>DRD output</td><td>DRD 模块输出侧 transaction、DRDOD_EN/bypass。</td><td>与 DRD input 独立连接；bypass 场景比较 input/output，不能用 Analog checker 替代。</td></tr></table>
       <div class="note"><strong>定位原则：</strong>checker 不是串联调用关系，而是在 DUT 不同 tap 并行采样。调试时按数据通路找“第一个失败层”：Data Merge 正常而 Digital Top 失败，问题集中在拆分阶段；Digital Top 正常而 Analog 失败，优先查 chopper、channel mapping、控制时序或模型分支。</div>
