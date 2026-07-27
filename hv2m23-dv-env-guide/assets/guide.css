@@ -96,6 +96,19 @@ p { margin: 8px 0 14px; }
 table { width: 100%; border-collapse: collapse; margin: 12px 0 22px; background: var(--surface); }
 .table-scroll { width: 100%; overflow-x: auto; }
 .table-scroll table { min-width: 900px; }
+.register-table { min-width: 1800px !important; table-layout: fixed; }
+.register-table th:nth-child(1), .register-table td:nth-child(1) { width: 90px; }
+.register-table th:nth-child(2), .register-table td:nth-child(2) { width: 150px; }
+.register-table th:nth-child(3), .register-table td:nth-child(3),
+.register-table th:nth-child(4), .register-table td:nth-child(4),
+.register-table th:nth-child(5), .register-table td:nth-child(5) { width: 105px; }
+.register-table th:nth-child(6), .register-table td:nth-child(6) { width: 250px; }
+.register-table th:nth-child(7), .register-table td:nth-child(7) { width: 300px; }
+.register-table th:nth-child(8), .register-table td:nth-child(8) { width: 180px; }
+.register-table th:nth-child(9), .register-table td:nth-child(9) { width: 260px; }
+.register-table th:nth-child(10), .register-table td:nth-child(10) { width: 180px; }
+.register-case-links { max-height: 220px; overflow-y: auto; }
+.register-case-links a { display: block; margin: 4px 0; }
 details > summary { cursor: pointer; color: var(--blue); font-weight: 650; margin: 10px 0; }
 th, td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: 10px 12px; }
 th { color: var(--muted); font-size: 12px; text-transform: uppercase; }

@@ -604,6 +604,19 @@ p { margin: 8px 0 14px; }
 table { width: 100%; border-collapse: collapse; margin: 12px 0 22px; background: var(--surface); }
 .table-scroll { width: 100%; overflow-x: auto; }
 .table-scroll table { min-width: 900px; }
+.register-table { min-width: 1800px !important; table-layout: fixed; }
+.register-table th:nth-child(1), .register-table td:nth-child(1) { width: 90px; }
+.register-table th:nth-child(2), .register-table td:nth-child(2) { width: 150px; }
+.register-table th:nth-child(3), .register-table td:nth-child(3),
+.register-table th:nth-child(4), .register-table td:nth-child(4),
+.register-table th:nth-child(5), .register-table td:nth-child(5) { width: 105px; }
+.register-table th:nth-child(6), .register-table td:nth-child(6) { width: 250px; }
+.register-table th:nth-child(7), .register-table td:nth-child(7) { width: 300px; }
+.register-table th:nth-child(8), .register-table td:nth-child(8) { width: 180px; }
+.register-table th:nth-child(9), .register-table td:nth-child(9) { width: 260px; }
+.register-table th:nth-child(10), .register-table td:nth-child(10) { width: 180px; }
+.register-case-links { max-height: 220px; overflow-y: auto; }
+.register-case-links a { display: block; margin: 4px 0; }
 details > summary { cursor: pointer; color: var(--blue); font-weight: 650; margin: 10px 0; }
 th, td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: 10px 12px; }
 th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
@@ -1132,9 +1145,12 @@ python regression_cov.py</code></pre>
             for key in ("address", "name", "type", "default", "access",
                         "description", "values", "simCheck"))
         + "<td>" + (
-            " ".join(
+            f'<details><summary>{len(item["caseNames"])} 个 case</summary>'
+            '<div class="register-case-links">'
+            + "".join(
                 f'<a href="cases.html?q={quote(name)}"><code>{esc(name)}</code></a>'
                 for name in item["caseNames"])
+            + "</div></details>"
             if item["caseNames"] else '<span class="muted">未关联</span>'
         ) + "</td><td>" + cell_html(item["linkMethod"]) + "</td></tr>"
         for item in metadata["registers"])
@@ -1190,7 +1206,7 @@ python regression_cov.py</code></pre>
       <h2>Workbook 维护历史</h2><table><tr><th>Date</th><th>Comment</th><th>Owner</th></tr>{history_rows}</table>
       <h2>Coverage 快照</h2><table><tr><th>Score</th><th>Line</th><th>Condition</th><th>Toggle</th><th>FSM</th><th>Branch</th><th>Date</th></tr><tr><td>{cell_html(coverage['score'])}%</td><td>{cell_html(coverage['line'])}%</td><td>{cell_html(coverage['condition'])}%</td><td>{cell_html(coverage['toggle'])}%</td><td>{cell_html(coverage['fsm'])}%</td><td>{cell_html(coverage['branch'])}%</td><td>{cell_html(coverage['date'])}</td></tr></table><div class="note"><strong>Closure 重点：</strong>当前最低项为 {esc(weakest_coverage[0])} {cell_html(weakest_coverage[1])}%。该表是 Excel 在 {cell_html(coverage['date'])} 记录的单次快照，不代表实时回归结果；下一次更新应同时记录回归版本、waiver 和未覆盖原因。</div>
       <h2>Video Format 矩阵</h2><p>用于核对分辨率、blank、帧率、色深、driver channel、PCS、pair 和单 pair 速率。Case 名中的简化参数不能替代本表的系统带宽条件。</p><div class="table-scroll"><table><tr><th>No</th><th>Active</th><th>H/V blank</th><th>FPS</th><th>Depth</th><th>Channel</th><th>PCS</th><th>Pair/Driver</th><th>iSP Speed/Pair</th><th>Mode</th></tr>{format_rows}</table></div>
-      <h2>寄存器验证映射</h2><div class="stats"><div class="stat"><strong>{len(metadata['registers'])}</strong><span>register fields</span></div><div class="stat"><strong>{linked_registers}</strong><span>linked to cases</span></div><div class="stat"><strong>{no_case_registers}</strong><span>NO CASE</span></div><div class="stat"><strong>{pending_registers}</strong><span>manual / unresolved</span></div></div><p>关联依据保留在“关联规则”列：优先使用 Excel 中的精确 testcase 名和通配模式，其次使用 SHL、CHSEL、DOTC、POLC、H120V、DRDOD、DPLC、UTC 等明确功能关键词。无法可靠推断的条目保持未关联。点击 case 名可跳转并自动筛选 Case 计划索引。</p><details open><summary>展开全部 {len(metadata['registers'])} 个寄存器字段</summary><div class="table-scroll"><table><tr><th>Address</th><th>Name</th><th>Type</th><th>Default</th><th>Access</th><th>Description</th><th>Values</th><th>Sim Check</th><th>关联 Case</th><th>关联规则</th></tr>{register_rows}</table></div></details>
+      <h2>寄存器验证映射</h2><div class="stats"><div class="stat"><strong>{len(metadata['registers'])}</strong><span>register fields</span></div><div class="stat"><strong>{linked_registers}</strong><span>linked to cases</span></div><div class="stat"><strong>{no_case_registers}</strong><span>NO CASE</span></div><div class="stat"><strong>{pending_registers}</strong><span>manual / unresolved</span></div></div><p>关联依据保留在“关联规则”列：优先使用 Excel 中的精确 testcase 名和通配模式，其次使用 SHL、CHSEL、DOTC、POLC、H120V、DRDOD、DPLC、UTC 等明确功能关键词。无法可靠推断的条目保持未关联。点击 case 名可跳转并自动筛选 Case 计划索引。</p><details><summary>展开全部 {len(metadata['registers'])} 个寄存器字段</summary><div class="table-scroll"><table class="register-table"><tr><th>Address</th><th>Name</th><th>Type</th><th>Default</th><th>Access</th><th>Description</th><th>Values</th><th>Sim Check</th><th>关联 Case</th><th>关联规则</th></tr>{register_rows}</table></div></details>
       <h2>环境修改记录</h2><div class="grid-2"><section class="panel"><h3>状态分布</h3><p>{esc(env_status_text)}</p></section><section class="panel"><h3>Owner 分布</h3><p>{esc(env_owner_text)}</p></section></div><p>这些记录反映环境能力在哪个版本引入，也是移植下一项目时优先审计的风险列表。优先检查状态未完成、文件名为空或描述依赖旧层次路径的记录。</p><details open><summary>展开 {len(metadata['changes'])} 条环境变更</summary><div class="table-scroll"><table><tr><th>Date</th><th>File</th><th>Action</th><th>Owner</th><th>Status</th><th>Note</th></tr>{change_rows}</table></div></details>
     """
 
