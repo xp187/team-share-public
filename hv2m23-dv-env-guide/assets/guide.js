@@ -2,7 +2,9 @@
 (() => {
   const search = document.querySelector('#case-search');
   if (!search || !window.HV2_CASES) return;
-  const category = document.querySelector('#case-category');
+  const caseType = document.querySelector('#case-type');
+  const feature1 = document.querySelector('#case-feature1');
+  const feature2 = document.querySelector('#case-feature2');
   const scope = document.querySelector('#case-scope');
   const results = document.querySelector('#case-results');
   const count = document.querySelector('#case-count');
@@ -19,7 +21,10 @@
     const filtered = window.HV2_CASES.filter(item => {
       const haystack = JSON.stringify(item).toLowerCase();
       return (!query || haystack.includes(query))
-        && (!category.value || item.category === category.value)
+        && (!caseType.value || item.caseType === caseType.value)
+        && (!feature1.value || (feature1.value === '__blank__'
+          ? !item.feature1 : item.feature1 === feature1.value))
+        && (!feature2.value || item.feature2 === feature2.value)
         && (scope.value !== 'pass' || item.status.toUpperCase() === 'PASS')
         && (scope.value !== 'linked' || item.linkedSource)
         && (scope.value !== 'missing' || !item.linkedSource);
@@ -46,7 +51,7 @@
           <code>${escapeHtml(item.name)}</code>
           <span class="tag ${item.status.toUpperCase() === 'PASS' ? 'active' : ''}">${escapeHtml(item.status || 'status not set')}</span>
         </div>
-        <div class="tags"><span class="tag warn">${escapeHtml(item.caseType)}</span><span class="tag">${escapeHtml(item.feature1 || item.category)}</span>${item.feature2 ? `<span class="tag">${escapeHtml(item.feature2)}</span>` : ''}<span class="tag ${item.linkedSource ? 'active' : 'warn'}">${item.linkedSource ? 'source linked' : 'Excel only'}</span></div>
+        <div class="tags"><span class="tag warn">Case Type: ${escapeHtml(item.caseType)}</span><span class="tag">Feature I: ${escapeHtml(item.feature1 || 'Excel 未填写')}</span><span class="tag">Feature II: ${escapeHtml(item.feature2 || 'Excel 未填写')}</span><span class="tag ${item.linkedSource ? 'active' : 'warn'}">${item.linkedSource ? 'source linked' : 'Excel only'}</span></div>
         <h4>验证目标</h4><p class="case-description">${escapeHtml(item.description)}</p>
         <h4>检查点</h4><p class="case-checkpoint">${escapeHtml(item.checkpoint)}</p>
         ${item.comment ? `<h4>说明</h4><p class="case-description">${escapeHtml(item.comment)}</p>` : ''}
@@ -59,6 +64,7 @@
     }).join('');
   }
 
-  [search, category, scope].forEach(control => control.addEventListener('input', render));
+  [search, caseType, feature1, feature2, scope].forEach(control =>
+    control.addEventListener('input', render));
   render();
 })();

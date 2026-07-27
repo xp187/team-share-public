@@ -421,12 +421,35 @@ def load_excel_plan(
             "error": clean_cell(row[2]), "ongoing": clean_cell(row[3]),
             "unbuilt": clean_cell(row[4]), "total": clean_cell(row[5]),
         })
+    feature_groups = []
+    for sheet_name, case_type in (("normal case", "Normal"),
+                                  ("waveform case", "Waveform")):
+        sheet = workbook[sheet_name]
+        current_feature1 = ""
+        for row_number in range(2, sheet.max_row + 1):
+            feature1 = clean_cell(sheet.cell(row_number, 1).value)
+            feature2 = clean_cell(sheet.cell(row_number, 2).value)
+            if feature1:
+                current_feature1 = feature1
+            if not feature2:
+                continue
+            named_count = sum(
+                1 for item in plan
+                if item["sheet"] == sheet_name
+                and item["feature1"] == current_feature1
+                and item["feature2"] == feature2)
+            feature_groups.append({
+                "caseType": case_type, "feature1": current_feature1,
+                "feature2": feature2, "namedCount": named_count,
+                "source": f"{sheet_name}:{row_number}",
+            })
     metadata = {
         "registers": registers,
         "changes": changes,
         "formats": formats,
         "history": history,
         "caseStatus": case_status,
+        "featureGroups": feature_groups,
         "coverage": {
             "score": clean_cell(coverage_row[0]), "line": clean_cell(coverage_row[1]),
             "condition": clean_cell(coverage_row[2]), "toggle": clean_cell(coverage_row[3]),
@@ -550,7 +573,7 @@ pre code { background: transparent; color: inherit; padding: 0; }
 .tag { display: inline-flex; align-items: center; border: 1px solid var(--line); color: var(--muted); padding: 2px 7px; border-radius: 999px; font-size: 11px; }
 .tag.active { border-color: var(--green); background: var(--green-soft); color: var(--green); }
 .tag.warn { border-color: var(--amber); background: var(--amber-soft); color: var(--amber); }
-.case-controls { position: sticky; top: 56px; z-index: 10; display: grid; grid-template-columns: 1fr 190px 160px; gap: 8px; padding: 12px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.case-controls { position: sticky; top: 56px; z-index: 10; display: grid; grid-template-columns: minmax(220px, 1fr) repeat(4, minmax(130px, 170px)); gap: 8px; padding: 12px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
 input, select { width: 100%; min-height: 38px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); padding: 7px 10px; border-radius: 4px; font: inherit; }
 .case-results { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
 .case-title { display: flex; align-items: flex-start; gap: 8px; justify-content: space-between; }
@@ -580,7 +603,9 @@ GUIDE_JS = r"""
 (() => {
   const search = document.querySelector('#case-search');
   if (!search || !window.HV2_CASES) return;
-  const category = document.querySelector('#case-category');
+  const caseType = document.querySelector('#case-type');
+  const feature1 = document.querySelector('#case-feature1');
+  const feature2 = document.querySelector('#case-feature2');
   const scope = document.querySelector('#case-scope');
   const results = document.querySelector('#case-results');
   const count = document.querySelector('#case-count');
@@ -597,7 +622,10 @@ GUIDE_JS = r"""
     const filtered = window.HV2_CASES.filter(item => {
       const haystack = JSON.stringify(item).toLowerCase();
       return (!query || haystack.includes(query))
-        && (!category.value || item.category === category.value)
+        && (!caseType.value || item.caseType === caseType.value)
+        && (!feature1.value || (feature1.value === '__blank__'
+          ? !item.feature1 : item.feature1 === feature1.value))
+        && (!feature2.value || item.feature2 === feature2.value)
         && (scope.value !== 'pass' || item.status.toUpperCase() === 'PASS')
         && (scope.value !== 'linked' || item.linkedSource)
         && (scope.value !== 'missing' || !item.linkedSource);
@@ -624,7 +652,7 @@ GUIDE_JS = r"""
           <code>${escapeHtml(item.name)}</code>
           <span class="tag ${item.status.toUpperCase() === 'PASS' ? 'active' : ''}">${escapeHtml(item.status || 'status not set')}</span>
         </div>
-        <div class="tags"><span class="tag warn">${escapeHtml(item.caseType)}</span><span class="tag">${escapeHtml(item.feature1 || item.category)}</span>${item.feature2 ? `<span class="tag">${escapeHtml(item.feature2)}</span>` : ''}<span class="tag ${item.linkedSource ? 'active' : 'warn'}">${item.linkedSource ? 'source linked' : 'Excel only'}</span></div>
+        <div class="tags"><span class="tag warn">Case Type: ${escapeHtml(item.caseType)}</span><span class="tag">Feature I: ${escapeHtml(item.feature1 || 'Excel 未填写')}</span><span class="tag">Feature II: ${escapeHtml(item.feature2 || 'Excel 未填写')}</span><span class="tag ${item.linkedSource ? 'active' : 'warn'}">${item.linkedSource ? 'source linked' : 'Excel only'}</span></div>
         <h4>验证目标</h4><p class="case-description">${escapeHtml(item.description)}</p>
         <h4>检查点</h4><p class="case-checkpoint">${escapeHtml(item.checkpoint)}</p>
         ${item.comment ? `<h4>说明</h4><p class="case-description">${escapeHtml(item.comment)}</p>` : ''}
@@ -637,7 +665,8 @@ GUIDE_JS = r"""
     }).join('');
   }
 
-  [search, category, scope].forEach(control => control.addEventListener('input', render));
+  [search, caseType, feature1, feature2, scope].forEach(control =>
+    control.addEventListener('input', render));
   render();
 })();
 """
@@ -1017,20 +1046,33 @@ python regression_cov.py</code></pre>
       <h2>回归清单治理</h2><p>当前 <code>case_list.txt</code> 的唯一名称与实际目录存在差异。新增清单项前应自动检查目录存在、主 class 可编译、输入文件齐全，并把不存在的名称单独报告，避免“提交了回归但实际没有运行目标”的假覆盖。</p>
     """
 
-    categories = sorted({str(item["category"]) for item in cases})
-    option_html = "".join(f'<option value="{esc(value)}">{esc(value)}</option>' for value in categories)
-    category_counts = Counter(str(item["category"]) for item in cases)
-    category_rows = "".join(
-        f"<tr><td>{esc(name)}</td><td>{count}</td></tr>"
-        for name, count in category_counts.most_common()
-    )
+    case_types = sorted({str(item["caseType"]) for item in cases})
+    feature1_values = sorted({str(item["feature1"]) for item in cases
+                              if item["feature1"]})
+    feature2_values = sorted({str(item["feature2"]) for item in cases
+                              if item["feature2"]})
+    case_type_options = "".join(
+        f'<option value="{esc(value)}">{esc(value)}</option>'
+        for value in case_types)
+    feature1_options = "".join(
+        f'<option value="{esc(value)}">{esc(value)}</option>'
+        for value in feature1_values)
+    feature2_options = "".join(
+        f'<option value="{esc(value)}">{esc(value)}</option>'
+        for value in feature2_values)
+    hierarchy_rows = "".join(
+        f"<tr><td>{esc(str(item['caseType']))}</td>"
+        f"<td>{esc(str(item['feature1']) or 'Excel 未填写')}</td>"
+        f"<td>{esc(str(item['feature2']))}</td>"
+        f"<td>{item['namedCount']}</td><td><code>{esc(str(item['source']))}</code></td></tr>"
+        for item in metadata["featureGroups"])
     cases_body = f"""
       <div class="stats"><div class="stat"><strong>{len(cases)}</strong><span>Excel plan rows</span></div><div class="stat"><strong>{passed_count}</strong><span>PASS rows</span></div><div class="stat"><strong>{linked_count}</strong><span>source linked</span></div><div class="stat"><strong id="case-count">0</strong><span>current results</span></div></div>
       <div class="note"><strong>数据来源：</strong>Case 范围与描述以 Excel 的 <code>normal case</code>、<code>waveform case</code> sheet 为准。空白描述/check 项按同一连续 Feature 分组继承上一条有效内容；每张卡保留 sheet 和行号便于回查。</div>
       <div class="note"><strong>源码关联：</strong>共 {linked_count} 条计划行能关联当前 tests 目录，{excel_only_count} 条仅存在于 Excel 或名称尚未与目录一致。源码关联不会覆盖 Excel 描述，只增加宏、checker、force 和检查调用证据。</div>
-      <div class="case-controls"><input id="case-search" type="search" placeholder="搜索 case、Feature、描述、check 点、owner、宏或源码"><select id="case-category"><option value="">全部 Feature</option>{option_html}</select><select id="case-scope"><option value="all">全部计划项</option><option value="pass">仅 PASS</option><option value="linked">已关联源码</option><option value="missing">仅 Excel</option></select></div>
+      <div class="case-controls"><input id="case-search" type="search" placeholder="搜索 case、Feature、描述、check 点、owner、宏或源码"><select id="case-type"><option value="">全部 Case Type</option>{case_type_options}</select><select id="case-feature1"><option value="">全部 Feature I</option><option value="__blank__">Feature I：Excel 未填写</option>{feature1_options}</select><select id="case-feature2"><option value="">全部 Feature II</option>{feature2_options}</select><select id="case-scope"><option value="all">全部计划项</option><option value="pass">仅 PASS</option><option value="linked">已关联源码</option><option value="missing">仅 Excel</option></select></div>
       <div class="case-results" id="case-results"></div>
-      <h2>Case 家族分布</h2><table><tr><th>源码派生类别</th><th>目录数量</th></tr>{category_rows}</table>
+      <h2>Normal / Waveform Feature 分组</h2><p>以下层级直接来自 Excel。Normal Case 同时列出 Feature I 与 Feature II；Waveform Case 的 Feature I 原表为空，因此如实标记为“Excel 未填写”，并完整列出六个 Feature II 分组。只有 Feature 标题但暂时没有 Case Name 的分组也会保留并显示为 0。</p><div class="table-scroll"><table><tr><th>Case Type</th><th>Feature I</th><th>Feature II</th><th>命名 Case 数量</th><th>Excel 位置</th></tr>{hierarchy_rows}</table></div>
       <h2>代表性 Case 阅读方法</h2>
       <div class="grid-2"><section class="panel"><h3>基础数据通路</h3><p>从 <code>t_8b1lane</code> 开始，核对 PAIR_NUM、PORT_NUM、尺寸宏和四类基础图像 checker，再与 2-lane/多 port 变体比较。</p></section><section class="panel"><h3>DRDOD</h3><p>查看 <code>t_8b2lane_DRD_PANEL3</code> 与 <code>t_drdod_en_toggle_2lane_HKC1_R</code>，重点跟踪 DRD 功能宏、panel 配置和 input/output checker。</p></section><section class="panel"><h3>协议异常</h3><p>查看 <code>t_pixel_with_training_pattern</code>、prefix/setting 异常类 case，结合 force、注入参数和关闭的 checker 理解定向判定。</p></section><section class="panel"><h3>寄存器 / I2C</h3><p>查看 <code>t_i2c_access_reg_unlock_reset</code>，从 I2C_SIM、check 调用和 force/release 证据理解非图像类验证。</p></section></div>
       <script src="assets/cases-data.js?v=20260727"></script><script src="assets/guide.js?v=20260727"></script>

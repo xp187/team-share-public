@@ -110,7 +110,7 @@ pre code { background: transparent; color: inherit; padding: 0; }
 .tag { display: inline-flex; align-items: center; border: 1px solid var(--line); color: var(--muted); padding: 2px 7px; border-radius: 999px; font-size: 11px; }
 .tag.active { border-color: var(--green); background: var(--green-soft); color: var(--green); }
 .tag.warn { border-color: var(--amber); background: var(--amber-soft); color: var(--amber); }
-.case-controls { position: sticky; top: 56px; z-index: 10; display: grid; grid-template-columns: 1fr 190px 160px; gap: 8px; padding: 12px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.case-controls { position: sticky; top: 56px; z-index: 10; display: grid; grid-template-columns: minmax(220px, 1fr) repeat(4, minmax(130px, 170px)); gap: 8px; padding: 12px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
 input, select { width: 100%; min-height: 38px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); padding: 7px 10px; border-radius: 4px; font: inherit; }
 .case-results { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
 .case-title { display: flex; align-items: flex-start; gap: 8px; justify-content: space-between; }
