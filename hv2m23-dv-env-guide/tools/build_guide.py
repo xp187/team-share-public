@@ -6,9 +6,11 @@ from __future__ import annotations
 import html
 import json
 import re
+from fnmatch import fnmatchcase
 from collections import Counter
 from pathlib import Path
 from textwrap import dedent
+from urllib.parse import quote
 
 from openpyxl import load_workbook
 
@@ -275,6 +277,48 @@ def polished_excel_text(text: str, fallback: str) -> str:
     return text.replace("\n", "；")
 
 
+def link_register_cases(
+        registers: list[dict[str, object]],
+        plan: list[dict[str, object]]) -> None:
+    """Link register Sim_Check entries to testcase names with traceable rules."""
+    case_names = sorted({str(item["name"]) for item in plan})
+    keyword_rules = {
+        "SHL CASE": "SHL", "CHSEL CASE": "CHSEL",
+        "DOTC CASE": "DOTC", "POLC CASE": "POLC",
+        "H120V CASE": "H120V", "DRDOD CASE": "DRD",
+        "SD_CHOP CASE": "chopper", "G_CHOP CASE": "chopper",
+        "DPLC CASE": "DPLC", "UTC CASE": "utc",
+    }
+    case_to_registers: dict[str, list[dict[str, str]]] = {
+        name: [] for name in case_names}
+    for register in registers:
+        sim_check = str(register["simCheck"])
+        matches: set[str] = set()
+        method = ""
+        patterns = re.findall(r"t_[A-Za-z0-9_*]+", sim_check)
+        if patterns:
+            method = "Excel testcase name/pattern"
+            for pattern in patterns:
+                matches.update(name for name in case_names
+                               if fnmatchcase(name, pattern))
+        elif sim_check in keyword_rules:
+            method = f"Feature keyword: {keyword_rules[sim_check]}"
+            keyword = keyword_rules[sim_check].lower()
+            matches.update(name for name in case_names
+                           if keyword in name.lower())
+        register["caseNames"] = sorted(matches)
+        register["linkMethod"] = method
+        for name in matches:
+            case_to_registers[name].append({
+                "address": str(register["address"]),
+                "name": str(register["name"]),
+                "simCheck": sim_check,
+                "linkMethod": method,
+            })
+    for item in plan:
+        item["registers"] = case_to_registers[str(item["name"])]
+
+
 def load_excel_plan(
         source_cases: list[dict[str, object]]) -> tuple[list[dict[str, object]], dict[str, object]]:
     """Load canonical case-plan rows and supporting workbook sheets."""
@@ -377,6 +421,7 @@ def load_excel_plan(
             "values": clean_cell(row[7]), "access": clean_cell(row[8]),
             "simCheck": clean_cell(row[9]),
         })
+    link_register_cases(registers, plan)
     changes = []
     for row in workbook["ENV changelist"].iter_rows(min_row=2, values_only=True):
         if not any(value is not None for value in row):
@@ -609,6 +654,8 @@ GUIDE_JS = r"""
   const scope = document.querySelector('#case-scope');
   const results = document.querySelector('#case-results');
   const count = document.querySelector('#case-count');
+  const initialQuery = new URLSearchParams(window.location.search).get('q');
+  if (initialQuery) search.value = initialQuery;
 
   const escapeHtml = value => String(value)
     .replaceAll('&', '&amp;').replaceAll('<', '&lt;')
@@ -656,6 +703,7 @@ GUIDE_JS = r"""
         <h4>验证目标</h4><p class="case-description">${escapeHtml(item.description)}</p>
         <h4>检查点</h4><p class="case-checkpoint">${escapeHtml(item.checkpoint)}</p>
         ${item.comment ? `<h4>说明</h4><p class="case-description">${escapeHtml(item.comment)}</p>` : ''}
+        ${item.registers.length ? `<h4>关联寄存器</h4><div class="tags">${tags(item.registers.map(reg => `${reg.address} ${reg.name}`))}</div>` : ''}
         <div class="tags">${item.owner ? `<span class="tag">Owner: ${escapeHtml(item.owner)}</span>` : ''}${item.date ? `<span class="tag">Date: ${escapeHtml(item.date)}</span>` : ''}${item.runSummary ? `<span class="tag">Run: ${escapeHtml(item.runSummary)}</span>` : ''}</div>
         <div class="tags">${tags(item.features)}${tags(macroTags)}</div>
         <div class="tags">${tags(item.enabledChecks.map(v => `ON: ${v}`))}${tags(item.disabledChecks.map(v => `OFF: ${v}`))}</div>
@@ -1082,7 +1130,13 @@ python regression_cov.py</code></pre>
         "<tr>" + "".join(
             f"<td>{cell_html(item[key])}</td>"
             for key in ("address", "name", "type", "default", "access",
-                        "description", "values", "simCheck")) + "</tr>"
+                        "description", "values", "simCheck"))
+        + "<td>" + (
+            " ".join(
+                f'<a href="cases.html?q={quote(name)}"><code>{esc(name)}</code></a>'
+                for name in item["caseNames"])
+            if item["caseNames"] else '<span class="muted">未关联</span>'
+        ) + "</td><td>" + cell_html(item["linkMethod"]) + "</td></tr>"
         for item in metadata["registers"])
     change_rows = "".join(
         f"<tr><td>{cell_html(item['date'])}</td><td>{cell_html(item['file'])}</td>"
@@ -1105,15 +1159,39 @@ python regression_cov.py</code></pre>
         f"<td>{cell_html(item['owner'])}</td></tr>"
         for item in metadata["history"])
     coverage = metadata["coverage"]
+    linked_registers = sum(bool(item["caseNames"])
+                           for item in metadata["registers"])
+    no_case_registers = sum(
+        str(item["simCheck"]).upper() == "NO CASE"
+        for item in metadata["registers"])
+    pending_registers = (len(metadata["registers"]) - linked_registers
+                         - no_case_registers)
+    env_status_counts = Counter(
+        str(item["status"]).lower() or "未填写"
+        for item in metadata["changes"])
+    env_owner_counts = Counter(
+        str(item["owner"]) or "未填写" for item in metadata["changes"])
+    env_status_text = " / ".join(
+        f"{name}: {count}" for name, count in env_status_counts.most_common())
+    env_owner_text = " / ".join(
+        f"{name}: {count}" for name, count in env_owner_counts.most_common())
+    coverage_metrics = [
+        ("Line", coverage["line"]), ("Condition", coverage["condition"]),
+        ("Toggle", coverage["toggle"]), ("FSM", coverage["fsm"]),
+        ("Branch", coverage["branch"]),
+    ]
+    weakest_coverage = min(
+        coverage_metrics,
+        key=lambda item: float(item[1]) if item[1] else float("inf"))
     plan_body = f"""
       <div class="note"><strong>唯一主清单：</strong><code>{cell_html(metadata['workbook'])}</code>。本页保留 workbook 中除 case 明细外的 register、ENV changelist、coverage 和 video format 信息；case 明细见 <a href="cases.html">Case 计划索引</a>。</div>
       <h2>计划状态</h2><div class="stats"><div class="stat"><strong>{len(cases)}</strong><span>named rows</span></div><div class="stat"><strong>{passed_count}</strong><span>PASS</span></div><div class="stat"><strong>{len(metadata['registers'])}</strong><span>register fields</span></div><div class="stat"><strong>{len(metadata['formats'])}</strong><span>video formats</span></div></div>
       <p>下表直接保留 workbook 的 <code>case status</code> 统计口径。命名计划行还包含未计入该状态表的标题或扩展条目，因此网页索引总数与状态表 Total 不要求相等。</p><table><tr><th>Case type</th><th>Pass</th><th>Error</th><th>On going</th><th>Unbuild</th><th>Total</th></tr>{status_rows}</table>
       <h2>Workbook 维护历史</h2><table><tr><th>Date</th><th>Comment</th><th>Owner</th></tr>{history_rows}</table>
-      <h2>Coverage 快照</h2><table><tr><th>Score</th><th>Line</th><th>Condition</th><th>Toggle</th><th>FSM</th><th>Branch</th><th>Date</th></tr><tr><td>{cell_html(coverage['score'])}</td><td>{cell_html(coverage['line'])}</td><td>{cell_html(coverage['condition'])}</td><td>{cell_html(coverage['toggle'])}</td><td>{cell_html(coverage['fsm'])}</td><td>{cell_html(coverage['branch'])}</td><td>{cell_html(coverage['date'])}</td></tr></table>
+      <h2>Coverage 快照</h2><table><tr><th>Score</th><th>Line</th><th>Condition</th><th>Toggle</th><th>FSM</th><th>Branch</th><th>Date</th></tr><tr><td>{cell_html(coverage['score'])}%</td><td>{cell_html(coverage['line'])}%</td><td>{cell_html(coverage['condition'])}%</td><td>{cell_html(coverage['toggle'])}%</td><td>{cell_html(coverage['fsm'])}%</td><td>{cell_html(coverage['branch'])}%</td><td>{cell_html(coverage['date'])}</td></tr></table><div class="note"><strong>Closure 重点：</strong>当前最低项为 {esc(weakest_coverage[0])} {cell_html(weakest_coverage[1])}%。该表是 Excel 在 {cell_html(coverage['date'])} 记录的单次快照，不代表实时回归结果；下一次更新应同时记录回归版本、waiver 和未覆盖原因。</div>
       <h2>Video Format 矩阵</h2><p>用于核对分辨率、blank、帧率、色深、driver channel、PCS、pair 和单 pair 速率。Case 名中的简化参数不能替代本表的系统带宽条件。</p><div class="table-scroll"><table><tr><th>No</th><th>Active</th><th>H/V blank</th><th>FPS</th><th>Depth</th><th>Channel</th><th>PCS</th><th>Pair/Driver</th><th>iSP Speed/Pair</th><th>Mode</th></tr>{format_rows}</table></div>
-      <h2>寄存器验证映射</h2><p>Excel register sheet 中的地址、字段、默认值、访问属性和 Sim_Check 全量整理如下。<code>NO CASE</code> 不等于不需要验证，应在通用读写、reset/default 或 coverage 中说明覆盖来源。</p><details><summary>展开 {len(metadata['registers'])} 个寄存器字段</summary><div class="table-scroll"><table><tr><th>Address</th><th>Name</th><th>Type</th><th>Default</th><th>Access</th><th>Description</th><th>Values</th><th>Sim Check</th></tr>{register_rows}</table></div></details>
-      <h2>环境变更记录</h2><p>这些记录反映环境已解决过的适配点，也是移植下一项目时优先审计的风险列表。</p><details open><summary>展开 {len(metadata['changes'])} 条环境变更</summary><div class="table-scroll"><table><tr><th>Date</th><th>File</th><th>Action</th><th>Owner</th><th>Status</th><th>Note</th></tr>{change_rows}</table></div></details>
+      <h2>寄存器验证映射</h2><div class="stats"><div class="stat"><strong>{len(metadata['registers'])}</strong><span>register fields</span></div><div class="stat"><strong>{linked_registers}</strong><span>linked to cases</span></div><div class="stat"><strong>{no_case_registers}</strong><span>NO CASE</span></div><div class="stat"><strong>{pending_registers}</strong><span>manual / unresolved</span></div></div><p>关联依据保留在“关联规则”列：优先使用 Excel 中的精确 testcase 名和通配模式，其次使用 SHL、CHSEL、DOTC、POLC、H120V、DRDOD、DPLC、UTC 等明确功能关键词。无法可靠推断的条目保持未关联。点击 case 名可跳转并自动筛选 Case 计划索引。</p><details open><summary>展开全部 {len(metadata['registers'])} 个寄存器字段</summary><div class="table-scroll"><table><tr><th>Address</th><th>Name</th><th>Type</th><th>Default</th><th>Access</th><th>Description</th><th>Values</th><th>Sim Check</th><th>关联 Case</th><th>关联规则</th></tr>{register_rows}</table></div></details>
+      <h2>环境修改记录</h2><div class="grid-2"><section class="panel"><h3>状态分布</h3><p>{esc(env_status_text)}</p></section><section class="panel"><h3>Owner 分布</h3><p>{esc(env_owner_text)}</p></section></div><p>这些记录反映环境能力在哪个版本引入，也是移植下一项目时优先审计的风险列表。优先检查状态未完成、文件名为空或描述依赖旧层次路径的记录。</p><details open><summary>展开 {len(metadata['changes'])} 条环境变更</summary><div class="table-scroll"><table><tr><th>Date</th><th>File</th><th>Action</th><th>Owner</th><th>Status</th><th>Note</th></tr>{change_rows}</table></div></details>
     """
 
     portability_body = """

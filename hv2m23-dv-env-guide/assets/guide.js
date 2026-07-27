@@ -8,6 +8,8 @@
   const scope = document.querySelector('#case-scope');
   const results = document.querySelector('#case-results');
   const count = document.querySelector('#case-count');
+  const initialQuery = new URLSearchParams(window.location.search).get('q');
+  if (initialQuery) search.value = initialQuery;
 
   const escapeHtml = value => String(value)
     .replaceAll('&', '&amp;').replaceAll('<', '&lt;')
@@ -55,6 +57,7 @@
         <h4>验证目标</h4><p class="case-description">${escapeHtml(item.description)}</p>
         <h4>检查点</h4><p class="case-checkpoint">${escapeHtml(item.checkpoint)}</p>
         ${item.comment ? `<h4>说明</h4><p class="case-description">${escapeHtml(item.comment)}</p>` : ''}
+        ${item.registers.length ? `<h4>关联寄存器</h4><div class="tags">${tags(item.registers.map(reg => `${reg.address} ${reg.name}`))}</div>` : ''}
         <div class="tags">${item.owner ? `<span class="tag">Owner: ${escapeHtml(item.owner)}</span>` : ''}${item.date ? `<span class="tag">Date: ${escapeHtml(item.date)}</span>` : ''}${item.runSummary ? `<span class="tag">Run: ${escapeHtml(item.runSummary)}</span>` : ''}</div>
         <div class="tags">${tags(item.features)}${tags(macroTags)}</div>
         <div class="tags">${tags(item.enabledChecks.map(v => `ON: ${v}`))}${tags(item.disabledChecks.map(v => `OFF: ${v}`))}</div>
