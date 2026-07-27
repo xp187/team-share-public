@@ -925,6 +925,39 @@ def build_svgs() -> None:
       <rect class="box" x="245" y="260" width="695" height="80" rx="8"/><text class="ink" x="592" y="288" text-anchor="middle">Frame protocol</text><text class="small" x="592" y="313" text-anchor="middle">VBP setting -> HBP -> BAC+POL -> pixel -> EOL -> HFP -> VFP</text><text class="small" x="592" y="333" text-anchor="middle">LANE / TRAINING / REGISTER / HBK / BAC / POL / EOL / PIXEL / DUMMY</text>
       <path class="arrow-orange dash" d="M355 200 V260 M830 200 V260"/>
     """
+    isptx_sequence_detail = """
+      <rect class="green dash" x="25" y="25" width="930" height="690" rx="14"/><text class="ink" x="50" y="55">TX: isptx_sequence_1.sv (HV2M23 main flow)</text>
+      <rect class="box" x="55" y="75" width="870" height="68" rx="8"/><text class="ink" x="80" y="102">body() :1104</text><text class="small" x="80" y="126">get rx_cfg / vif1 / SIM_TEST_PATH / FILE_PATH -> calculate lane_total_number -> send_isp()</text>
+      <path class="arrow" d="M490 143 V170"/>
+      <rect class="box" x="55" y="170" width="870" height="155" rx="8"/><text class="ink" x="80" y="198">send_isp() FSM :1028</text>
+      <rect class="blue" x="80" y="220" width="225" height="78" rx="8"/><text class="ink" x="192" y="247" text-anchor="middle">TRAIN_SEND</text><text class="small" x="192" y="270" text-anchor="middle">1L/2L training transaction</text><text class="small" x="192" y="290" text-anchor="middle">parallel 33 ms timeout</text>
+      <rect class="blue" x="375" y="220" width="225" height="78" rx="8"/><text class="ink" x="487" y="247" text-anchor="middle">TRAIN_ACTIVE</text><text class="small" x="487" y="270" text-anchor="middle">send_ppm() || mon_unlock</text><text class="small" x="487" y="290" text-anchor="middle">unlock &lt;= 21 -> retrain</text>
+      <rect class="box" x="670" y="220" width="225" height="78" rx="8"/><text class="ink" x="782" y="247" text-anchor="middle">DRV_PPM_DONE</text><text class="small" x="782" y="270" text-anchor="middle">all frames complete</text><text class="small" x="782" y="290" text-anchor="middle">leave FSM</text>
+      <path class="arrow" d="M305 259 H375 M600 259 H670"/><path class="arrow-orange dash" d="M487 298 V315 H192 V298"/>
+      <path class="arrow" d="M487 325 V352"/>
+      <rect class="purple dash" x="55" y="352" width="870" height="330" rx="10"/><text class="ink" x="80" y="380">send_ppm() :423 - loop frame c = 0 .. frame_num-1</text>
+      <rect class="box" x="80" y="405" width="245" height="110" rx="8"/><text class="ink" x="202" y="432" text-anchor="middle">VBP / setting lines</text><text class="small" x="202" y="456" text-anchor="middle">frame0: first_frame_setting_line</text><text class="small" x="202" y="478" text-anchor="middle">later: setting_line</text><text class="small" x="202" y="500" text-anchor="middle">send_register() :311</text>
+      <rect class="green" x="365" y="405" width="245" height="110" rx="8"/><text class="ink" x="487" y="432" text-anchor="middle">Pixel source selection</text><text class="small" x="487" y="456" text-anchor="middle">OD_k != 0: direct DRD data</text><text class="small" x="487" y="478" text-anchor="middle">else: DPI load_ppm() :563</text><text class="small" x="487" y="500" text-anchor="middle">decode + write input PPM</text>
+      <rect class="box" x="650" y="405" width="245" height="110" rx="8"/><text class="ink" x="772" y="432" text-anchor="middle">VACT / VFP packets</text><text class="small" x="772" y="456" text-anchor="middle">HBP -> BAC+POL -> PIXEL</text><text class="small" x="772" y="478" text-anchor="middle">EOL -> HFP, repeat VACT</text><text class="small" x="772" y="500" text-anchor="middle">then VFP blank lines</text>
+      <path class="arrow" d="M325 460 H365 M610 460 H650"/>
+      <rect class="amber" x="80" y="555" width="245" height="95" rx="8"/><text class="ink" x="202" y="582" text-anchor="middle">Register payload</text><text class="small" x="202" y="606" text-anchor="middle">process_cfg(frameN)</text><text class="small" x="202" y="628" text-anchor="middle">get_reg() -> 8B9B symbols</text>
+      <rect class="amber" x="365" y="555" width="245" height="95" rx="8"/><text class="ink" x="487" y="582" text-anchor="middle">Per-frame special data</text><text class="small" x="487" y="606" text-anchor="middle">DPLC remap / DRD direct gen</text><text class="small" x="487" y="628" text-anchor="middle">scramble / inject / UTC paths</text>
+      <rect class="amber" x="650" y="555" width="245" height="95" rx="8"/><text class="ink" x="772" y="582" text-anchor="middle">Frame switching</text><text class="small" x="772" y="606" text-anchor="middle">cfg_frameN + pattern/frame_N</text><text class="small" x="772" y="628" text-anchor="middle">frame id shared with golden</text>
+      <path class="arrow-orange dash" d="M202 515 V555 M487 515 V555 M772 515 V555"/>
+
+      <rect class="green dash" x="980" y="25" width="390" height="690" rx="14"/><text class="ink" x="1005" y="55">Golden generation: exec_c() :56</text>
+      <rect class="box" x="1010" y="80" width="330" height="105" rx="8"/><text class="ink" x="1175" y="108" text-anchor="middle">pic_process</text><text class="small" x="1175" y="133" text-anchor="middle">W/H/P, subpix, DOTC/POLC</text><text class="small" x="1175" y="155" text-anchor="middle">SHL/H120V/DPLC_MODE</text><text class="small" x="1175" y="177" text-anchor="middle">-> outResult[/id]</text>
+      <rect class="box" x="1010" y="215" width="330" height="105" rx="8"/><text class="ink" x="1175" y="243" text-anchor="middle">DPLC_MODE == 1</text><text class="small" x="1175" y="268" text-anchor="middle">dplc.pl -> DPLC_frameN_idM.ppm</text><text class="small" x="1175" y="290" text-anchor="middle">current mode = duplicate</text><text class="small" x="1175" y="312" text-anchor="middle">AVE / DELTA / LAST args</text>
+      <rect class="box" x="1010" y="350" width="330" height="105" rx="8"/><text class="ink" x="1175" y="378" text-anchor="middle">DRDOD golden</text><text class="small" x="1175" y="403" text-anchor="middle">drdod_process.py</text><text class="small" x="1175" y="425" text-anchor="middle">panel + OD_k/w1..w6/gray</text><text class="small" x="1175" y="447" text-anchor="middle">-> drdod_out_frameN.ppm</text>
+      <rect class="green" x="1010" y="495" width="330" height="155" rx="8"/><text class="ink" x="1175" y="525" text-anchor="middle">Golden artifacts</text><text class="small" x="1175" y="552" text-anchor="middle">outResult/data_merge/*.txt</text><text class="small" x="1175" y="574" text-anchor="middle">outResult/digital/*.txt</text><text class="small" x="1175" y="596" text-anchor="middle">outResult/analog/*.txt</text><text class="small" x="1175" y="618" text-anchor="middle">DPLC / DRDOD PPM</text><text class="small" x="1175" y="640" text-anchor="middle">loaded later by scoreboards</text>
+      <path class="arrow-green" d="M1175 185 V215 M1175 320 V350 M1175 455 V495"/><path class="arrow-green" d="M610 460 H950 V572 H1010"/>
+
+      <rect class="box" x="25" y="755" width="1345" height="120" rx="12"/><text class="ink" x="50" y="785">Transaction / Driver / DUT pad</text>
+      <rect class="blue" x="60" y="805" width="340" height="48" rx="8"/><text class="ink" x="230" y="825" text-anchor="middle">isptx_transaction :1-45</text><text class="small" x="230" y="845" text-anchor="middle">id + 9b data / 18b two_data / control symbols</text>
+      <rect class="amber" x="460" y="805" width="440" height="48" rx="8"/><text class="ink" x="680" y="825" text-anchor="middle">isptx_driver main_phase :879</text><text class="small" x="680" y="845" text-anchor="middle">dispatch id -> convert_one/sec_bit :758/784 -> 9 clocks</text>
+      <rect class="green" x="960" y="805" width="370" height="48" rx="8"/><text class="ink" x="1145" y="825" text-anchor="middle">chip_tb_top -> DUT</text><text class="small" x="1145" y="845" text-anchor="middle">b_if.rxp/rxn0/1 -> APAD_RXP/RXN0/1</text>
+      <path class="arrow" d="M400 829 H460 M900 829 H960"/><path class="arrow" d="M487 682 V735 H230 V805"/>
+    """
     checker_position = """
       <rect class="blue" x="25" y="75" width="150" height="90" rx="8"/><text class="ink" x="100" y="105" text-anchor="middle">RX/decode</text><text class="small" x="100" y="132" text-anchor="middle">DUT input</text>
       <rect class="green" x="215" y="55" width="170" height="130" rx="8"/><text class="ink" x="300" y="87" text-anchor="middle">Data Merge</text><text class="small" x="300" y="114" text-anchor="middle">2 streams</text><text class="small" x="300" y="136" text-anchor="middle">merge/mapping</text><text class="small" x="300" y="158" text-anchor="middle">monitor -> scb</text>
@@ -966,6 +999,7 @@ def build_svgs() -> None:
         "frame-sequence.svg": svg_document(980, 490, frame_sequence, "HV2M23 per-frame verification sequence"),
         "debug-flow.svg": svg_document(1050, 450, debug_flow, "HV2M23 checker failure triage flow"),
         "isptx-driver-flow.svg": svg_document(1200, 380, isptx_driver_flow, "ISPTX sequence to DUT driver flow"),
+        "isptx-sequence-detail.svg": svg_document(1400, 900, isptx_sequence_detail, "Detailed ISPTX sequence source flow"),
         "checker-position.svg": svg_document(1060, 450, checker_position, "Checker positions in the DUT data path"),
         "golden-flow.svg": svg_document(1060, 370, golden_flow, "C model golden generation and checker loading"),
         "special-modes.svg": svg_document(850, 420, special_modes, "DPLC and DRDOD special processing"),
@@ -1124,7 +1158,7 @@ def build_pages(
       {figure('verification-flow.svg', '激励与 golden 共用同一份 env_cfg：寄存器配置、图像模型和 packet 发送在每帧对齐。')}
       <h2>每帧执行顺序</h2>
       <ol class="steps"><li><strong>读取 case 资产。</strong> <code>user_def.sv</code> 决定静态宏，<code>cfg_frameN.txt</code> 由 env_cfg 的 <code>process_cfg()</code> 解析。</li><li><strong>生成寄存器 payload。</strong> <code>get_reg()</code> 将当前 frame 配置打包，<code>send_register()</code> 发送 setting line。</li><li><strong>运行 golden。</strong> sequence 调用 <code>pic_process</code>；DRDOD 调用 <code>drdod_process.py</code>；DPLC 调用当前环境内的 <code>dplc.pl</code>。</li><li><strong>发送 pixel stream。</strong> 从 <code>pattern/frame_N.ppm</code> 读取 P3 数据，按协议插入 blank、setting 与异常注入。</li><li><strong>采样与比较。</strong> monitor 输出 transaction/PPM，scoreboard 按 frame 和输出通道加载 golden。</li></ol>
-      {figure('isptx-driver-flow.svg', 'ISPTX sequence 到 DUT：sequence 负责协议和 transaction，driver 负责逐 bit 引脚时序。')}
+      {figure('isptx-sequence-detail.svg', 'ISPTX sequence 源码分解：body、FSM、逐帧组包、golden、transaction、driver 与 DUT pad 的完整关系。')}
       <h2>ISPTX Sequence 到 DUT 的具体链路</h2>
       <table><tr><th>阶段</th><th>实际动作</th><th>源码位置</th></tr>
       <tr><td>启动 sequence</td><td><code>base_vseq</code> 将 <code>isptx_sequence[_1..3]</code> 启动在对应 <code>p_isptx_sqrN</code>；<code>body()</code> 取得 rx_cfg、vif、SIM_TEST_PATH 和 FILE_PATH 后调用 <code>send_isp()</code>。</td><td><code>base_vseq.sv</code><br><code>isptx_sequence_1.sv:1104</code></td></tr>
