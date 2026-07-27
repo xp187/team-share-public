@@ -94,6 +94,9 @@ p { margin: 8px 0 14px; }
 .figure img { display: block; width: 100%; min-width: 720px; height: auto; }
 .caption { color: var(--muted); font-size: 12px; text-align: center; padding-top: 8px; }
 table { width: 100%; border-collapse: collapse; margin: 12px 0 22px; background: var(--surface); }
+.table-scroll { width: 100%; overflow-x: auto; }
+.table-scroll table { min-width: 900px; }
+details > summary { cursor: pointer; color: var(--blue); font-weight: 650; margin: 10px 0; }
 th, td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: 10px 12px; }
 th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
 code { font: 12px/1.5 Consolas, monospace; background: var(--blue-soft); color: var(--blue); padding: 2px 5px; border-radius: 3px; word-break: break-word; }
@@ -113,6 +116,8 @@ input, select { width: 100%; min-height: 38px; border: 1px solid var(--line); ba
 .case-title { display: flex; align-items: flex-start; gap: 8px; justify-content: space-between; }
 .case-title code { font-size: 12px; }
 .case-description { color: var(--muted); font-size: 13px; }
+.case-card h4 { margin: 13px 0 3px; font-size: 12px; color: var(--ink); }
+.case-checkpoint { margin: 3px 0 10px; padding: 9px 11px; border-left: 3px solid var(--green); background: var(--green-soft); font-size: 13px; white-space: pre-line; }
 .case-evidence { margin-top: 9px; font-size: 12px; }
 .case-evidence summary { cursor: pointer; color: var(--blue); }
 .empty { padding: 40px; text-align: center; color: var(--muted); border: 1px dashed var(--line); }

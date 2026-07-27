@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="assets/guide.css?v=20260727">
   </head>
   <body>
-    <header class="topbar"><div class="topbar-inner"><a class="brand" href="index.html"><span>HV2M23</span> DV Guide</a><nav class="nav"><a href="index.html" class="active">首页</a><a href="overview.html" class="">概览</a><a href="tb-arch.html" class="">TB 架构</a><a href="stimulus.html" class="">激励与 Golden</a><a href="checkers.html" class="">检查机制</a><a href="run.html" class="">运行与回归</a><a href="cases.html" class="">Case 源码索引</a><a href="faq.html" class="">FAQ</a></nav></div></header>
+    <header class="topbar"><div class="topbar-inner"><a class="brand" href="index.html"><span>HV2M23</span> DV Guide</a><nav class="nav"><a href="index.html" class="active">首页</a><a href="overview.html" class="">概览</a><a href="tb-arch.html" class="">TB 架构</a><a href="stimulus.html" class="">激励与 Golden</a><a href="checkers.html" class="">检查机制</a><a href="plan.html" class="">验证计划</a><a href="run.html" class="">运行与回归</a><a href="cases.html" class="">Case 计划索引</a><a href="portability.html" class="">复用与移植</a><a href="faq.html" class="">FAQ</a></nav></div></header>
     <main class="layout">
       <header class="page-head">
         <div class="eyebrow">HV2M23 / DV_TCON_C</div>
@@ -18,14 +18,14 @@
         <div class="source-stamp">Source baseline: E:\DV_TCON_C · audited 2026-07-27</div>
       </header>
 
-<div class="stats"><div class="stat"><strong>321</strong><span>testcase directories</span></div><div class="stat"><strong>92</strong><span>unique case_list entries</span></div><div class="stat"><strong>6</strong><span>entries with source directory</span></div><div class="stat"><strong>12</strong><span>source-derived categories</span></div></div>
-<div class="note"><strong>源码一致性：</strong><code>case_list.txt</code> 中有 86 个唯一名称在当前 <code>tests</code> 目录下没有同名目录；索引仅把能够与源码目录关联的 6 个 case 标记为 active。</div>
+<div class="stats"><div class="stat"><strong>275</strong><span>Excel named plan rows</span></div><div class="stat"><strong>260</strong><span>Excel PASS rows</span></div><div class="stat"><strong>255</strong><span>rows linked to source</span></div><div class="stat"><strong>20</strong><span>Excel-only rows</span></div></div>
+<div class="note"><strong>Case 事实源：</strong>具体 case 范围、验证目标、check 项、owner 和状态以 <code>3.HV2M23_EDA_case_list.xlsx</code> 为准；tests 源码只作为实现证据和补充，不再反向扩大计划范围。</div>
 <figure class="figure"><img src="assets/architecture.svg" alt="验证环境总览：1-4 路 ISPTX/I2C agent 驱动 DUT，多个 monitor/scoreboard 从不同层级闭环检查。"><figcaption class="caption">验证环境总览：1-4 路 ISPTX/I2C agent 驱动 DUT，多个 monitor/scoreboard 从不同层级闭环检查。</figcaption></figure>
 <h2>从哪里开始</h2>
 <div class="grid-3">
   <section class="panel"><h3>理解数据流</h3><p>先看概览、TB 架构与激励页，确认 testcase 配置如何变成寄存器包、pixel stream 和 golden 文件。</p><a href="overview.html">打开概览</a></section>
   <section class="panel"><h3>定位检查失败</h3><p>按 checker 层级判断错误发生在 data merge、digital split、chopper/analog 还是 DRDOD。</p><a href="checkers.html">打开检查机制</a></section>
-  <section class="panel"><h3>查具体 Case</h3><p>Case 索引直接扫描 tests 目录，显示真实宏、checker 开关、force 和源码证据。</p><a href="cases.html">打开 Case 索引</a></section>
+  <section class="panel"><h3>查具体 Case</h3><p>Case 索引以 Excel 计划为准，并叠加可关联的宏、checker 开关、force 和源码证据。</p><a href="cases.html">打开 Case 索引</a></section>
 </div>
 <div class="note"><strong>重要：</strong>用例名里的 CHSEL 是寄存器映射参数，不是编译宏 CHIP_SEL。必须以每个目录的 <code>user_def.sv</code> 为准。</div>
 
@@ -33,10 +33,10 @@
 <div class="grid-3">
   <section class="panel"><h3>环境搭建</h3><p>从 <code>chip_tb_top</code>、<code>base_test</code> 到多路 source env，解释组件是谁创建、interface 如何下发。</p></section>
   <section class="panel"><h3>激励闭环</h3><p>把宏、cfg frame、PPM、golden 命令、setting/pixel packet 和逐帧比较串成一条可追踪链路。</p></section>
-  <section class="panel"><h3>Case 审计</h3><p>321 个目录按源码自动归类，不使用旧 Excel 文案；支持搜索宏、force、checker 和源码路径。</p></section>
+  <section class="panel"><h3>Case 审计</h3><p>{len(cases)} 条 Excel 命名计划项保留描述、check 点、owner 和状态，同时显示源码关联差异。</p></section>
 </div>
 <h2>推荐阅读路径</h2>
-<ol class="steps"><li><strong>第一次接触环境：</strong>概览 -> TB 架构 -> 激励与 Golden。</li><li><strong>正在定位 fail：</strong>检查机制 -> 运行与回归 -> Case 源码索引。</li><li><strong>准备新增 case：</strong>先搜索相近 case，再核对 FAQ 的提交检查表。</li></ol>
+<ol class="steps"><li><strong>第一次接触环境：</strong>概览 -> TB 架构 -> 激励与 Golden。</li><li><strong>正在定位 fail：</strong>检查机制 -> 运行与回归 -> Case 计划索引。</li><li><strong>准备新增 case：</strong>先在 Excel 计划中建立目标和 check 点，再关联源码目录。</li><li><strong>准备下一项目：</strong>阅读复用与移植页，按平台层、适配层、内容层拆分。</li></ol>
 
       <footer class="footer">HV2M23 DV_TCON_C 验证环境使用指南 · 源码审计版 2026-07-27</footer>
     </main>

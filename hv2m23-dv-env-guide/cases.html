@@ -5,25 +5,25 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Testcase 源码索引 - HV2M23 DV Guide</title>
+    <title>Testcase 验证计划索引 - HV2M23 DV Guide</title>
     <link rel="stylesheet" href="assets/guide.css?v=20260727">
   </head>
   <body>
-    <header class="topbar"><div class="topbar-inner"><a class="brand" href="index.html"><span>HV2M23</span> DV Guide</a><nav class="nav"><a href="index.html" class="">首页</a><a href="overview.html" class="">概览</a><a href="tb-arch.html" class="">TB 架构</a><a href="stimulus.html" class="">激励与 Golden</a><a href="checkers.html" class="">检查机制</a><a href="run.html" class="">运行与回归</a><a href="cases.html" class="active">Case 源码索引</a><a href="faq.html" class="">FAQ</a></nav></div></header>
+    <header class="topbar"><div class="topbar-inner"><a class="brand" href="index.html"><span>HV2M23</span> DV Guide</a><nav class="nav"><a href="index.html" class="">首页</a><a href="overview.html" class="">概览</a><a href="tb-arch.html" class="">TB 架构</a><a href="stimulus.html" class="">激励与 Golden</a><a href="checkers.html" class="">检查机制</a><a href="plan.html" class="">验证计划</a><a href="run.html" class="">运行与回归</a><a href="cases.html" class="active">Case 计划索引</a><a href="portability.html" class="">复用与移植</a><a href="faq.html" class="">FAQ</a></nav></div></header>
     <main class="layout">
       <header class="page-head">
         <div class="eyebrow">HV2M23 / DV_TCON_C</div>
-        <h1>Testcase 源码索引</h1>
-        <p class="lead">直接扫描 tests 目录生成的可搜索索引；描述、宏、checker 与 force 均来自具体代码。</p>
+        <h1>Testcase 验证计划索引</h1>
+        <p class="lead">以 HV2M23 EDA Excel 为主清单，整合验证目标、check 点、状态与可关联的源码证据。</p>
         <div class="source-stamp">Source baseline: E:\DV_TCON_C · audited 2026-07-27</div>
       </header>
 
-<div class="stats"><div class="stat"><strong>321</strong><span>source directories</span></div><div class="stat"><strong>92</strong><span>unique case_list entries</span></div><div class="stat"><strong>6</strong><span>linked active entries</span></div><div class="stat"><strong id="case-count">0</strong><span>current results</span></div></div>
-<div class="note"><strong>清单差异：</strong>当前有 86 个 <code>case_list.txt</code> 名称找不到同名 testcase 目录，可能由外部生成流程创建或已过期；本页不为这些名称推测源码描述。</div>
-<div class="note"><strong>数据来源：</strong>本页由 <code>tools/build_guide.py</code> 扫描 tests 目录生成，不采用旧 Excel 描述。目录名参数与 user_def 宏分开显示。</div>
-<div class="case-controls"><input id="case-search" type="search" placeholder="搜索 case、宏、checker、force 或源码路径"><select id="case-category"><option value="">全部类别</option><option value="Analog control">Analog control</option><option value="DPLC">DPLC</option><option value="DRDOD">DRDOD</option><option value="Datapath">Datapath</option><option value="Directed waveform">Directed waveform</option><option value="Link / Align">Link / Align</option><option value="Power / Wake">Power / Wake</option><option value="Protocol abnormal">Protocol abnormal</option><option value="Register / I2C">Register / I2C</option><option value="Test IO">Test IO</option><option value="Unlock / UTC">Unlock / UTC</option><option value="Video matrix">Video matrix</option></select><select id="case-scope"><option value="all">全部目录</option><option value="active">仅 active regression</option></select></div>
+<div class="stats"><div class="stat"><strong>275</strong><span>Excel plan rows</span></div><div class="stat"><strong>260</strong><span>PASS rows</span></div><div class="stat"><strong>255</strong><span>source linked</span></div><div class="stat"><strong id="case-count">0</strong><span>current results</span></div></div>
+<div class="note"><strong>数据来源：</strong>Case 范围与描述以 Excel 的 <code>normal case</code>、<code>waveform case</code> sheet 为准。空白描述/check 项按同一连续 Feature 分组继承上一条有效内容；每张卡保留 sheet 和行号便于回查。</div>
+<div class="note"><strong>源码关联：</strong>共 255 条计划行能关联当前 tests 目录，20 条仅存在于 Excel 或名称尚未与目录一致。源码关联不会覆盖 Excel 描述，只增加宏、checker、force 和检查调用证据。</div>
+<div class="case-controls"><input id="case-search" type="search" placeholder="搜索 case、Feature、描述、check 点、owner、宏或源码"><select id="case-category"><option value="">全部 Feature</option><option value="IO">IO</option><option value="abnormal packet">abnormal packet</option><option value="clock">clock</option><option value="datapath">datapath</option><option value="internal">internal</option><option value="register">register</option><option value="reset">reset</option></select><select id="case-scope"><option value="all">全部计划项</option><option value="pass">仅 PASS</option><option value="linked">已关联源码</option><option value="missing">仅 Excel</option></select></div>
 <div class="case-results" id="case-results"></div>
-<h2>Case 家族分布</h2><table><tr><th>源码派生类别</th><th>目录数量</th></tr><tr><td>Video matrix</td><td>86</td></tr><tr><td>DRDOD</td><td>58</td></tr><tr><td>Analog control</td><td>38</td></tr><tr><td>Unlock / UTC</td><td>37</td></tr><tr><td>Datapath</td><td>31</td></tr><tr><td>DPLC</td><td>22</td></tr><tr><td>Directed waveform</td><td>12</td></tr><tr><td>Link / Align</td><td>9</td></tr><tr><td>Protocol abnormal</td><td>9</td></tr><tr><td>Power / Wake</td><td>9</td></tr><tr><td>Register / I2C</td><td>5</td></tr><tr><td>Test IO</td><td>5</td></tr></table>
+<h2>Case 家族分布</h2><table><tr><th>源码派生类别</th><th>目录数量</th></tr><tr><td>datapath</td><td>237</td></tr><tr><td>register</td><td>14</td></tr><tr><td>IO</td><td>11</td></tr><tr><td>abnormal packet</td><td>8</td></tr><tr><td>reset</td><td>2</td></tr><tr><td>clock</td><td>2</td></tr><tr><td>internal</td><td>1</td></tr></table>
 <h2>代表性 Case 阅读方法</h2>
 <div class="grid-2"><section class="panel"><h3>基础数据通路</h3><p>从 <code>t_8b1lane</code> 开始，核对 PAIR_NUM、PORT_NUM、尺寸宏和四类基础图像 checker，再与 2-lane/多 port 变体比较。</p></section><section class="panel"><h3>DRDOD</h3><p>查看 <code>t_8b2lane_DRD_PANEL3</code> 与 <code>t_drdod_en_toggle_2lane_HKC1_R</code>，重点跟踪 DRD 功能宏、panel 配置和 input/output checker。</p></section><section class="panel"><h3>协议异常</h3><p>查看 <code>t_pixel_with_training_pattern</code>、prefix/setting 异常类 case，结合 force、注入参数和关闭的 checker 理解定向判定。</p></section><section class="panel"><h3>寄存器 / I2C</h3><p>查看 <code>t_i2c_access_reg_unlock_reset</code>，从 I2C_SIM、check 调用和 force/release 证据理解非图像类验证。</p></section></div>
 <script src="assets/cases-data.js?v=20260727"></script><script src="assets/guide.js?v=20260727"></script>

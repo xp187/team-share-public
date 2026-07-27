@@ -20,7 +20,9 @@
       const haystack = JSON.stringify(item).toLowerCase();
       return (!query || haystack.includes(query))
         && (!category.value || item.category === category.value)
-        && (scope.value !== 'active' || item.active);
+        && (scope.value !== 'pass' || item.status.toUpperCase() === 'PASS')
+        && (scope.value !== 'linked' || item.linkedSource)
+        && (scope.value !== 'missing' || !item.linkedSource);
     });
     count.textContent = `${filtered.length} / ${window.HV2_CASES.length}`;
     if (!filtered.length) {
@@ -31,6 +33,7 @@
       const macroTags = Object.entries(item.macros)
         .map(([key, value]) => `${key}=${value}`);
       const evidence = [
+        `Excel: ${item.planId}`,
         `Source: ${item.source}`,
         `cfg_frame files: ${item.cfgCount}`,
         `pattern files: ${item.patternCount}`,
@@ -41,12 +44,17 @@
       return `<article class="case-card">
         <div class="case-title">
           <code>${escapeHtml(item.name)}</code>
-          <span class="tag ${item.active ? 'active' : ''}">${item.active ? 'active regression' : 'directory only'}</span>
+          <span class="tag ${item.status.toUpperCase() === 'PASS' ? 'active' : ''}">${escapeHtml(item.status || 'status not set')}</span>
         </div>
-        <div class="tags"><span class="tag warn">${escapeHtml(item.category)}</span>${tags(item.features)}${tags(macroTags)}</div>
-        <p class="case-description">${escapeHtml(item.description)}</p>
+        <div class="tags"><span class="tag warn">${escapeHtml(item.caseType)}</span><span class="tag">${escapeHtml(item.feature1 || item.category)}</span>${item.feature2 ? `<span class="tag">${escapeHtml(item.feature2)}</span>` : ''}<span class="tag ${item.linkedSource ? 'active' : 'warn'}">${item.linkedSource ? 'source linked' : 'Excel only'}</span></div>
+        <h4>验证目标</h4><p class="case-description">${escapeHtml(item.description)}</p>
+        <h4>检查点</h4><p class="case-checkpoint">${escapeHtml(item.checkpoint)}</p>
+        ${item.comment ? `<h4>说明</h4><p class="case-description">${escapeHtml(item.comment)}</p>` : ''}
+        <div class="tags">${item.owner ? `<span class="tag">Owner: ${escapeHtml(item.owner)}</span>` : ''}${item.date ? `<span class="tag">Date: ${escapeHtml(item.date)}</span>` : ''}${item.runSummary ? `<span class="tag">Run: ${escapeHtml(item.runSummary)}</span>` : ''}</div>
+        <div class="tags">${tags(item.features)}${tags(macroTags)}</div>
         <div class="tags">${tags(item.enabledChecks.map(v => `ON: ${v}`))}${tags(item.disabledChecks.map(v => `OFF: ${v}`))}</div>
-        <details class="case-evidence"><summary>查看源码证据</summary><pre><code>${escapeHtml(evidence.join('\n'))}</code></pre></details>
+        ${item.sourceDescription ? `<details class="case-evidence"><summary>查看源码补充描述</summary><p>${escapeHtml(item.sourceDescription)}</p></details>` : ''}
+        <details class="case-evidence"><summary>查看 Excel 与源码证据</summary><pre><code>${escapeHtml(evidence.join('\n'))}</code></pre></details>
       </article>`;
     }).join('');
   }

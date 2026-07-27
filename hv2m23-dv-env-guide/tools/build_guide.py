@@ -10,11 +10,16 @@ from collections import Counter
 from pathlib import Path
 from textwrap import dedent
 
+from openpyxl import load_workbook
+
 
 GUIDE_DIR = Path(__file__).resolve().parents[1]
 ASSET_DIR = GUIDE_DIR / "assets"
 TESTS_DIR = Path(r"E:\DV_TCON_C\top\tests")
 SOURCE_ROOT = Path(r"E:\DV_TCON_C")
+CASELIST_XLSX = Path(
+    r"C:\Users\xiapeng2\Desktop\HV2M23\04.Architecture\IP_digital\2.Verification"
+    r"\1.EDA\3.HV2M23_EDA_case_list.xlsx")
 BUILD_DATE = "2026-07-27"
 
 NAV_ITEMS = [
@@ -23,8 +28,10 @@ NAV_ITEMS = [
     ("tb-arch.html", "TB 架构"),
     ("stimulus.html", "激励与 Golden"),
     ("checkers.html", "检查机制"),
+    ("plan.html", "验证计划"),
     ("run.html", "运行与回归"),
-    ("cases.html", "Case 源码索引"),
+    ("cases.html", "Case 计划索引"),
+    ("portability.html", "复用与移植"),
     ("faq.html", "FAQ"),
 ]
 
@@ -154,7 +161,7 @@ def describe_case(
     return " ".join(parts)
 
 
-def scan_cases() -> list[dict[str, object]]:
+def scan_source_cases() -> list[dict[str, object]]:
     """Scan all testcase directories and return browser-ready metadata."""
     active_names = {
         line.strip()
@@ -236,6 +243,199 @@ def scan_cases() -> list[dict[str, object]]:
             "hasReadme": (case_dir / "README.md").exists(),
         })
     return cases
+
+
+def clean_cell(value: object) -> str:
+    """Normalize spreadsheet text without discarding line-level meaning."""
+    if value is None:
+        return ""
+    if hasattr(value, "strftime"):
+        return value.strftime("%Y-%m-%d")
+    if isinstance(value, float):
+        return f"{value:.6f}".rstrip("0").rstrip(".")
+    text = str(value).replace("\r\n", "\n").replace("\r", "\n")
+    lines = [" ".join(line.split()) for line in text.splitlines()]
+    return "\n".join(line for line in lines if line).strip()
+
+
+def normalize_case_name(raw_name: str) -> tuple[str, list[str]]:
+    """Extract the primary testcase name and aliases from an Excel cell."""
+    candidates = re.findall(r"t_[A-Za-z0-9_]+", raw_name)
+    if not candidates:
+        return raw_name.splitlines()[0].strip(), []
+    primary = candidates[0]
+    aliases = list(dict.fromkeys(candidates[1:]))
+    return primary, aliases
+
+
+def polished_excel_text(text: str, fallback: str) -> str:
+    """Turn spreadsheet notes into readable prose while preserving content."""
+    if not text:
+        return fallback
+    return text.replace("\n", "；")
+
+
+def load_excel_plan(
+        source_cases: list[dict[str, object]]) -> tuple[list[dict[str, object]], dict[str, object]]:
+    """Load canonical case-plan rows and supporting workbook sheets."""
+    if not CASELIST_XLSX.exists():
+        raise FileNotFoundError(f"Case list workbook not found: {CASELIST_XLSX}")
+    workbook = load_workbook(CASELIST_XLSX, data_only=True)
+    source_by_name = {str(item["name"]): item for item in source_cases}
+    plan: list[dict[str, object]] = []
+
+    for sheet_name, case_type in (("normal case", "Normal"),
+                                  ("waveform case", "Waveform")):
+        sheet = workbook[sheet_name]
+        inherited = {"feature1": "", "feature2": "", "description": "",
+                     "checkpoint": "", "comment": ""}
+        for row_number in range(2, sheet.max_row + 1):
+            raw_name = clean_cell(sheet.cell(row_number, 4).value)
+            if not raw_name:
+                continue
+            values = {
+                "feature1": clean_cell(sheet.cell(row_number, 1).value),
+                "feature2": clean_cell(sheet.cell(row_number, 2).value),
+                "description": clean_cell(sheet.cell(row_number, 5).value),
+                "checkpoint": clean_cell(sheet.cell(row_number, 6).value),
+                "comment": clean_cell(sheet.cell(row_number, 7).value),
+            }
+            if values["feature1"] or values["feature2"]:
+                for key in ("description", "checkpoint", "comment"):
+                    if not values[key]:
+                        inherited[key] = ""
+            for key, value in values.items():
+                if value:
+                    inherited[key] = value
+            name, aliases = normalize_case_name(raw_name)
+            source = source_by_name.get(name)
+            if source is None:
+                source = next((source_by_name.get(alias) for alias in aliases
+                               if alias in source_by_name), None)
+            category = inherited["feature1"] or inherited["feature2"] or case_type
+            description = polished_excel_text(
+                inherited["description"],
+                f"验证 {category} 分类下该 {case_type} testcase 的目标功能与边界条件。")
+            checkpoint = polished_excel_text(
+                inherited["checkpoint"],
+                "确认配置和激励进入目标 DUT 路径；检查关键状态、输出数据和恢复行为，并产生确定性的自动 PASS/FAIL 结果。")
+            item: dict[str, object] = {
+                "name": name,
+                "rawName": raw_name,
+                "aliases": aliases,
+                "planId": f"{sheet_name}:{row_number}",
+                "sheet": sheet_name,
+                "row": row_number,
+                "caseType": case_type,
+                "category": category,
+                "feature1": inherited["feature1"],
+                "feature2": inherited["feature2"],
+                "laneNote": clean_cell(sheet.cell(row_number, 3).value),
+                "description": description,
+                "checkpoint": checkpoint,
+                "comment": polished_excel_text(inherited["comment"], ""),
+                "runSummary": clean_cell(sheet.cell(row_number, 8).value),
+                "owner": clean_cell(sheet.cell(row_number, 9).value),
+                "revision": clean_cell(sheet.cell(row_number, 10).value),
+                "status": clean_cell(sheet.cell(row_number, 11).value),
+                "date": clean_cell(sheet.cell(row_number, 12).value),
+                "linkedSource": source is not None,
+            }
+            if source:
+                item.update({
+                    "active": source["active"],
+                    "source": source["source"],
+                    "sourceDescription": source["description"],
+                    "macros": source["macros"],
+                    "features": source["features"],
+                    "enabledChecks": source["enabledChecks"],
+                    "disabledChecks": source["disabledChecks"],
+                    "cfgCount": source["cfgCount"],
+                    "patternCount": source["patternCount"],
+                    "forces": source["forces"],
+                    "checkCalls": source["checkCalls"],
+                    "errorCalls": source["errorCalls"],
+                })
+            else:
+                item.update({
+                    "active": False, "source": "No matching testcase directory",
+                    "sourceDescription": "", "macros": {}, "features": [],
+                    "enabledChecks": [], "disabledChecks": [], "cfgCount": 0,
+                    "patternCount": 0, "forces": [], "checkCalls": 0,
+                    "errorCalls": 0,
+                })
+            plan.append(item)
+
+    registers = []
+    for row in workbook["register"].iter_rows(min_row=4, values_only=True):
+        if row[2] is None:
+            continue
+        registers.append({
+            "address": clean_cell(row[1]), "name": clean_cell(row[2]),
+            "type": clean_cell(row[3]), "default": clean_cell(row[4]),
+            "block": clean_cell(row[5]), "description": clean_cell(row[6]),
+            "values": clean_cell(row[7]), "access": clean_cell(row[8]),
+            "simCheck": clean_cell(row[9]),
+        })
+    changes = []
+    for row in workbook["ENV changelist"].iter_rows(min_row=2, values_only=True):
+        if not any(value is not None for value in row):
+            continue
+        changes.append({
+            "date": clean_cell(row[0]), "file": clean_cell(row[1]),
+            "action": clean_cell(row[2]), "owner": clean_cell(row[3]),
+            "status": clean_cell(row[4]), "note": clean_cell(row[5]),
+        })
+    formats = []
+    video_sheet = workbook["video format"]
+    for row_number in range(6, video_sheet.max_row + 1):
+        row = [video_sheet.cell(row_number, column).value for column in range(1, 16)]
+        if row[1] is None:
+            continue
+        formats.append({
+            "no": clean_cell(row[1]), "hPeriod": clean_cell(row[2]),
+            "vPeriod": clean_cell(row[3]), "hBlank": clean_cell(row[4]),
+            "vBlank": clean_cell(row[5]), "fps": clean_cell(row[6]),
+            "pixelClock": clean_cell(row[7]), "depth": clean_cell(row[8]),
+            "bandwidth": clean_cell(row[9]), "channel": clean_cell(row[10]),
+            "pcs": clean_cell(row[11]), "pair": clean_cell(row[12]),
+            "ispSpeed": clean_cell(row[13]), "mode": clean_cell(row[14]),
+        })
+    coverage_row = list(workbook["coverage"].iter_rows(min_row=2, max_row=2,
+                                                        values_only=True))[0]
+    history = []
+    for row in workbook["History"].iter_rows(min_row=3, values_only=True):
+        if not any(value is not None for value in row):
+            continue
+        history.append({
+            "date": clean_cell(row[1]), "comment": clean_cell(row[2]),
+            "owner": clean_cell(row[3]),
+        })
+    case_status = []
+    status_sheet = workbook["case status "]
+    for row in status_sheet.iter_rows(min_row=3, values_only=True):
+        if row[0] is None:
+            continue
+        case_status.append({
+            "type": clean_cell(row[0]), "pass": clean_cell(row[1]),
+            "error": clean_cell(row[2]), "ongoing": clean_cell(row[3]),
+            "unbuilt": clean_cell(row[4]), "total": clean_cell(row[5]),
+        })
+    metadata = {
+        "registers": registers,
+        "changes": changes,
+        "formats": formats,
+        "history": history,
+        "caseStatus": case_status,
+        "coverage": {
+            "score": clean_cell(coverage_row[0]), "line": clean_cell(coverage_row[1]),
+            "condition": clean_cell(coverage_row[2]), "toggle": clean_cell(coverage_row[3]),
+            "fsm": clean_cell(coverage_row[4]), "branch": clean_cell(coverage_row[5]),
+            "date": clean_cell(coverage_row[6]),
+        },
+        "workbook": str(CASELIST_XLSX),
+    }
+    return plan, metadata
 
 
 CSS = r"""
@@ -334,6 +534,9 @@ p { margin: 8px 0 14px; }
 .figure img { display: block; width: 100%; min-width: 720px; height: auto; }
 .caption { color: var(--muted); font-size: 12px; text-align: center; padding-top: 8px; }
 table { width: 100%; border-collapse: collapse; margin: 12px 0 22px; background: var(--surface); }
+.table-scroll { width: 100%; overflow-x: auto; }
+.table-scroll table { min-width: 900px; }
+details > summary { cursor: pointer; color: var(--blue); font-weight: 650; margin: 10px 0; }
 th, td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: 10px 12px; }
 th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
 code { font: 12px/1.5 Consolas, monospace; background: var(--blue-soft); color: var(--blue); padding: 2px 5px; border-radius: 3px; word-break: break-word; }
@@ -353,6 +556,8 @@ input, select { width: 100%; min-height: 38px; border: 1px solid var(--line); ba
 .case-title { display: flex; align-items: flex-start; gap: 8px; justify-content: space-between; }
 .case-title code { font-size: 12px; }
 .case-description { color: var(--muted); font-size: 13px; }
+.case-card h4 { margin: 13px 0 3px; font-size: 12px; color: var(--ink); }
+.case-checkpoint { margin: 3px 0 10px; padding: 9px 11px; border-left: 3px solid var(--green); background: var(--green-soft); font-size: 13px; white-space: pre-line; }
 .case-evidence { margin-top: 9px; font-size: 12px; }
 .case-evidence summary { cursor: pointer; color: var(--blue); }
 .empty { padding: 40px; text-align: center; color: var(--muted); border: 1px dashed var(--line); }
@@ -393,7 +598,9 @@ GUIDE_JS = r"""
       const haystack = JSON.stringify(item).toLowerCase();
       return (!query || haystack.includes(query))
         && (!category.value || item.category === category.value)
-        && (scope.value !== 'active' || item.active);
+        && (scope.value !== 'pass' || item.status.toUpperCase() === 'PASS')
+        && (scope.value !== 'linked' || item.linkedSource)
+        && (scope.value !== 'missing' || !item.linkedSource);
     });
     count.textContent = `${filtered.length} / ${window.HV2_CASES.length}`;
     if (!filtered.length) {
@@ -404,6 +611,7 @@ GUIDE_JS = r"""
       const macroTags = Object.entries(item.macros)
         .map(([key, value]) => `${key}=${value}`);
       const evidence = [
+        `Excel: ${item.planId}`,
         `Source: ${item.source}`,
         `cfg_frame files: ${item.cfgCount}`,
         `pattern files: ${item.patternCount}`,
@@ -414,12 +622,17 @@ GUIDE_JS = r"""
       return `<article class="case-card">
         <div class="case-title">
           <code>${escapeHtml(item.name)}</code>
-          <span class="tag ${item.active ? 'active' : ''}">${item.active ? 'active regression' : 'directory only'}</span>
+          <span class="tag ${item.status.toUpperCase() === 'PASS' ? 'active' : ''}">${escapeHtml(item.status || 'status not set')}</span>
         </div>
-        <div class="tags"><span class="tag warn">${escapeHtml(item.category)}</span>${tags(item.features)}${tags(macroTags)}</div>
-        <p class="case-description">${escapeHtml(item.description)}</p>
+        <div class="tags"><span class="tag warn">${escapeHtml(item.caseType)}</span><span class="tag">${escapeHtml(item.feature1 || item.category)}</span>${item.feature2 ? `<span class="tag">${escapeHtml(item.feature2)}</span>` : ''}<span class="tag ${item.linkedSource ? 'active' : 'warn'}">${item.linkedSource ? 'source linked' : 'Excel only'}</span></div>
+        <h4>验证目标</h4><p class="case-description">${escapeHtml(item.description)}</p>
+        <h4>检查点</h4><p class="case-checkpoint">${escapeHtml(item.checkpoint)}</p>
+        ${item.comment ? `<h4>说明</h4><p class="case-description">${escapeHtml(item.comment)}</p>` : ''}
+        <div class="tags">${item.owner ? `<span class="tag">Owner: ${escapeHtml(item.owner)}</span>` : ''}${item.date ? `<span class="tag">Date: ${escapeHtml(item.date)}</span>` : ''}${item.runSummary ? `<span class="tag">Run: ${escapeHtml(item.runSummary)}</span>` : ''}</div>
+        <div class="tags">${tags(item.features)}${tags(macroTags)}</div>
         <div class="tags">${tags(item.enabledChecks.map(v => `ON: ${v}`))}${tags(item.disabledChecks.map(v => `OFF: ${v}`))}</div>
-        <details class="case-evidence"><summary>查看源码证据</summary><pre><code>${escapeHtml(evidence.join('\n'))}</code></pre></details>
+        ${item.sourceDescription ? `<details class="case-evidence"><summary>查看源码补充描述</summary><p>${escapeHtml(item.sourceDescription)}</p></details>` : ''}
+        <details class="case-evidence"><summary>查看 Excel 与源码证据</summary><pre><code>${escapeHtml(evidence.join('\n'))}</code></pre></details>
       </article>`;
     }).join('');
   }
@@ -651,25 +864,26 @@ def figure(filename: str, caption: str) -> str:
     return f'<figure class="figure"><img src="assets/{filename}" alt="{esc(caption)}"><figcaption class="caption">{caption}</figcaption></figure>'
 
 
-def build_pages(cases: list[dict[str, object]]) -> dict[str, str]:
+def build_pages(
+        cases: list[dict[str, object]], metadata: dict[str, object]) -> dict[str, str]:
     """Build all guide pages from audited source facts."""
-    case_list_names = {
-        line.strip()
-        for line in read_text(TESTS_DIR / "case_list.txt").splitlines()
-        if line.strip() and not line.lstrip().startswith("#")
-    }
-    active_count = sum(1 for item in cases if item["active"])
-    missing_active_count = len(case_list_names) - active_count
+    def cell_html(value: object) -> str:
+        return esc(value).replace("\n", "<br>")
+
+    passed_count = sum(
+        1 for item in cases if str(item["status"]).upper() == "PASS")
+    linked_count = sum(1 for item in cases if item["linkedSource"])
+    excel_only_count = len(cases) - linked_count
     category_count = len({str(item["category"]) for item in cases})
     index_body = f"""
-      <div class="stats"><div class="stat"><strong>{len(cases)}</strong><span>testcase directories</span></div><div class="stat"><strong>{len(case_list_names)}</strong><span>unique case_list entries</span></div><div class="stat"><strong>{active_count}</strong><span>entries with source directory</span></div><div class="stat"><strong>{category_count}</strong><span>source-derived categories</span></div></div>
-      <div class="note"><strong>源码一致性：</strong><code>case_list.txt</code> 中有 {missing_active_count} 个唯一名称在当前 <code>tests</code> 目录下没有同名目录；索引仅把能够与源码目录关联的 {active_count} 个 case 标记为 active。</div>
+      <div class="stats"><div class="stat"><strong>{len(cases)}</strong><span>Excel named plan rows</span></div><div class="stat"><strong>{passed_count}</strong><span>Excel PASS rows</span></div><div class="stat"><strong>{linked_count}</strong><span>rows linked to source</span></div><div class="stat"><strong>{excel_only_count}</strong><span>Excel-only rows</span></div></div>
+      <div class="note"><strong>Case 事实源：</strong>具体 case 范围、验证目标、check 项、owner 和状态以 <code>3.HV2M23_EDA_case_list.xlsx</code> 为准；tests 源码只作为实现证据和补充，不再反向扩大计划范围。</div>
       {figure('architecture.svg', '验证环境总览：1-4 路 ISPTX/I2C agent 驱动 DUT，多个 monitor/scoreboard 从不同层级闭环检查。')}
       <h2>从哪里开始</h2>
       <div class="grid-3">
         <section class="panel"><h3>理解数据流</h3><p>先看概览、TB 架构与激励页，确认 testcase 配置如何变成寄存器包、pixel stream 和 golden 文件。</p><a href="overview.html">打开概览</a></section>
         <section class="panel"><h3>定位检查失败</h3><p>按 checker 层级判断错误发生在 data merge、digital split、chopper/analog 还是 DRDOD。</p><a href="checkers.html">打开检查机制</a></section>
-        <section class="panel"><h3>查具体 Case</h3><p>Case 索引直接扫描 tests 目录，显示真实宏、checker 开关、force 和源码证据。</p><a href="cases.html">打开 Case 索引</a></section>
+        <section class="panel"><h3>查具体 Case</h3><p>Case 索引以 Excel 计划为准，并叠加可关联的宏、checker 开关、force 和源码证据。</p><a href="cases.html">打开 Case 索引</a></section>
       </div>
       <div class="note"><strong>重要：</strong>用例名里的 CHSEL 是寄存器映射参数，不是编译宏 CHIP_SEL。必须以每个目录的 <code>user_def.sv</code> 为准。</div>
     """
@@ -679,10 +893,10 @@ def build_pages(cases: list[dict[str, object]]) -> dict[str, str]:
       <div class="grid-3">
         <section class="panel"><h3>环境搭建</h3><p>从 <code>chip_tb_top</code>、<code>base_test</code> 到多路 source env，解释组件是谁创建、interface 如何下发。</p></section>
         <section class="panel"><h3>激励闭环</h3><p>把宏、cfg frame、PPM、golden 命令、setting/pixel packet 和逐帧比较串成一条可追踪链路。</p></section>
-        <section class="panel"><h3>Case 审计</h3><p>321 个目录按源码自动归类，不使用旧 Excel 文案；支持搜索宏、force、checker 和源码路径。</p></section>
+        <section class="panel"><h3>Case 审计</h3><p>{len(cases)} 条 Excel 命名计划项保留描述、check 点、owner 和状态，同时显示源码关联差异。</p></section>
       </div>
       <h2>推荐阅读路径</h2>
-      <ol class="steps"><li><strong>第一次接触环境：</strong>概览 -> TB 架构 -> 激励与 Golden。</li><li><strong>正在定位 fail：</strong>检查机制 -> 运行与回归 -> Case 源码索引。</li><li><strong>准备新增 case：</strong>先搜索相近 case，再核对 FAQ 的提交检查表。</li></ol>
+      <ol class="steps"><li><strong>第一次接触环境：</strong>概览 -> TB 架构 -> 激励与 Golden。</li><li><strong>正在定位 fail：</strong>检查机制 -> 运行与回归 -> Case 计划索引。</li><li><strong>准备新增 case：</strong>先在 Excel 计划中建立目标和 check 点，再关联源码目录。</li><li><strong>准备下一项目：</strong>阅读复用与移植页，按平台层、适配层、内容层拆分。</li></ol>
     """
 
     overview_body = f"""
@@ -811,10 +1025,10 @@ python regression_cov.py</code></pre>
         for name, count in category_counts.most_common()
     )
     cases_body = f"""
-      <div class="stats"><div class="stat"><strong>{len(cases)}</strong><span>source directories</span></div><div class="stat"><strong>{len(case_list_names)}</strong><span>unique case_list entries</span></div><div class="stat"><strong>{active_count}</strong><span>linked active entries</span></div><div class="stat"><strong id="case-count">0</strong><span>current results</span></div></div>
-      <div class="note"><strong>清单差异：</strong>当前有 {missing_active_count} 个 <code>case_list.txt</code> 名称找不到同名 testcase 目录，可能由外部生成流程创建或已过期；本页不为这些名称推测源码描述。</div>
-      <div class="note"><strong>数据来源：</strong>本页由 <code>tools/build_guide.py</code> 扫描 tests 目录生成，不采用旧 Excel 描述。目录名参数与 user_def 宏分开显示。</div>
-      <div class="case-controls"><input id="case-search" type="search" placeholder="搜索 case、宏、checker、force 或源码路径"><select id="case-category"><option value="">全部类别</option>{option_html}</select><select id="case-scope"><option value="all">全部目录</option><option value="active">仅 active regression</option></select></div>
+      <div class="stats"><div class="stat"><strong>{len(cases)}</strong><span>Excel plan rows</span></div><div class="stat"><strong>{passed_count}</strong><span>PASS rows</span></div><div class="stat"><strong>{linked_count}</strong><span>source linked</span></div><div class="stat"><strong id="case-count">0</strong><span>current results</span></div></div>
+      <div class="note"><strong>数据来源：</strong>Case 范围与描述以 Excel 的 <code>normal case</code>、<code>waveform case</code> sheet 为准。空白描述/check 项按同一连续 Feature 分组继承上一条有效内容；每张卡保留 sheet 和行号便于回查。</div>
+      <div class="note"><strong>源码关联：</strong>共 {linked_count} 条计划行能关联当前 tests 目录，{excel_only_count} 条仅存在于 Excel 或名称尚未与目录一致。源码关联不会覆盖 Excel 描述，只增加宏、checker、force 和检查调用证据。</div>
+      <div class="case-controls"><input id="case-search" type="search" placeholder="搜索 case、Feature、描述、check 点、owner、宏或源码"><select id="case-category"><option value="">全部 Feature</option>{option_html}</select><select id="case-scope"><option value="all">全部计划项</option><option value="pass">仅 PASS</option><option value="linked">已关联源码</option><option value="missing">仅 Excel</option></select></div>
       <div class="case-results" id="case-results"></div>
       <h2>Case 家族分布</h2><table><tr><th>源码派生类别</th><th>目录数量</th></tr>{category_rows}</table>
       <h2>代表性 Case 阅读方法</h2>
@@ -822,11 +1036,63 @@ python regression_cov.py</code></pre>
       <script src="assets/cases-data.js?v=20260727"></script><script src="assets/guide.js?v=20260727"></script>
     """
 
+    register_rows = "".join(
+        "<tr>" + "".join(
+            f"<td>{cell_html(item[key])}</td>"
+            for key in ("address", "name", "type", "default", "access",
+                        "description", "values", "simCheck")) + "</tr>"
+        for item in metadata["registers"])
+    change_rows = "".join(
+        f"<tr><td>{cell_html(item['date'])}</td><td>{cell_html(item['file'])}</td>"
+        f"<td>{cell_html(item['action'])}</td><td>{cell_html(item['owner'])}</td>"
+        f"<td>{cell_html(item['status'])}</td><td>{cell_html(item['note'])}</td></tr>"
+        for item in metadata["changes"])
+    format_rows = "".join(
+        f"<tr><td>{cell_html(item['no'])}</td><td>{cell_html(item['hPeriod'])}x{cell_html(item['vPeriod'])}</td>"
+        f"<td>{cell_html(item['hBlank'])}/{cell_html(item['vBlank'])}</td><td>{cell_html(item['fps'])}</td>"
+        f"<td>{cell_html(item['depth'])}</td><td>{cell_html(item['channel'])}</td><td>{cell_html(item['pcs'])}</td>"
+        f"<td>{cell_html(item['pair'])}</td><td>{cell_html(item['ispSpeed'])}</td><td>{cell_html(item['mode'])}</td></tr>"
+        for item in metadata["formats"])
+    status_rows = "".join(
+        f"<tr><td>{cell_html(item['type'])}</td><td>{cell_html(item['pass'])}</td>"
+        f"<td>{cell_html(item['error'])}</td><td>{cell_html(item['ongoing'])}</td>"
+        f"<td>{cell_html(item['unbuilt'])}</td><td>{cell_html(item['total'])}</td></tr>"
+        for item in metadata["caseStatus"])
+    history_rows = "".join(
+        f"<tr><td>{cell_html(item['date'])}</td><td>{cell_html(item['comment'])}</td>"
+        f"<td>{cell_html(item['owner'])}</td></tr>"
+        for item in metadata["history"])
+    coverage = metadata["coverage"]
+    plan_body = f"""
+      <div class="note"><strong>唯一主清单：</strong><code>{cell_html(metadata['workbook'])}</code>。本页保留 workbook 中除 case 明细外的 register、ENV changelist、coverage 和 video format 信息；case 明细见 <a href="cases.html">Case 计划索引</a>。</div>
+      <h2>计划状态</h2><div class="stats"><div class="stat"><strong>{len(cases)}</strong><span>named rows</span></div><div class="stat"><strong>{passed_count}</strong><span>PASS</span></div><div class="stat"><strong>{len(metadata['registers'])}</strong><span>register fields</span></div><div class="stat"><strong>{len(metadata['formats'])}</strong><span>video formats</span></div></div>
+      <p>下表直接保留 workbook 的 <code>case status</code> 统计口径。命名计划行还包含未计入该状态表的标题或扩展条目，因此网页索引总数与状态表 Total 不要求相等。</p><table><tr><th>Case type</th><th>Pass</th><th>Error</th><th>On going</th><th>Unbuild</th><th>Total</th></tr>{status_rows}</table>
+      <h2>Workbook 维护历史</h2><table><tr><th>Date</th><th>Comment</th><th>Owner</th></tr>{history_rows}</table>
+      <h2>Coverage 快照</h2><table><tr><th>Score</th><th>Line</th><th>Condition</th><th>Toggle</th><th>FSM</th><th>Branch</th><th>Date</th></tr><tr><td>{cell_html(coverage['score'])}</td><td>{cell_html(coverage['line'])}</td><td>{cell_html(coverage['condition'])}</td><td>{cell_html(coverage['toggle'])}</td><td>{cell_html(coverage['fsm'])}</td><td>{cell_html(coverage['branch'])}</td><td>{cell_html(coverage['date'])}</td></tr></table>
+      <h2>Video Format 矩阵</h2><p>用于核对分辨率、blank、帧率、色深、driver channel、PCS、pair 和单 pair 速率。Case 名中的简化参数不能替代本表的系统带宽条件。</p><div class="table-scroll"><table><tr><th>No</th><th>Active</th><th>H/V blank</th><th>FPS</th><th>Depth</th><th>Channel</th><th>PCS</th><th>Pair/Driver</th><th>iSP Speed/Pair</th><th>Mode</th></tr>{format_rows}</table></div>
+      <h2>寄存器验证映射</h2><p>Excel register sheet 中的地址、字段、默认值、访问属性和 Sim_Check 全量整理如下。<code>NO CASE</code> 不等于不需要验证，应在通用读写、reset/default 或 coverage 中说明覆盖来源。</p><details><summary>展开 {len(metadata['registers'])} 个寄存器字段</summary><div class="table-scroll"><table><tr><th>Address</th><th>Name</th><th>Type</th><th>Default</th><th>Access</th><th>Description</th><th>Values</th><th>Sim Check</th></tr>{register_rows}</table></div></details>
+      <h2>环境变更记录</h2><p>这些记录反映环境已解决过的适配点，也是移植下一项目时优先审计的风险列表。</p><details open><summary>展开 {len(metadata['changes'])} 条环境变更</summary><div class="table-scroll"><table><tr><th>Date</th><th>File</th><th>Action</th><th>Owner</th><th>Status</th><th>Note</th></tr>{change_rows}</table></div></details>
+    """
+
+    portability_body = """
+      <h2>复用目标</h2><p>下一项目不应复制整个目录后逐个修编译错误，而应把环境拆成稳定平台层、芯片适配层和项目验证内容层。平台层保持协议与 UVM 机制稳定，所有 RTL 层次、寄存器表、分辨率和模型差异集中到适配层。</p>
+      <div class="grid-3"><section class="panel"><h3>平台层</h3><p>ISPTX/I2C agent、transaction、sequencer、通用 packet 发送、analysis port、回归框架和报告格式。</p></section><section class="panel"><h3>项目适配层</h3><p>TB top、interface bind、DUT hierarchy tap、env_cfg、寄存器打包、golden 命令和 checker 数据映射。</p></section><section class="panel"><h3>验证内容层</h3><p>Excel 计划、testcase、cfg frame、pattern、功能 checkpoint、waiver 和 coverage closure。</p></section></div>
+      <h2>当前环境中的耦合点</h2><table><tr><th>耦合点</th><th>当前位置</th><th>移植策略</th></tr><tr><td>DUT 层次与 checker tap</td><td><code>chip_tb_top.sv</code>、interface/connect、定向 force</td><td>集中到 bind/interface adapter，禁止通用 monitor 散落新项目层次路径。</td></tr><tr><td>连接数量</td><td><code>CONNECT_NUM</code> 分支分散在 TB、base_test、base_vseq</td><td>改为数组/循环或统一 connection descriptor；修正 2/3 路额外 sequence 风险。</td></tr><tr><td>寄存器配置</td><td><code>env_cfg.sv</code>、<code>process_cfg()</code>、<code>get_reg()</code></td><td>从机器可读 register spec 生成字段模型与 packer，保留项目覆盖层。</td></tr><tr><td>图像与 golden</td><td><code>isptx_sequence*.sv</code> 内拼接命令</td><td>抽象 model adapter API，参数对象化；路径和输出命名由项目配置提供。</td></tr><tr><td>Checker 文件路径</td><td>scoreboard 内部 <code>outResult</code> 和 PPM 命名</td><td>统一 artifact locator，输入 frame/id/path，避免 scoreboard 自行拼字符串。</td></tr><tr><td>Case 计划</td><td>Excel 与 tests 目录</td><td>Excel 保持需求主清单；生成稳定 case ID，与源码和 coverage 双向关联。</td></tr></table>
+      <h2>移植到下一项目的八个阶段</h2><ol class="steps"><li><strong>冻结基线。</strong>记录当前回归 PASS 数、coverage、模型版本、寄存器版本和已知问题。</li><li><strong>建立适配清单。</strong>列出接口、时钟复位、连接数、lane/pair/port、寄存器、模型和 DUT tap 差异。</li><li><strong>先移植 TB 静态层。</strong>完成 DUT 实例、clock/reset、ISPTX/I2C interface 和 checker tap，执行 interface smoke。</li><li><strong>移植配置层。</strong>生成新 env_cfg/register packer，完成 default、RW、unlock/reset 和多帧配置测试。</li><li><strong>打通单连接主链路。</strong>只启用 Data Merge，验证 setting、pixel、golden、actual 和 UVM error 闭环。</li><li><strong>逐层打开 checker。</strong>Digital Top -> Chopper -> Analog -> DRD input/output，每层先做正向 PASS 和故意 mismatch。</li><li><strong>扩展多连接和格式矩阵。</strong>验证 connection id、文件隔离、并行 sequence 和带宽边界，不假设旧 CONNECT_NUM 分支正确。</li><li><strong>迁移验证计划。</strong>逐行映射 Excel Feature/checkpoint 到新项目 case ID，标记复用、修改、新增或不适用，并重新关闭 coverage。</li></ol>
+      <h2>移植验收门槛</h2><table><tr><th>阶段</th><th>必须通过</th><th>禁止项</th></tr><tr><td>Compile/Elaboration</td><td>无层次路径、interface、宏和 config_db fatal</td><td>不得用 force 绕过结构连接问题</td></tr><tr><td>Agent smoke</td><td>ISPTX/I2C transaction 数和时序符合预期</td><td>不得关闭 monitor 掩盖流量缺失</td></tr><tr><td>Golden closure</td><td>模型命令可复现，产物按 frame/id 隔离</td><td>不得读取旧项目残留文件</td></tr><tr><td>Checker closure</td><td>每条 analysis path 有正向与负向实验</td><td>只 PASS、不能故意 fail 不算完成</td></tr><tr><td>Regression</td><td>Excel 计划行有明确映射和自动结果</td><td>Excel-only、source-only 和 waiver 必须有 owner</td></tr><tr><td>Coverage</td><td>达到新项目目标并解释差异</td><td>不能直接继承旧项目 coverage 数字</td></tr></table>
+      <h2>建议的目录边界</h2><pre><code>dv_platform/        # reusable agents, transactions, base sequences
+project_adapter/    # DUT interfaces, register/model/checker adapters
+project_tests/      # plan IDs, tests, cfg frames, patterns
+project_config/     # paths, connection descriptors, format matrix
+artifacts/          # run-id/frame-id scoped golden and actual outputs</code></pre>
+      <div class="note"><strong>完成定义：</strong>移植完成不是“smoke case 能跑”，而是 Excel 计划可追溯、每条 checker 能主动抓错、多连接和关键 video format 通过、coverage 重新关闭，并且没有依赖旧项目绝对路径或残留产物。</div>
+    """
+
     faq_body = """
       <h2>为什么 case 名写 CHSEL1，但 CHIP_SEL 是 0？</h2><p>CHSEL 是数据映射寄存器参数；CHIP_SEL 是选择芯片寄存器映射版本的编译宏。两者独立，必须分别查看目录名/cfg_frame 与 user_def.sv。</p>
       <h2>为什么有些 case 没有图像 checker？</h2><p>定向 reset、WAKE、I2C 或异常协议 case 可能主动关闭图像 checker，转而在 testcase 中调用 check_i2c、check_cfg_signal 或直接检查层次信号。Case 索引会显示开关和源码调用计数。</p>
       <h2>为什么 cfg_frame 数量少于 FRAME_NUM？</h2><p>部分基础 case 只有 cfg_frame0；env_cfg/sequence 可能复用配置。新增 case 时不要假定复用，应先核对 process_cfg() 和实际仿真日志。</p>
-      <h2>如何判断文档是否过期？</h2><p>页面头部显示源码审计日期；运行 <code>python tools/build_guide.py</code> 可重新扫描 tests 并刷新 case 数据。架构事实仍需在 env/checker 改动后人工复核正文。</p>
+      <h2>如何判断文档是否过期？</h2><p>页面头部显示审计日期；运行 <code>python tools/build_guide.py</code> 会重新读取 Excel 主清单并扫描 tests 源码。Excel 更新决定 case 范围和计划内容，env/checker 源码更新决定实现证据，两边都需要复核。</p>
       <h2>新人最短路径</h2><ol class="steps"><li>复制最接近的 testcase，而不是从空目录开始。</li><li>先让单 case deterministic PASS。</li><li>确认目标 checker 打开且能故意制造一次 fail。</li><li>再加入 case_list.txt 跑回归。</li></ol>
       <h2>CONNECT_NUM、PAIR_NUM 和 PORT_NUM 怎么区分？</h2><p><code>CONNECT_NUM</code> 决定创建多少套 source env、绑定多少组 interface，并选择多少路 sequence；<code>PAIR_NUM</code> 和 <code>PORT_NUM</code> 参与频率计算、图像宽度、子像素及 packet 数据组织。三个宏可能取相近数值，但职责不同，不能互相替代。</p>
       <h2>为什么要故意制造一次 fail？</h2><p>一个始终 PASS 的 case 不能证明 checker 真正连接且覆盖了目标路径。最小负向实验可以确认 monitor 有采样、scoreboard 加载了正确 golden，并且 mismatch 能传播成 UVM error。</p>
@@ -839,8 +1105,10 @@ python regression_cov.py</code></pre>
         "tb-arch.html": page("tb-arch.html", "Testbench 架构", "依据 base_test、source_driver_env、base_vseq 和 checker_agent 的实际构建与连接关系。", arch_body),
         "stimulus.html": page("stimulus.html", "激励、配置与 Golden", "从 testcase 资产到寄存器包、pixel stream 和三类模型输出的逐帧执行路径。", stimulus_body),
         "checkers.html": page("checkers.html", "Checker 与失败定位", "按 Data Merge、Digital Top、Chopper/Analog 和 DRDOD 独立路径说明实际 monitor/scoreboard。", checkers_body),
+        "plan.html": page("plan.html", "Excel 验证计划总览", "整理主清单中的计划状态、寄存器验证映射、环境变更、coverage 和 video format。", plan_body),
         "run.html": page("run.html", "运行、回归与 Case 生命周期", "使用仓库中的 run_tc.sh、regression.py 和 case_list.txt，建立可复现的运行闭环。", run_body),
-        "cases.html": page("cases.html", "Testcase 源码索引", "直接扫描 tests 目录生成的可搜索索引；描述、宏、checker 与 force 均来自具体代码。", cases_body),
+        "cases.html": page("cases.html", "Testcase 验证计划索引", "以 HV2M23 EDA Excel 为主清单，整合验证目标、check 点、状态与可关联的源码证据。", cases_body),
+        "portability.html": page("portability.html", "环境复用与下一项目移植", "把稳定平台机制与芯片适配内容分层，给出可执行的移植阶段、风险点和验收门槛。", portability_body),
         "faq.html": page("faq.html", "FAQ 与新人检查表", "集中解释 CHSEL/CHIP_SEL、checker 开关、配置帧复用和文档刷新方式。", faq_body),
     }
 
@@ -850,7 +1118,8 @@ def main() -> None:
     if not TESTS_DIR.exists():
         raise FileNotFoundError(f"Test directory not found: {TESTS_DIR}")
     ASSET_DIR.mkdir(parents=True, exist_ok=True)
-    cases = scan_cases()
+    source_cases = scan_source_cases()
+    cases, metadata = load_excel_plan(source_cases)
     category_counts = Counter(str(item["category"]) for item in cases)
     (ASSET_DIR / "guide.css").write_text(
         "/* Auto-generated by tools/build_guide.py */\n" + CSS.strip() + "\n",
@@ -863,7 +1132,7 @@ def main() -> None:
         f"// Auto-generated by tools/build_guide.py\nwindow.HV2_CASES={data};\n",
         encoding="utf-8")
     build_svgs()
-    for filename, content in build_pages(cases).items():
+    for filename, content in build_pages(cases, metadata).items():
         (GUIDE_DIR / filename).write_text(content, encoding="utf-8")
     print(
         f"Generated {len(cases)} testcase records across "
