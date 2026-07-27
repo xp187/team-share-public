@@ -14,13 +14,15 @@
             <header class="page-head">
               <div class="eyebrow">HV2M23 / DV_TCON_C</div>
               <h1>脚本使用指南</h1>
-              <p class="lead">按用途整理仿真、回归、结果检查、coverage、checker 生成和网页维护脚本的输入、命令、产物与风险。</p>
+              <p class="lead">完整整理 Python、Shell 和 Perl 脚本，说明仿真、模型、回归、生成维护和专项工具的输入、命令、产物与风险。</p>
               <div class="source-stamp">Source baseline: E:\DV_TCON_C · audited 2026-07-27</div>
             </header>
             <div class="content-grid">
-              <aside class="section-nav"><strong>本页目录</strong><a href="#section-1">脚本总览</a><a href="#section-2">run_tc.sh：单 Case、波形与 Coverage</a><a href="#section-3">Regression：维护和启动</a><a href="#section-4">user_def_addon.pl：合并宏定义</a><a href="#section-5">produce_checker1.py：生成 Checker 骨架</a><a href="#section-6">网页指南生成器</a></aside>
+              <aside class="section-nav"><strong>本页目录</strong><a href="#section-1">脚本总览</a><a href="#section-2">Shell 脚本（.sh）</a><a href="#section-3">Perl 脚本（.pl）</a><a href="#section-4">Python 脚本（.py）完整分类</a><a href="#section-5">run_tc.sh：单 Case、波形与 Coverage</a><a href="#section-6">Regression：维护和启动</a><a href="#section-7">user_def_addon.pl：合并宏定义</a><a href="#section-8">produce_checker1.py：生成 Checker 骨架</a><a href="#section-9">网页指南生成器</a></aside>
               <div class="page-content">
       <div class="note"><strong>环境前提：</strong>以下仿真脚本面向 Linux/LSF 服务器，依赖 <code>DV_PATH</code>、<code>DV_TOP_PATH</code>、<code>DV_SCRIPT_PATH</code>、<code>SIM_PATH</code>、VCS/Verdi/URG 和 <code>bsub</code>。命令应在项目环境初始化完成后执行；Windows 本机仅适合运行网页生成器。</div>
+      <div class="stats"><div class="stat"><strong>48</strong><span>active script files</span></div><div class="stat"><strong>26</strong><span>Python (.py)</span></div><div class="stat"><strong>18</strong><span>Shell (.sh)</span></div><div class="stat"><strong>4</strong><span>Perl (.pl)</span></div></div>
+      <p>统计范围为整个 <code>E:/DV_TCON_C</code>。源码树实际找到 81 个 <code>.py/.sh/.pl</code> 文件；上面的 48 个有效副本排除了 <code>top/tests/tests</code> 下的历史镜像和 <code>cmodel_bk</code> 备份。镜像脚本应只用于追溯，日常修改以非备份路径为准。</p>
       <h2 id="section-1">脚本总览</h2>
       <div class="table-scroll"><table class="script-table"><tr><th>脚本</th><th>主要用途</th><th>建议运行目录</th><th>关键输入/产物</th></tr>
       <tr><td><code>script/run_tc.sh</code></td><td>单 case 编译、仿真、波形和 coverage 的统一入口。</td><td><code>$DV_TCON_C/script</code></td><td>位置参数；输出到 <code>$SIM_PATH/&lt;level&gt;_TCON_C/&lt;case&gt;</code></td></tr>
@@ -33,7 +35,37 @@
       <tr><td><code>script/produce_checker1.py</code></td><td>从 CSV 生成 checker bind、interface、transaction 和 monitor 骨架。</td><td>目标 checker 目录</td><td><code>cfg.csv</code>；生成多个 <code>.sv/.svh</code></td></tr>
       <tr><td><code>tools/build_guide.py</code></td><td>读取 Excel 与源码，重建本指南和 SVG。</td><td>指南仓库根目录</td><td>275 条 case、HTML、CSS/JS 和 SVG</td></tr></table></div>
 
-      <h2 id="section-2">run_tc.sh：单 Case、波形与 Coverage</h2>
+      <h2 id="section-2">Shell 脚本（.sh）</h2>
+      <div class="table-scroll"><table class="script-table"><tr><th>脚本/脚本组</th><th>用途</th><th>调用方式</th><th>风险与说明</th></tr>
+      <tr><td><code>script/run_tc.sh</code></td><td>仿真总入口；建立结果目录、复制 makefile、清理产物并调用对应 make target。</td><td><code>run_tc.sh &lt;level&gt; &lt;case&gt; chip_tb_top &lt;action&gt; [clean]</code></td><td>会清理目标 case 的旧 PPM、outResult 和部分仿真结果。</td></tr>
+      <tr><td><code>top/agents/isprx_env/cmodel/Run.sh</code></td><td>从 testcase 的 <code>user_def.sv</code> 读取 HACT/VACT/PORT/PAIR/POLC/SHL 等宏，逐帧调用 <code>pic_process</code>。</td><td><code>Run.sh &lt;case&gt; &lt;TOP mode&gt;</code></td><td>输入 pattern 和输出 outResult 依赖当前仿真目录；检查 frame 数及宏值。</td></tr>
+      <tr><td><code>top/agents/cmodel/.../build_all_prj.sh</code></td><td>批量 build、clean 或运行各芯片 pic_split_transform 工程。</td><td><code>sh build_all_prj.sh all|clean|run</code></td><td>当前源码的 <code>run</code> 条件写法应在使用前复核；<code>cmodel_bk</code> 是备份副本。</td></tr>
+      <tr><td><code>top/agents/cmodel/.../&lt;project&gt;/Run.sh</code></td><td>HK1V11、HK2M22、HV1V21、HV1V22、HV1V31、HV2A31、HV2M23、HV3310B1 的模型示例命令。</td><td>进入对应项目目录执行 <code>sh Run.sh</code></td><td>多数包含固定尺寸或历史绝对路径，属于项目示例，不应直接当回归入口。</td></tr>
+      <tr><td><code>top/tests/create_new_case.sh</code></td><td>从 <code>t_8b1lane</code> 克隆 case，并按 case 名解析分辨率、pair、DPLC、chopper 和寄存器字段。</td><td><code>./create_new_case.sh &lt;new_case_name&gt;</code></td><td>会批量复制、替换、重命名并修改 cfg/SV；只应在 tests 根目录和干净工作区执行。</td></tr>
+      <tr><td><code>top/tests/copy_test.sh</code></td><td>复制已有 testcase，替换内部名称并删除 Verdi 临时文件。</td><td><code>./copy_test.sh &lt;old_case&gt; &lt;new_case&gt;</code></td><td>使用递归文本替换；pattern/golden 被排除，复制后需人工检查资产。</td></tr>
+      <tr><td><code>top/tests/produce.sh</code></td><td>串联 <code>produce_case.py</code> 和 <code>produce_isp_register.py</code> 生成 testcase。</td><td><code>./produce.sh &lt;case&gt; &lt;register.csv&gt;</code></td><td>脚本头中的旧项目示例仅供参数格式参考。</td></tr>
+      <tr><td><code>top/tests/creat_cases.sh</code></td><td>按固定命名规则批量复制 DPLC case 并修改宏、文件名和寄存器内容。</td><td>在 tests 根目录直接执行</td><td>一次修改多个目录，且当前文件含历史编码文本；使用前必须审核匹配范围。</td></tr>
+      <tr><td><code>*/pattern/run_gen_pattern.sh</code></td><td>调用同目录 <code>gen_pattern.py</code> 生成特定 case 的 PPM pattern。</td><td>进入对应 pattern 目录执行</td><td>属于 case-local 工具，尺寸和输出名只适用于对应 testcase。</td></tr>
+      <tr><td><code>top/agents/cmodel/test/HV2A31/Run.sh</code></td><td>HV2A31 CModel 测试示例。</td><td>进入测试目录执行</td><td>非 HV2M23 主流程；保留用于模型回归参考。</td></tr></table></div>
+
+      <h2 id="section-3">Perl 脚本（.pl）</h2>
+      <div class="table-scroll"><table class="script-table"><tr><th>脚本</th><th>用途</th><th>命令示例</th><th>产物/注意事项</th></tr>
+      <tr><td><code>script/user_def_addon.pl</code></td><td>合并基础 user_def 与 addon 宏，同名 define 使用 addon 值。</td><td><code>perl user_def_addon.pl base.sv addon.sv &gt; merged.sv</code></td><td>只处理单行 define；结果输出到 stdout。</td></tr>
+      <tr><td><code>top/agents/isprx_env/cmodel/dplc.pl</code></td><td>读取 P3 PPM，按 duplicate/average 等参数生成 DPLC golden。</td><td><code>perl dplc.pl --mode=... --input=in.ppm --output=out.ppm ...</code></td><td>参数契约应以 sequence 实际拼接命令为准；会检查 PPM 像素数量。</td></tr>
+      <tr><td><code>top/agents/isprx_env/regen_register_for_simulation.pl</code></td><td>从 flat register 文本生成 I2C/ISP simulation cfg、default/invert check 和 get 映射文本。</td><td><code>perl regen_register_for_simulation.pl &lt;flat_register.txt&gt;</code></td><td>在当前目录覆盖多个 <code>register_for_simulation_*.txt</code> 文件。</td></tr>
+      <tr><td><code>top/tests/t_debugpin/gen_test.pl</code></td><td>读取 debugpin 列表，生成逐项 force 和 DTESTO 检查代码。</td><td><code>perl gen_test.pl debugpin.list</code></td><td>生成 <code>debugpin.v</code>；RTL 层次路径为 HV2M23 专用，修改 mapping 前必须核对 RTL。</td></tr></table></div>
+
+      <h2 id="section-4">Python 脚本（.py）完整分类</h2>
+      <table><tr><th>类别</th><th>脚本</th><th>说明</th></tr>
+      <tr><td>运行与回归</td><td><code>regression.py</code>、<code>regression_cov.py</code>、<code>run_case.py</code>、<code>run_input_test.py</code>、<code>run_parallel.py</code>、<code>run_tests_mondisp.py</code>、<code>run_tests_unlock_utc.py</code></td><td>普通/coverage/专项/并行运行入口；有的使用参数，有的使用脚本内 case 数组。</td></tr>
+      <tr><td>结果与 coverage</td><td><code>script/check.py</code>、<code>script/merge_coverage.py</code></td><td>汇总日志并合并 VDB；不替代原始日志复核。</td></tr>
+      <tr><td>Case 与寄存器生成</td><td><code>produce_case.py</code>、<code>produce_isp_register.py</code>、<code>produce_isp_register_all.py</code>、<code>produce_all_register.py</code>、<code>user_def_register.py</code>、<code>user_def_register_rx.py</code></td><td>从命名、CSV 或 diff 资产生成 testcase、cfg 和寄存器相关文件。</td></tr>
+      <tr><td>环境与 RGM 维护</td><td><code>generate_env_cfg.py</code>、<code>update_env_cfg.py</code>、<code>extract_register_names.py</code>、<code>produce_rgl.py</code>、<code>script/produce_checker1.py</code></td><td>生成/更新 env_cfg、寄存器名、RGM 和 checker 骨架；可能覆盖源码文件。</td></tr>
+      <tr><td>DRDOD 与 pattern</td><td><code>drdod_process.py</code>、<code>gen_ppm.py</code>、case-local <code>gen_pattern.py</code>、<code>analog_separate.py</code></td><td>生成或处理 PPM；参数、尺寸和通道格式需与对应 case/sequence 对齐。</td></tr>
+      <tr><td>专项维护</td><td><code>remove.py</code></td><td>当前指向 <code>_test_sv</code> fixture 并批量注释指定代码，属于维护实验工具，不是正常回归入口。</td></tr></table>
+      <div class="note"><strong>重复目录：</strong><code>top/tests/tests</code> 中存在一套历史脚本和 DRD smoke pattern 工具镜像，<code>top/agents/cmodel_bk</code> 中存在 CModel Shell 备份。除非正在对比历史版本，否则不要在这些目录修改或执行脚本。</div>
+
+      <h2 id="section-5">run_tc.sh：单 Case、波形与 Coverage</h2>
       <pre><code>cd $DV_TCON_C/script
 # Show built-in help
 run_tc.sh -h
@@ -51,7 +83,7 @@ run_tc.sh TOP_COV &lt;case_name&gt; chip_tb_top cov_rpt</code></pre>
       <table><tr><th>位置</th><th>含义</th><th>常用值</th></tr><tr><td>1</td><td>验证层级</td><td><code>TOP</code>、<code>TOP_DUMP</code>、<code>TOP_COV</code>、<code>TOP_NETLIST</code>、<code>FPGA_TOP</code></td></tr><tr><td>2</td><td>testcase 目录/名称</td><td><code>t_*</code></td></tr><tr><td>3</td><td>TB top</td><td><code>chip_tb_top</code></td></tr><tr><td>4</td><td>动作或 seed 入口</td><td><code>random</code>、<code>verdi</code>、<code>cov</code>、<code>cov_rpt</code></td></tr><tr><td>5</td><td>清理旧结果</td><td><code>clean</code></td></tr><tr><td>6</td><td>可选运行控制</td><td><code>norunc</code></td></tr></table>
       <div class="note"><strong>注意：</strong><code>run_tc.sh</code> 会清理目标仿真目录内的 PPM、outResult 和部分旧结果。先确认 <code>SIM_PATH</code>、验证层级和 case 名正确，不要在有需保留调试产物时直接使用 <code>clean</code>。</div>
 
-      <h2 id="section-3">Regression：维护和启动</h2>
+      <h2 id="section-6">Regression：维护和启动</h2>
       <ol class="steps"><li>打开 <code>regression.py</code> 或 <code>regression_cov.py</code>，只保留本轮要运行的 <code>test_names</code> 条目。</li><li>确认每个名称在 <code>top/tests</code> 下存在同名目录，且 case 资产完整。</li><li>在 <code>top/tests</code> 目录运行脚本，检查生成的 bsub 命令是否使用预期的 TOP/TOP_COV。</li><li>job 完成后进入结果根目录运行 <code>check.py</code>；Coverage 回归再运行 <code>merge_coverage.py</code>。</li></ol>
       <pre><code>cd $DV_TCON_C/top/tests
 python regression.py
@@ -66,16 +98,16 @@ python check.py
 python merge_coverage.py</code></pre>
       <p><code>check.py</code> 将包含 <code>Error</code> 的 compile.log 判为编译失败；对 sim.log，它把 <code>UVM_ERROR</code> 数量大于 1 判为 compare fail。这个规则来自当前脚本实现，不等价于通用 UVM pass/fail 标准，遇到异常统计时应回看原始日志。</p>
 
-      <h2 id="section-4">user_def_addon.pl：合并宏定义</h2>
+      <h2 id="section-7">user_def_addon.pl：合并宏定义</h2>
       <pre><code>perl $DV_TCON_C/script/user_def_addon.pl   base_user_def.sv user_def_addon.sv &gt; merged_user_def.sv</code></pre>
       <p>输出保持基础文件中的 define 顺序；addon 中同名 define 覆盖原值，新 define 追加到末尾。脚本只处理形如 <code>`define NAME VALUE</code> 的单行定义，并移除 <code>//</code> 后的行内注释。</p>
 
-      <h2 id="section-5">produce_checker1.py：生成 Checker 骨架</h2>
+      <h2 id="section-8">produce_checker1.py：生成 Checker 骨架</h2>
       <pre><code>cd $DV_TCON_C/script
 python produce_checker1.py cfg.csv</code></pre>
       <p><code>cfg.csv</code> 描述 checker 名称、RTL module、bind instance、DUT hierarchy、端口、transaction 字段和 analysis_port。脚本会在当前目录写入 bind <code>.svh</code>、interface、transaction 和 monitor 文件。生成物是骨架，仍需人工实现采样 task、scoreboard、golden 加载并在 <code>checker_agent</code> 中连接；运行前建议在干净分支或临时目录预览输出，避免覆盖手工代码。</p>
 
-      <h2 id="section-6">网页指南生成器</h2>
+      <h2 id="section-9">网页指南生成器</h2>
       <pre><code>cd E:/project/team-share-public/hv2m23-dv-env-guide
 python -m py_compile tools/build_guide.py
 python -B tools/build_guide.py</code></pre>
