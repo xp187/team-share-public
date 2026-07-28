@@ -1,0 +1,141 @@
+<svg viewBox="0 0 940 700" width="940" role="img" aria-label="isptx_sequence 激励发送流程总图">
+          <defs>
+            <marker id="am20" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="#66727d"></path>
+            </marker>
+            <marker id="am20g" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="#16805f"></path>
+            </marker>
+          </defs>
+
+          <rect x="10" y="10" width="920" height="80" rx="12" fill="none" stroke="#d9dee3" stroke-width="1.5"/>
+          <text x="28" y="32" font-size="12.5" font-weight="700" fill="#66727d">Test / Config Layer</text>
+          <rect x="30" y="44" width="210" height="36" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="135" y="59" text-anchor="middle" font-size="11" font-weight="700" fill="#1b232b">t_* 用例 test class</text>
+          <text x="135" y="73" text-anchor="middle" font-size="9.5" fill="#66727d">env_cfg + 4×*_check_on</text>
+          <rect x="250" y="44" width="210" height="36" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="355" y="59" text-anchor="middle" font-size="11" font-weight="700" fill="#1b232b">user_def.sv</text>
+          <text x="355" y="73" text-anchor="middle" font-size="9.5" fill="#66727d">HACT・VACT・FPS・PORT_NUM・FRAME_NUM</text>
+          <rect x="470" y="44" width="210" height="36" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="575" y="59" text-anchor="middle" font-size="11" font-weight="700" fill="#1b232b">pattern/frame_N.ppm</text>
+          <text x="575" y="73" text-anchor="middle" font-size="9.5" fill="#66727d">P3 文本图像</text>
+          <rect x="690" y="44" width="220" height="36" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="800" y="59" text-anchor="middle" font-size="11" font-weight="700" fill="#1b232b">cfg_frameN.txt</text>
+          <text x="800" y="73" text-anchor="middle" font-size="9.5" fill="#66727d">每帧寄存器值（二进制字符串）</text>
+
+          <rect x="10" y="106" width="600" height="470" rx="12" fill="none" stroke="#16805f" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <text x="28" y="130" font-size="12.5" font-weight="700" fill="#16805f">发送端 TX · isptx_sequence.sv（8B/10B 主流程）</text>
+
+          <rect x="30" y="142" width="560" height="48" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="45" y="162" font-size="11.5" font-weight="700" fill="#1b232b">body()（:1064）</text>
+          <text x="45" y="179" font-size="10" fill="#66727d">randomize → config_db 取 env_cfg / vif → plusargs SIM_TEST_PATH / FILE_PATH</text>
+
+          <rect x="30" y="202" width="560" height="88" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="45" y="220" font-size="11.5" font-weight="700" fill="#1b232b">send_isp() FSM（:985）</text>
+          <rect x="45" y="228" width="165" height="52" rx="8" fill="#dff3ee" stroke="#087e6b"/>
+          <text x="127" y="245" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">TRAIN_SEND</text>
+          <text x="127" y="260" text-anchor="middle" font-size="9" fill="#66727d">link_training TBK 逐 bit</text>
+          <text x="127" y="272" text-anchor="middle" font-size="9" fill="#66727d">→ PAD_LOCK 后再 4us；500us 超时</text>
+          <rect x="222" y="228" width="200" height="52" rx="8" fill="#dff3ee" stroke="#087e6b"/>
+          <text x="322" y="245" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">TRAIN_ACTIVE</text>
+          <text x="322" y="260" text-anchor="middle" font-size="9" fill="#66727d">LSP → CTRL_F → send_ppm()</text>
+          <text x="322" y="272" text-anchor="middle" font-size="9" fill="#66727d">mon_unlock 失锁重训（&gt;3 次放弃）</text>
+          <rect x="434" y="228" width="140" height="52" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="504" y="250" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">DRV_PPM_DONE</text>
+          <text x="504" y="266" text-anchor="middle" font-size="9" fill="#66727d">#300ns 结束</text>
+          <line x1="210" y1="254" x2="218" y2="254" stroke="#66727d" stroke-width="1.2" marker-end="url(#am20)"/>
+          <line x1="422" y1="254" x2="430" y2="254" stroke="#66727d" stroke-width="1.2" marker-end="url(#am20)"/>
+
+          <rect x="30" y="302" width="175" height="86" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="117" y="320" text-anchor="middle" font-size="11" font-weight="700" fill="#1b232b">send_LSP_seq(10)（:240）</text>
+          <text x="117" y="337" text-anchor="middle" font-size="9.5" fill="#66727d">K2 → ea~ed 训练字节 ×32 → K3</text>
+          <text x="117" y="351" text-anchor="middle" font-size="9.5" fill="#66727d">×10 次；K 极性取 rsp.init_data</text>
+          <text x="117" y="365" text-anchor="middle" font-size="9.5" fill="#66727d">（driver 回传线上电平）</text>
+          <rect x="215" y="302" width="185" height="86" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="307" y="320" text-anchor="middle" font-size="11" font-weight="700" fill="#1b232b">send_CTRLF_seq(0)（:290）</text>
+          <text x="307" y="337" text-anchor="middle" font-size="9.5" fill="#66727d">K4 → 60 字节寄存器</text>
+          <text x="307" y="351" text-anchor="middle" font-size="9.5" fill="#66727d">get_ctrlF_reg()（:319）</text>
+          <text x="307" y="365" text-anchor="middle" font-size="9.5" fill="#66727d">逐字节 scramble → encode_8b10b</text>
+          <rect x="410" y="302" width="180" height="86" rx="8" fill="#dff3ee" stroke="#087e6b"/>
+          <text x="500" y="320" text-anchor="middle" font-size="11" font-weight="700" fill="#1b232b">寄存器数据来源</text>
+          <text x="500" y="337" text-anchor="middle" font-size="9.5" fill="#66727d">env_cfg.get_ctrlF/L_reg()</text>
+          <text x="500" y="351" text-anchor="middle" font-size="9.5" fill="#66727d">→ process_line 重读 cfg_frameN.txt</text>
+          <text x="500" y="365" text-anchor="middle" font-size="9.5" fill="#66727d">CTRL_F 60B(0x00~0x3F) / CTRL_L 5B</text>
+
+          <rect x="30" y="404" width="560" height="160" rx="10" fill="none" stroke="#087e6b" stroke-width="1.2" stroke-dasharray="4 3"/>
+          <text x="45" y="424" font-size="11.5" font-weight="700" fill="#087e6b">send_ppm() 逐帧循环 c = 0 .. frame_num-1（:539-983）</text>
+          <rect x="45" y="436" width="165" height="116" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="127" y="453" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">VBP / VFP 行（:572/:919）</text>
+          <text x="127" y="469" text-anchor="middle" font-size="9" fill="#66727d">HBP 0 填充 →</text>
+          <text x="127" y="482" text-anchor="middle" font-size="9" fill="#66727d">CTRLL(BKDU=1)（:671）</text>
+          <text x="127" y="495" text-anchor="middle" font-size="9" fill="#66727d">→ VBK 字节 → K2 key</text>
+          <text x="127" y="508" text-anchor="middle" font-size="9" fill="#66727d">→ HFP 0 填充</text>
+          <text x="127" y="526" text-anchor="middle" font-size="9" fill="#66727d">VBK_TEST 时 vbk 逐行++</text>
+          <rect x="225" y="436" width="165" height="116" rx="8" fill="#e0f3eb" stroke="#16805f"/>
+          <text x="307" y="453" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">帧间（:634-638）</text>
+          <text x="307" y="469" text-anchor="middle" font-size="9" fill="#66727d">get_ppm() 按 lane id 截取（:453）</text>
+          <text x="307" y="482" text-anchor="middle" font-size="9" fill="#66727d">→ write_ppm() 存档（:157）</text>
+          <text x="307" y="495" text-anchor="middle" font-size="9" font-weight="700" fill="#1b232b">→ exec_c(c) 每帧 VACT 前一次</text>
+          <text x="307" y="508" text-anchor="middle" font-size="9" fill="#66727d">pixels 无跨帧缓存</text>
+          <text x="307" y="526" text-anchor="middle" font-size="9" fill="#66727d">帧末 delete</text>
+          <rect x="405" y="436" width="170" height="116" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="490" y="453" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">VACT 行（:644-917）</text>
+          <text x="490" y="469" text-anchor="middle" font-size="9" fill="#66727d">CTRLL（仅首行 Fsync=1）</text>
+          <text x="490" y="482" text-anchor="middle" font-size="9" fill="#66727d">逐字节 scramble→8b10b→ONE_PKT</text>
+          <text x="490" y="495" text-anchor="middle" font-size="9" fill="#66727d">行尾 K3（开扰）/ K2 → HFP 0</text>
+          <text x="490" y="508" text-anchor="middle" font-size="9" fill="#66727d">末行 send_CTRLF_seq(c+1)（:816）</text>
+          <text x="490" y="526" text-anchor="middle" font-size="9" font-weight="700" fill="#1b232b">← 帧间寄存器切换点</text>
+          <line x1="210" y1="494" x2="221" y2="494" stroke="#66727d" stroke-width="1.2" marker-end="url(#am20)"/>
+          <line x1="390" y1="494" x2="401" y2="494" stroke="#66727d" stroke-width="1.2" marker-end="url(#am20)"/>
+
+          <rect x="630" y="106" width="300" height="238" rx="12" fill="none" stroke="#16805f" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <text x="648" y="130" font-size="12.5" font-weight="700" fill="#16805f">golden 生成 · exec_c()（:92-130）</text>
+          <rect x="648" y="142" width="264" height="58" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="780" y="160" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">pic_process（$system 调用）</text>
+          <text x="780" y="175" text-anchor="middle" font-size="9" fill="#66727d">-W -H -P -I frame_c -R outResult -p 1</text>
+          <text x="780" y="188" text-anchor="middle" font-size="9" fill="#66727d">-r CH_SEL -X HPOL1 -Y POL2 -O POL -C POLC -S SDC -OW -H4</text>
+          <rect x="648" y="208" width="264" height="44" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="780" y="225" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">DPLC_MODE=1 → dplc.pl（:123）</text>
+          <text x="780" y="240" text-anchor="middle" font-size="9" fill="#66727d">--mode duplicate/average/delta/auto → DPLC_frameN_idM.ppm</text>
+          <rect x="648" y="260" width="264" height="72" rx="8" fill="#e0f3eb" stroke="#16805f"/>
+          <text x="780" y="278" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">golden 输出（仿真目录）</text>
+          <text x="780" y="293" text-anchor="middle" font-size="9" fill="#66727d">outResult/data_merge/*.txt</text>
+          <text x="780" y="306" text-anchor="middle" font-size="9" fill="#66727d">outResult/digital/*_{Lodd,Leven,Rodd,Reven}.txt</text>
+          <text x="780" y="319" text-anchor="middle" font-size="9" fill="#66727d">outResult/analog/*.txt</text>
+
+          <rect x="630" y="356" width="300" height="96" rx="10" fill="#fff0d8" stroke="#a85d00"/>
+          <text x="648" y="376" font-size="11" font-weight="700" fill="#1b232b">420b 分支（编译宏 CHPI_MODE_420B）</text>
+          <text x="648" y="393" font-size="9.5" fill="#66727d">send_420b_lsp / ctrl_f_data / active_line（:1120-1449）</text>
+          <text x="648" y="407" font-size="9.5" fill="#66727d">长编码 70b 对齐；IDLE 用 K5~K8 图案</text>
+          <text x="648" y="421" font-size="9.5" font-weight="700" fill="#1b232b">注意：420b 路径不调 exec_c()</text>
+
+          <rect x="630" y="462" width="300" height="114" rx="10" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="648" y="482" font-size="11" font-weight="700" fill="#1b232b">多帧与寄存器切换</text>
+          <text x="648" y="499" font-size="9.5" fill="#66727d">帧数 env_cfg.frame_num（send_ppm :566）</text>
+          <text x="648" y="513" font-size="9.5" fill="#66727d">末行提前发下一帧 CTRL_F（:816，对齐 K4 帧界）</text>
+          <text x="648" y="527" font-size="9.5" fill="#66727d">process_line 每次都重读 cfg_frameN.txt（env_cfg:624）</text>
+          <text x="648" y="541" font-size="9.5" fill="#66727d">golden 帧号约定 = RTL 帧号 + `DV（frame0 跳过比对）</text>
+
+          <rect x="10" y="592" width="920" height="96" rx="12" fill="none" stroke="#d9dee3" stroke-width="1.5"/>
+          <text x="28" y="614" font-size="12.5" font-weight="700" fill="#66727d">Transaction / Driver（isptx_agent）</text>
+          <rect x="30" y="624" width="330" height="52" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="195" y="642" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">isptx_transaction（:16-45）</text>
+          <text x="195" y="657" text-anchor="middle" font-size="9" fill="#66727d">id 枚举 + one_pkt[9:0] + k1~k4；rsp.init_data 回传电平</text>
+          <rect x="390" y="624" width="330" height="52" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="555" y="642" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">isptx_driver（:931-1110）</text>
+          <text x="555" y="657" text-anchor="middle" font-size="9" fill="#66727d">drv_one_pkt()：LSB-first、每 vif.clk 打 1bit → rxp0/rxn0</text>
+          <rect x="750" y="624" width="170" height="52" rx="8" fill="#dff3ee" stroke="#087e6b"/>
+          <text x="835" y="642" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">DUT pad</text>
+          <text x="835" y="657" text-anchor="middle" font-size="9" fill="#66727d">APAD_RXP0 / APAD_RXN0</text>
+
+          <line x1="320" y1="90" x2="320" y2="138" stroke="#66727d" stroke-width="1.5" marker-end="url(#am20)"/>
+          <line x1="310" y1="190" x2="310" y2="198" stroke="#66727d" stroke-width="1.5" marker-end="url(#am20)"/>
+          <line x1="310" y1="290" x2="310" y2="298" stroke="#66727d" stroke-width="1.5" marker-end="url(#am20)"/>
+          <line x1="310" y1="388" x2="310" y2="400" stroke="#66727d" stroke-width="1.5" marker-end="url(#am20)"/>
+          <line x1="360" y1="650" x2="386" y2="650" stroke="#66727d" stroke-width="1.5" marker-end="url(#am20)"/>
+          <line x1="720" y1="650" x2="746" y2="650" stroke="#66727d" stroke-width="1.5" marker-end="url(#am20)"/>
+          <line x1="310" y1="564" x2="310" y2="620" stroke="#66727d" stroke-width="1.5" marker-end="url(#am20)"/>
+          <text x="318" y="600" font-size="9" fill="#66727d">uvm_do_with(tr, {...})</text>
+          <line x1="394" y1="470" x2="642" y2="300" stroke="#16805f" stroke-width="1.8" marker-end="url(#am20g)"/>
+          <text x="470" y="400" font-size="9.5" fill="#16805f">$system 调 cmodel</text>
+        </svg>

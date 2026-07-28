@@ -1,0 +1,177 @@
+<svg viewBox="0 0 940 620" width="940" role="img" aria-label="各级 checker 检查流程图">
+          <defs>
+            <marker id="am22" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+              <path d="M0,0 L7,3.5 L0,7 z" fill="#66727d"></path>
+            </marker>
+          </defs>
+          <text x="175" y="22" font-size="10.5" font-weight="700" fill="#66727d">① 采样触发</text>
+          <text x="327" y="22" font-size="10.5" font-weight="700" fill="#66727d">② 缓冲 / 计数</text>
+          <text x="479" y="22" font-size="10.5" font-weight="700" fill="#66727d">③ 帧齐落盘</text>
+          <text x="631" y="22" font-size="10.5" font-weight="700" fill="#66727d">④ 读 golden</text>
+          <text x="783" y="22" font-size="10.5" font-weight="700" fill="#66727d">⑤ 比对报错</text>
+
+          <rect x="12" y="48" width="135" height="104" rx="10" fill="#dff3ee" stroke="#087e6b" stroke-width="1.5"/>
+          <text x="79" y="86" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">data_merge</text>
+          <text x="79" y="102" text-anchor="middle" font-size="9" fill="#66727d">data_merge_scoreboard.sv</text>
+          <text x="79" y="116" text-anchor="middle" font-size="9" fill="#66727d">CENTER1.PIX_DATA</text>
+          <g font-size="8.6" fill="#66727d">
+            <rect x="160" y="40" width="140" height="120" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+            <text x="230" y="56" text-anchor="middle">@posedge VS 帧起</text>
+            <text x="230" y="70" text-anchor="middle">PIX_DATA_START 行起</text>
+            <text x="230" y="84" text-anchor="middle">negedge DCLK_DIV1P5</text>
+            <text x="230" y="98" text-anchor="middle">采 PIX_DATA[23:0]</text>
+            <text x="230" y="112" text-anchor="middle">→ 3 字节/拍</text>
+            <rect x="312" y="40" width="140" height="120" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+            <text x="382" y="56" text-anchor="middle">analysis_chmod()</text>
+            <text x="382" y="70" text-anchor="middle">按 CH_SEL 得</text>
+            <text x="382" y="84" text-anchor="middle">sub_pix_cnt</text>
+            <text x="382" y="98" text-anchor="middle">vact 行齐 → aport.write</text>
+            <text x="382" y="112" text-anchor="middle">unlock 清帧复位</text>
+            <rect x="464" y="40" width="140" height="120" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+            <text x="534" y="56" text-anchor="middle">write_dump()（:81）</text>
+            <text x="534" y="70" text-anchor="middle">write_ppm() →</text>
+            <text x="534" y="84" text-anchor="middle">isprx_data_merge_ppm/</text>
+            <text x="534" y="98" text-anchor="middle">drv_&lt;id&gt;_frame_&lt;c&gt;.ppm</text>
+            <rect x="616" y="40" width="140" height="120" rx="8" fill="#e0f3eb" stroke="#16805f"/>
+            <text x="686" y="56" text-anchor="middle">get_cmodel()（:53）</text>
+            <text x="686" y="70" text-anchor="middle">outResult/data_merge/</text>
+            <text x="686" y="84" text-anchor="middle">frame_&lt;N&gt;_data_merge</text>
+            <text x="686" y="98" text-anchor="middle">&lt;id&gt;.txt</text>
+            <text x="686" y="112" text-anchor="middle">N = c + `DV</text>
+            <rect x="768" y="40" width="140" height="120" rx="8" fill="#fff0d8" stroke="#a85d00"/>
+            <text x="838" y="56" text-anchor="middle">compare_cmodel()</text>
+            <text x="838" y="70" text-anchor="middle">逐字节 pop_front</text>
+            <text x="838" y="84" text-anchor="middle">i%3 → R/G/B</text>
+            <text x="838" y="98" text-anchor="middle">队列残留 → uvm_fatal</text>
+            <text x="838" y="116" text-anchor="middle" font-weight="700" fill="#1b232b">"data merge error"</text>
+            <text x="838" y="130" text-anchor="middle">帧/行/像素/exp/act</text>
+          </g>
+
+          <rect x="12" y="188" width="135" height="104" rx="10" fill="#dff3ee" stroke="#087e6b" stroke-width="1.5"/>
+          <text x="79" y="222" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">digital_top</text>
+          <text x="79" y="238" text-anchor="middle" font-size="9" fill="#66727d">digital_top_scoreboard</text>
+          <text x="79" y="252" text-anchor="middle" font-size="9" fill="#66727d">DBR/DBL 四路</text>
+          <g font-size="8.6" fill="#66727d">
+            <rect x="160" y="180" width="140" height="120" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+            <text x="230" y="196" text-anchor="middle">4 路并行 el/ol/or/er</text>
+            <text x="230" y="210" text-anchor="middle">SLIN/SRIN ↓ 行起</text>
+            <text x="230" y="224" text-anchor="middle">CLKA/CLKB 沿采</text>
+            <text x="230" y="238" text-anchor="middle">{DBx5,3,1}/{DBx4,2,0}</text>
+            <text x="230" y="252" text-anchor="middle">24bit/拍</text>
+            <rect x="312" y="180" width="140" height="120" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+            <text x="382" y="196" text-anchor="middle">每帧 write_ol/or/el/er</text>
+            <text x="382" y="210" text-anchor="middle">tr 带 R_* 镜像</text>
+            <text x="382" y="224" text-anchor="middle">create_arr() 按 CH_SEL</text>
+            <text x="382" y="238" text-anchor="middle">定 left/right_count</text>
+            <rect x="464" y="180" width="140" height="120" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+            <text x="534" y="196" text-anchor="middle">main_phase（:478）</text>
+            <text x="534" y="210" text-anchor="middle">等四路帧号到齐</text>
+            <text x="534" y="224" text-anchor="middle">按 SDC 重排整行</text>
+            <text x="534" y="238" text-anchor="middle">→ isprx_digital_top_</text>
+            <text x="534" y="252" text-anchor="middle">ppm/drv_&lt;id&gt;_frame_&lt;c-1&gt;</text>
+            <rect x="616" y="180" width="140" height="120" rx="8" fill="#e0f3eb" stroke="#16805f"/>
+            <text x="686" y="196" text-anchor="middle">outResult/digital/</text>
+            <text x="686" y="210" text-anchor="middle">frame_&lt;N&gt;_digital&lt;id&gt;</text>
+            <text x="686" y="224" text-anchor="middle">chesel_{Lodd,Leven,</text>
+            <text x="686" y="238" text-anchor="middle">Rodd,Reven}.txt</text>
+            <text x="686" y="256" text-anchor="middle">DPLC → DPLC_frame</text>
+            <text x="686" y="270" text-anchor="middle">&lt;N&gt;_id&lt;id&gt;.ppm</text>
+            <rect x="768" y="180" width="140" height="120" rx="8" fill="#fff0d8" stroke="#a85d00"/>
+            <text x="838" y="196" text-anchor="middle">逐拍三元组比对</text>
+            <text x="838" y="210" text-anchor="middle">DPOLINV 先 bit7 取反</text>
+            <text x="838" y="224" text-anchor="middle">缺 golden → uvm_fatal</text>
+            <text x="838" y="242" text-anchor="middle" font-weight="700" fill="#1b232b">"digital sb error"</text>
+            <text x="838" y="256" text-anchor="middle" font-weight="700" fill="#1b232b">/ "dt pixel error"</text>
+          </g>
+
+          <rect x="12" y="328" width="135" height="104" rx="10" fill="#dff3ee" stroke="#087e6b" stroke-width="1.5"/>
+          <text x="79" y="362" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">analog</text>
+          <text x="79" y="378" text-anchor="middle" font-size="9" fill="#66727d">analog_data_output</text>
+          <text x="79" y="392" text-anchor="middle" font-size="9" fill="#66727d">_scoreboard.sv</text>
+          <g font-size="8.6" fill="#66727d">
+            <rect x="160" y="320" width="140" height="120" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+            <text x="230" y="336" text-anchor="middle">等 PORSD='h01</text>
+            <text x="230" y="350" text-anchor="middle">STB_A ↓ +#10</text>
+            <text x="230" y="364" text-anchor="middle">采 SIM_OUT[9660:0]</text>
+            <text x="230" y="378" text-anchor="middle">vact 行/帧</text>
+            <text x="230" y="392" text-anchor="middle">（TP=01 时 vact/2）</text>
+            <rect x="312" y="320" width="140" height="120" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+            <text x="382" y="336" text-anchor="middle">10bit 切分：</text>
+            <text x="382" y="350" text-anchor="middle">[7:0] 像素队列</text>
+            <text x="382" y="364" text-anchor="middle">[9] chopper / [8] pol</text>
+            <text x="382" y="378" text-anchor="middle">VBK、unlock 分支并行</text>
+            <rect x="464" y="320" width="140" height="120" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+            <text x="534" y="336" text-anchor="middle">line_cnt==vact-1</text>
+            <text x="534" y="350" text-anchor="middle">→ isprx_macro_top_</text>
+            <text x="534" y="364" text-anchor="middle">ppm/drv_&lt;id&gt;_frame_&lt;c&gt;</text>
+            <text x="534" y="378" text-anchor="middle">analog_check_on 门控</text>
+            <rect x="616" y="320" width="140" height="120" rx="8" fill="#e0f3eb" stroke="#16805f"/>
+            <text x="686" y="336" text-anchor="middle">get_cmodel()（:540）</text>
+            <text x="686" y="350" text-anchor="middle">outResult/analog/</text>
+            <text x="686" y="364" text-anchor="middle">frame_&lt;N&gt;_analog&lt;id&gt;.txt</text>
+            <text x="686" y="378" text-anchor="middle">DPLC（CH_SEL=1/3）</text>
+            <text x="686" y="392" text-anchor="middle">→ DPLC ppm；关闭</text>
+            <text x="686" y="406" text-anchor="middle">通道期望 8'h88</text>
+            <rect x="768" y="320" width="140" height="120" rx="8" fill="#fff0d8" stroke="#a85d00"/>
+            <text x="838" y="336" text-anchor="middle">逐 subpix 像素比</text>
+            <text x="838" y="350" text-anchor="middle">chop_pattern[i%8]</text>
+            <text x="838" y="364" text-anchor="middle">pol 查表 16 组合</text>
+            <text x="838" y="378" text-anchor="middle">vbk 逐行期望</text>
+            <text x="838" y="396" text-anchor="middle" font-weight="700" fill="#1b232b">"analog pixel/chop/</text>
+            <text x="838" y="410" text-anchor="middle" font-weight="700" fill="#1b232b">pol/vbk error"</text>
+          </g>
+
+          <rect x="12" y="468" width="135" height="104" rx="10" fill="#fff0d8" stroke="#a85d00" stroke-width="1.5"/>
+          <text x="79" y="502" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">checksum</text>
+          <text x="79" y="518" text-anchor="middle" font-size="9" fill="#66727d">checker_for_checksum</text>
+          <text x="79" y="532" text-anchor="middle" font-size="9" fill="#66727d">standalone・14 地址</text>
+          <g font-size="8.6" fill="#66727d">
+            <rect x="160" y="460" width="140" height="120" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+            <text x="230" y="476" text-anchor="middle">等 chksum_mode==1</text>
+            <text x="230" y="490" text-anchor="middle">（超时 10000us）</text>
+            <text x="230" y="504" text-anchor="middle">init_expected()</text>
+            <text x="230" y="518" text-anchor="middle">预载 cfg_frame1</text>
+            <rect x="312" y="460" width="140" height="120" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+            <text x="382" y="476" text-anchor="middle">K4_FIND ↑</text>
+            <text x="382" y="490" text-anchor="middle">apply_cfg_frame</text>
+            <text x="382" y="504" text-anchor="middle">(fid+1) 重读</text>
+            <text x="382" y="518" text-anchor="middle">cfg_frameN.txt</text>
+            <text x="382" y="532" text-anchor="middle">更新 expected[]</text>
+            <rect x="464" y="460" width="140" height="120" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+            <text x="534" y="476" text-anchor="middle">frame_end_a ↓ 触发</text>
+            <text x="534" y="490" text-anchor="middle">采 update_en_a /</text>
+            <text x="534" y="504" text-anchor="middle">unlock_active</text>
+            <text x="534" y="518" text-anchor="middle">check_frame_regs()</text>
+            <rect x="616" y="460" width="140" height="120" rx="8" fill="#e0f3eb" stroke="#16805f"/>
+            <text x="686" y="476" text-anchor="middle">层次直读 LC_CPUWR</text>
+            <text x="686" y="490" text-anchor="middle">shadow_xx_F /</text>
+            <text x="686" y="504" text-anchor="middle">R_REGxx_F</text>
+            <text x="686" y="518" text-anchor="middle">（0x00~0x0A、</text>
+            <text x="686" y="532" text-anchor="middle">0x1D~0x1F、0x27）</text>
+            <rect x="768" y="460" width="140" height="120" rx="8" fill="#fff0d8" stroke="#a85d00"/>
+            <text x="838" y="476" text-anchor="middle">update_en → loaded</text>
+            <text x="838" y="490" text-anchor="middle">shadow≠exp →</text>
+            <text x="838" y="504" text-anchor="middle" font-weight="700" fill="#1b232b">SDC_SHADOW</text>
+            <text x="838" y="518" text-anchor="middle">rreg≠loaded →</text>
+            <text x="838" y="532" text-anchor="middle" font-weight="700" fill="#1b232b">SDC_RREG</text>
+            <text x="838" y="550" text-anchor="middle">→ checksum_</text>
+            <text x="838" y="564" text-anchor="middle">summary.md</text>
+          </g>
+
+          <line x1="300" y1="100" x2="308" y2="100" stroke="#66727d" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="452" y1="100" x2="460" y2="100" stroke="#66727d" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="604" y1="100" x2="612" y2="100" stroke="#66727d" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="756" y1="100" x2="764" y2="100" stroke="#66727d" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="300" y1="240" x2="308" y2="240" stroke="#66727d" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="452" y1="240" x2="460" y2="240" stroke="#66727d" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="604" y1="240" x2="612" y2="240" stroke="#66727d" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="756" y1="240" x2="764" y2="240" stroke="#66727d" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="300" y1="380" x2="308" y2="380" stroke="#66727d" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="452" y1="380" x2="460" y2="380" stroke="#66727d" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="604" y1="380" x2="612" y2="380" stroke="#66727d" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="756" y1="380" x2="764" y2="380" stroke="#66727d" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="300" y1="520" x2="308" y2="520" stroke="#66727d" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="452" y1="520" x2="460" y2="520" stroke="#66727d" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="604" y1="520" x2="612" y2="520" stroke="#66727d" stroke-width="1.2" marker-end="url(#am22)"/>
+          <line x1="756" y1="520" x2="764" y2="520" stroke="#66727d" stroke-width="1.2" marker-end="url(#am22)"/>
+        </svg>

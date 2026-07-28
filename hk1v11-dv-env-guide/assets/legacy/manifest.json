@@ -1,0 +1,58 @@
+[
+  {
+    "page": "checkers.html",
+    "asset": "assets/legacy/checkers-01.svg"
+  },
+  {
+    "page": "checkers.html",
+    "asset": "assets/legacy/checkers-02.svg"
+  },
+  {
+    "page": "checkers.html",
+    "asset": "assets/legacy/checkers-03.svg"
+  },
+  {
+    "page": "overview.html",
+    "asset": "assets/legacy/overview-01.svg"
+  },
+  {
+    "page": "run.html",
+    "asset": "assets/legacy/run-01.svg"
+  },
+  {
+    "page": "run.html",
+    "asset": "assets/legacy/run-02.svg"
+  },
+  {
+    "page": "stimulus.html",
+    "asset": "assets/legacy/stimulus-01.svg"
+  },
+  {
+    "page": "stimulus.html",
+    "asset": "assets/legacy/stimulus-02.svg"
+  },
+  {
+    "page": "stimulus.html",
+    "asset": "assets/legacy/stimulus-03.svg"
+  },
+  {
+    "page": "stimulus.html",
+    "asset": "assets/legacy/stimulus-04.svg"
+  },
+  {
+    "page": "stimulus.html",
+    "asset": "assets/legacy/stimulus-05.svg"
+  },
+  {
+    "page": "tb-arch.html",
+    "asset": "assets/legacy/tb-arch-01.svg"
+  },
+  {
+    "page": "tb-arch.html",
+    "asset": "assets/legacy/tb-arch-02.svg"
+  },
+  {
+    "page": "cases.html",
+    "asset": "assets/legacy/cases-01.svg"
+  }
+]

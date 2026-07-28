@@ -1,0 +1,49 @@
+<svg viewBox="0 0 920 270" width="920" role="img" aria-label="4 条比对链结构图">
+          <defs>
+            <marker id="am8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="#66727d"></path>
+            </marker>
+          </defs>
+          <text x="60" y="24" font-size="12" font-weight="700" fill="#66727d">DUT 观测点</text>
+          <text x="330" y="24" font-size="12" font-weight="700" fill="#66727d">monitor → scoreboard</text>
+          <text x="680" y="24" font-size="12" font-weight="700" fill="#66727d">golden</text>
+
+          <rect x="20" y="40" width="220" height="44" rx="10" fill="#dff3ee" stroke="#087e6b" stroke-width="1.5"/>
+          <text x="130" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">CENTER1.PIX_DATA</text>
+          <rect x="290" y="40" width="240" height="44" rx="10" fill="#ffffff" stroke="#d9dee3" stroke-width="1.5"/>
+          <text x="410" y="66" text-anchor="middle" font-size="11.5" fill="#1b232b">rx_data_merge_mon → sb</text>
+          <rect x="600" y="40" width="300" height="44" rx="10" fill="#e0f3eb" stroke="#16805f" stroke-width="1.5"/>
+          <text x="750" y="66" text-anchor="middle" font-size="11" fill="#1b232b">data_merge/frame_N_data_mergeM.txt</text>
+          <line x1="240" y1="62" x2="286" y2="62" stroke="#66727d" stroke-width="1.5" marker-end="url(#am8)"/>
+          <line x1="530" y1="62" x2="596" y2="62" stroke="#66727d" stroke-width="1.5" marker-end="url(#am8)"/>
+
+          <rect x="20" y="100" width="220" height="44" rx="10" fill="#dff3ee" stroke="#087e6b" stroke-width="1.5"/>
+          <text x="130" y="126" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">DBR0-5 / DBL0-5</text>
+          <rect x="290" y="100" width="240" height="44" rx="10" fill="#ffffff" stroke="#d9dee3" stroke-width="1.5"/>
+          <text x="410" y="126" text-anchor="middle" font-size="11.5" fill="#1b232b">dt_mon → dt_sb（L/R×odd/even）</text>
+          <rect x="600" y="100" width="300" height="44" rx="10" fill="#e0f3eb" stroke="#16805f" stroke-width="1.5"/>
+          <text x="750" y="118" text-anchor="middle" font-size="11" fill="#1b232b">digital/frame_N_digitalMchesel_*.txt</text>
+          <text x="750" y="134" text-anchor="middle" font-size="10" fill="#66727d">DPLC_MODE 时改读 DPLC_frameN_idM.ppm</text>
+          <line x1="240" y1="122" x2="286" y2="122" stroke="#66727d" stroke-width="1.5" marker-end="url(#am8)"/>
+          <line x1="530" y1="122" x2="596" y2="122" stroke="#66727d" stroke-width="1.5" marker-end="url(#am8)"/>
+
+          <rect x="20" y="160" width="220" height="44" rx="10" fill="#dff3ee" stroke="#087e6b" stroke-width="1.5"/>
+          <text x="130" y="186" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">MACRO_TOP.SIM_OUT</text>
+          <rect x="290" y="160" width="240" height="44" rx="10" fill="#ffffff" stroke="#d9dee3" stroke-width="1.5"/>
+          <text x="410" y="186" text-anchor="middle" font-size="11.5" fill="#1b232b">ana_mon → ana_scb（pol/vbk/unlock）</text>
+          <rect x="600" y="160" width="300" height="44" rx="10" fill="#e0f3eb" stroke="#16805f" stroke-width="1.5"/>
+          <text x="750" y="186" text-anchor="middle" font-size="11" fill="#1b232b">cmodel analog 输出</text>
+          <line x1="240" y1="182" x2="286" y2="182" stroke="#66727d" stroke-width="1.5" marker-end="url(#am8)"/>
+          <line x1="530" y1="182" x2="596" y2="182" stroke="#66727d" stroke-width="1.5" marker-end="url(#am8)"/>
+
+          <rect x="20" y="220" width="220" height="44" rx="10" fill="#fff0d8" stroke="#a85d00" stroke-width="1.5"/>
+          <text x="130" y="238" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">FCONFIG 寄存器</text>
+          <text x="130" y="254" text-anchor="middle" font-size="10" fill="#66727d">R_REG00_F ~ R_REG39_F</text>
+          <rect x="290" y="220" width="240" height="44" rx="10" fill="#fff0d8" stroke="#a85d00" stroke-width="1.5"/>
+          <text x="410" y="246" text-anchor="middle" font-size="11.5" fill="#1b232b">checker_for_checksum（独立 class）</text>
+          <rect x="600" y="220" width="300" height="44" rx="10" fill="#fff0d8" stroke="#a85d00" stroke-width="1.5"/>
+          <text x="750" y="238" text-anchor="middle" font-size="11" fill="#1b232b">RTL 默认值 + cfg_frame 期望值</text>
+          <text x="750" y="254" text-anchor="middle" font-size="10" fill="#66727d">比 shadow → 装载行为</text>
+          <line x1="240" y1="242" x2="286" y2="242" stroke="#66727d" stroke-width="1.5" marker-end="url(#am8)"/>
+          <line x1="530" y1="242" x2="596" y2="242" stroke="#66727d" stroke-width="1.5" marker-end="url(#am8)"/>
+        </svg>

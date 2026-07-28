@@ -1,0 +1,38 @@
+<svg viewBox="0 0 920 250" width="920" role="img" aria-label="isprx_env 组件结构图">
+          <defs>
+            <marker id="am3" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="#66727d"></path>
+            </marker>
+          </defs>
+          <rect x="10" y="10" width="900" height="230" rx="14" fill="none" stroke="#087e6b" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <text x="30" y="36" font-size="13.5" font-weight="700" fill="#087e6b">source_driver_env（agents/isprx_env/env.sv:28-31）</text>
+
+          <rect x="40" y="55" width="200" height="165" rx="10" fill="#dff3ee" stroke="#087e6b" stroke-width="1.5"/>
+          <text x="140" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="#1b232b">isptx_agt（激励源）</text>
+          <text x="140" y="110" text-anchor="middle" font-size="11.5" fill="#1b232b">isptx_sequencer sqr</text>
+          <text x="140" y="132" text-anchor="middle" font-size="11.5" fill="#1b232b">isptx_driver drv</text>
+          <text x="140" y="154" text-anchor="middle" font-size="11.5" fill="#1b232b">bus_monitor mon</text>
+          <text x="140" y="186" text-anchor="middle" font-size="11" fill="#66727d">逐 bit 驱动差分 pad</text>
+
+          <rect x="270" y="55" width="200" height="165" rx="10" fill="#ffffff" stroke="#d9dee3" stroke-width="1.5"/>
+          <text x="370" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="#1b232b">i2c_agt</text>
+          <text x="370" y="106" text-anchor="middle" font-size="11.5" fill="#1b232b">driver / monitor / sqr</text>
+          <text x="370" y="128" text-anchor="middle" font-size="11.5" fill="#1b232b">scoreboard / cov</text>
+          <text x="370" y="160" text-anchor="middle" font-size="11" fill="#66727d">I2C slave 接口激励</text>
+          <text x="370" y="182" text-anchor="middle" font-size="11" fill="#66727d">devid 0x57/0x70/0x62</text>
+
+          <rect x="500" y="55" width="170" height="165" rx="10" fill="#ffffff" stroke="#d9dee3" stroke-width="1.5"/>
+          <text x="585" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="#1b232b">bcc_agt</text>
+          <text x="585" y="110" text-anchor="middle" font-size="11.5" fill="#1b232b">driver + sequencer</text>
+          <text x="585" y="132" text-anchor="middle" font-size="11.5" fill="#66727d">（无 monitor）</text>
+          <text x="585" y="166" text-anchor="middle" font-size="11" fill="#66727d">兼作 reg_model</text>
+          <text x="585" y="186" text-anchor="middle" font-size="11" fill="#66727d">物理前端</text>
+
+          <rect x="700" y="55" width="195" height="165" rx="10" fill="#fff0d8" stroke="#a85d00" stroke-width="1.5"/>
+          <text x="797" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="#1b232b">ck_agent（比对）</text>
+          <text x="797" y="108" text-anchor="middle" font-size="11.5" fill="#1b232b">rx_data_merge_mon+sb</text>
+          <text x="797" y="130" text-anchor="middle" font-size="11.5" fill="#1b232b">dt_mon + dt_sb</text>
+          <text x="797" y="152" text-anchor="middle" font-size="11.5" fill="#1b232b">ch_mon + ch_sb</text>
+          <text x="797" y="174" text-anchor="middle" font-size="11.5" fill="#1b232b">ana_mon + ana_scb</text>
+          <text x="797" y="202" text-anchor="middle" font-size="11" fill="#66727d">4 对 monitor+scoreboard</text>
+        </svg>

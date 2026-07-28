@@ -1,0 +1,112 @@
+<svg viewBox="0 0 940 660" width="940" role="img" aria-label="checker 结构关系图">
+          <defs>
+            <marker id="am21" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="#66727d"></path>
+            </marker>
+            <marker id="am21g" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="#16805f"></path>
+            </marker>
+          </defs>
+
+          <rect x="10" y="10" width="920" height="100" rx="12" fill="none" stroke="#d9dee3" stroke-width="1.5"/>
+          <text x="28" y="32" font-size="12.5" font-weight="700" fill="#66727d">观测信号 · tb/intf_connect.sv（层次化 assign → ana_data_output_if）</text>
+          <rect x="30" y="44" width="290" height="54" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="175" y="63" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">data merge 级（:18-21）</text>
+          <text x="175" y="78" text-anchor="middle" font-size="9" fill="#66727d">CENTER1.VS / PIX_DATA_START / DCLK_DIV1P5 / PIX_DATA[23:0]</text>
+          <text x="175" y="90" text-anchor="middle" font-size="9" fill="#66727d">（LOGIC_CENTER 内部）</text>
+          <rect x="335" y="44" width="290" height="54" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="480" y="63" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">digital top 级（:24-51）</text>
+          <text x="480" y="78" text-anchor="middle" font-size="9" fill="#66727d">DBR0-5 / DBL0-5・SLIN/SRIN・CLKA/CLKB</text>
+          <text x="480" y="90" text-anchor="middle" font-size="9" fill="#66727d">＋ LC_REG_MAPPING.R_* 寄存器镜像</text>
+          <rect x="640" y="44" width="280" height="54" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="780" y="63" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">analog 级（:54-58）</text>
+          <text x="780" y="78" text-anchor="middle" font-size="9" fill="#66727d">MACRO_TOP.SIM_OUT・LC_MONBLOCK.STB_A</text>
+          <text x="780" y="90" text-anchor="middle" font-size="9" fill="#66727d">BCC_I（link_status / unlock）</text>
+
+          <rect x="10" y="126" width="920" height="344" rx="12" fill="none" stroke="#087e6b" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <text x="28" y="150" font-size="12.5" font-weight="700" fill="#087e6b">ck_agent · checker_agent.sv（:25-48，4 对 monitor + scoreboard，analysis port 连接）</text>
+
+          <rect x="30" y="160" width="280" height="68" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="170" y="180" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">rx_data_merge_mon_0</text>
+          <text x="170" y="195" text-anchor="middle" font-size="9" fill="#66727d">@VS 帧起，negedge DCLK 采 PIX_DATA→3B</text>
+          <text x="170" y="207" text-anchor="middle" font-size="9" fill="#66727d">vact 行齐 → out_data_dump_aport</text>
+          <rect x="340" y="160" width="330" height="68" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="505" y="180" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">sb_0 · data_merge_scoreboard</text>
+          <text x="505" y="195" text-anchor="middle" font-size="9" fill="#66727d">写 drv_&lt;id&gt;_frame_&lt;c&gt;.ppm；逐字节 R/G/B 比对</text>
+          <text x="505" y="207" text-anchor="middle" font-size="9" fill="#66727d">→ uvm_error("data merge error") 带帧/行/像素</text>
+          <rect x="700" y="160" width="220" height="68" rx="8" fill="#e0f3eb" stroke="#16805f"/>
+          <text x="810" y="183" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1b232b">outResult/data_merge/</text>
+          <text x="810" y="197" text-anchor="middle" font-size="9" fill="#66727d">frame_N_data_mergeM.txt</text>
+          <text x="810" y="211" text-anchor="middle" font-size="9" fill="#66727d">N = 帧计数 + `DV</text>
+
+          <rect x="30" y="236" width="280" height="68" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="170" y="256" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">dt_mon（4 路并行 el/ol/or/er）</text>
+          <text x="170" y="271" text-anchor="middle" font-size="9" fill="#66727d">SLIN/SRIN 行起，CLKA/CLKB 沿采 24bit</text>
+          <text x="170" y="283" text-anchor="middle" font-size="9" fill="#66727d">同采 R_* 镜像（POL/POLC/POL2/H4INV…）</text>
+          <rect x="340" y="236" width="330" height="68" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="505" y="256" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">dt_sb（4 imp + main_phase 帧重组）</text>
+          <text x="505" y="271" text-anchor="middle" font-size="9" fill="#66727d">逐拍比四路；四路到齐按 SDC 重排整行写 ppm</text>
+          <text x="505" y="283" text-anchor="middle" font-size="9" fill="#66727d">DPLC 分支逐 subpix 比（dt pixel error）</text>
+          <rect x="700" y="236" width="220" height="68" rx="8" fill="#e0f3eb" stroke="#16805f"/>
+          <text x="810" y="252" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1b232b">outResult/digital/</text>
+          <text x="810" y="265" text-anchor="middle" font-size="9" fill="#66727d">frame_N_digitalMchesel_</text>
+          <text x="810" y="277" text-anchor="middle" font-size="9" fill="#66727d">{Lodd,Leven,Rodd,Reven}.txt</text>
+          <text x="810" y="293" text-anchor="middle" font-size="9" fill="#66727d">＋ DPLC_frameN_idM.ppm</text>
+
+          <rect x="30" y="312" width="280" height="68" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="170" y="332" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">ana_mon（5 fork 分支）</text>
+          <text x="170" y="347" text-anchor="middle" font-size="9" fill="#66727d">像素 / unlock / VBK / POL / 800us 看门狗</text>
+          <text x="170" y="359" text-anchor="middle" font-size="9" fill="#66727d">STB_A ↓ +#10 采 SIM_OUT[9660:0]</text>
+          <rect x="340" y="312" width="330" height="68" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="505" y="332" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">ana_scb（4 analysis imp）</text>
+          <text x="505" y="347" text-anchor="middle" font-size="9" fill="#66727d">write_monitor：像素+chopper；write_pol：极性查表</text>
+          <text x="505" y="359" text-anchor="middle" font-size="9" fill="#66727d">write_vbk：VBK；write_unlock：计数复位</text>
+          <rect x="700" y="312" width="220" height="68" rx="8" fill="#e0f3eb" stroke="#16805f"/>
+          <text x="810" y="335" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1b232b">outResult/analog/</text>
+          <text x="810" y="349" text-anchor="middle" font-size="9" fill="#66727d">frame_N_analogM.txt</text>
+          <text x="810" y="365" text-anchor="middle" font-size="9" fill="#66727d">＋ DPLC ppm（CH_SEL=1/3）</text>
+
+          <rect x="30" y="388" width="280" height="68" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="170" y="408" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">ch_mon</text>
+          <text x="170" y="423" text-anchor="middle" font-size="9" fill="#66727d">chopper 采样</text>
+          <rect x="340" y="388" width="330" height="68" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="505" y="408" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">ch_sb</text>
+          <text x="505" y="423" text-anchor="middle" font-size="9" fill="#66727d">chopper 比对（与 analog chopper 检查并存）</text>
+          <rect x="700" y="388" width="220" height="68" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="810" y="412" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1b232b">chopper pattern</text>
+          <text x="810" y="426" text-anchor="middle" font-size="9" fill="#66727d">env_cfg（SD_CHOP/TP）</text>
+
+          <rect x="10" y="486" width="600" height="150" rx="12" fill="none" stroke="#a85d00" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <text x="28" y="508" font-size="12.5" font-weight="700" fill="#a85d00">独立 checker · checker_for_checksum.sv（standalone，由各 test 直接例化）</text>
+          <rect x="30" y="518" width="275" height="52" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="167" y="536" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">init_expected()（:55）</text>
+          <text x="167" y="551" text-anchor="middle" font-size="9" fill="#66727d">RTL 复位默认 ＋ apply_cfg_frame(fid+1) 逐帧更新</text>
+          <rect x="320" y="518" width="270" height="52" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="455" y="536" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">monitor_frames()（:316）</text>
+          <text x="455" y="551" text-anchor="middle" font-size="9" fill="#66727d">K4_FIND ↑ → frame_end_a ↓ 触发逐帧检查</text>
+          <rect x="30" y="580" width="560" height="44" rx="8" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="310" y="597" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1b232b">check_frame_regs()（:269）：层次直读 LC_CPUWR（14 个地址）</text>
+          <text x="310" y="612" text-anchor="middle" font-size="9" fill="#66727d">shadow ≠ expected → SDC_SHADOW；rreg ≠ loaded → SDC_RREG；输出 checksum_summary.md</text>
+
+          <rect x="630" y="486" width="300" height="150" rx="12" fill="#ffffff" stroke="#d9dee3"/>
+          <text x="648" y="508" font-size="11.5" font-weight="700" fill="#1b232b">开关与判决</text>
+          <text x="648" y="526" font-size="9.5" fill="#66727d">env_cfg.data_merge/digital_top/chopper/analog</text>
+          <text x="648" y="540" font-size="9.5" fill="#66727d">　　_check_on 分别 gate 各 scoreboard</text>
+          <text x="648" y="554" font-size="9.5" fill="#66727d">digital_dplc_check 切 DPLC golden</text>
+          <text x="648" y="572" font-size="9.5" fill="#66727d">全部 uvm_error → report server</text>
+          <text x="648" y="586" font-size="9.5" fill="#66727d">base_test.report_phase 统计 err_num</text>
+          <text x="648" y="604" font-size="10" font-weight="700" fill="#1b232b">err_num == 0 → PASSED，否则 FAILED</text>
+
+          <line x1="470" y1="110" x2="470" y2="152" stroke="#66727d" stroke-width="1.5" marker-end="url(#am21)"/>
+          <text x="478" y="136" font-size="9" fill="#66727d">virtual ana_data_output_if</text>
+          <line x1="310" y1="194" x2="336" y2="194" stroke="#66727d" stroke-width="1.2" marker-end="url(#am21)"/>
+          <line x1="700" y1="194" x2="674" y2="194" stroke="#16805f" stroke-width="1.5" marker-end="url(#am21g)"/>
+          <line x1="310" y1="270" x2="336" y2="270" stroke="#66727d" stroke-width="1.2" marker-end="url(#am21)"/>
+          <line x1="700" y1="270" x2="674" y2="270" stroke="#16805f" stroke-width="1.5" marker-end="url(#am21g)"/>
+          <line x1="310" y1="346" x2="336" y2="346" stroke="#66727d" stroke-width="1.2" marker-end="url(#am21)"/>
+          <line x1="700" y1="346" x2="674" y2="346" stroke="#16805f" stroke-width="1.5" marker-end="url(#am21g)"/>
+          <line x1="310" y1="422" x2="336" y2="422" stroke="#66727d" stroke-width="1.2" marker-end="url(#am21)"/>
+          <line x1="700" y1="422" x2="674" y2="422" stroke="#66727d" stroke-width="1.5" marker-end="url(#am21)"/>
+          <line x1="505" y1="456" x2="720" y2="482" stroke="#a85d00" stroke-width="1.5" marker-end="url(#am21)"/>
+          <text x="560" y="476" font-size="9" fill="#a85d00">uvm_error 汇聚</text>
+        </svg>

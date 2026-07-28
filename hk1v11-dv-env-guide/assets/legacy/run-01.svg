@@ -1,0 +1,49 @@
+<svg viewBox="0 0 920 240" width="920" role="img" aria-label="单用例运行流程图">
+          <defs>
+            <marker id="am9" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="#66727d"></path>
+            </marker>
+          </defs>
+          <rect x="15" y="30" width="150" height="60" rx="10" fill="#dff3ee" stroke="#087e6b" stroke-width="1.5"/>
+          <text x="90" y="54" text-anchor="middle" font-size="12" font-weight="700" fill="#1b232b">run_tc.sh</text>
+          <text x="90" y="72" text-anchor="middle" font-size="10.5" fill="#66727d">TOP / TOP_COV / ...</text>
+
+          <rect x="205" y="30" width="190" height="60" rx="10" fill="#ffffff" stroke="#d9dee3" stroke-width="1.5"/>
+          <text x="300" y="50" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">建仿真目录</text>
+          <text x="300" y="66" text-anchor="middle" font-size="10.5" fill="#66727d">$SIM_PATH/TOP_TCON_C/&lt;case&gt;</text>
+          <text x="300" y="80" text-anchor="middle" font-size="10.5" fill="#66727d">+ ppm 子目录 + 拷 makefile</text>
+
+          <rect x="435" y="30" width="150" height="60" rx="10" fill="#ffffff" stroke="#d9dee3" stroke-width="1.5"/>
+          <text x="510" y="50" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">make comp</text>
+          <text x="510" y="66" text-anchor="middle" font-size="10.5" fill="#66727d">VCS：tb.f + RTL +</text>
+          <text x="510" y="80" text-anchor="middle" font-size="10.5" fill="#66727d">用例 test.f/user_def</text>
+
+          <rect x="625" y="30" width="150" height="60" rx="10" fill="#ffffff" stroke="#d9dee3" stroke-width="1.5"/>
+          <text x="700" y="50" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">make run（simv）</text>
+          <text x="700" y="66" text-anchor="middle" font-size="10.5" fill="#66727d">+UVM_TESTNAME=&lt;case&gt;</text>
+          <text x="700" y="80" text-anchor="middle" font-size="10.5" fill="#66727d">seed=date +%N</text>
+
+          <rect x="625" y="120" width="150" height="52" rx="10" fill="#fff0d8" stroke="#a85d00" stroke-width="1.5"/>
+          <text x="700" y="140" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">sim.log</text>
+          <text x="700" y="157" text-anchor="middle" font-size="10.5" fill="#66727d">TEST CASE PASSED/FAILED</text>
+
+          <rect x="435" y="120" width="150" height="52" rx="10" fill="#e0f3eb" stroke="#16805f" stroke-width="1.5"/>
+          <text x="510" y="140" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">check_sim_results.sh</text>
+          <text x="510" y="157" text-anchor="middle" font-size="10.5" fill="#66727d">汇总 → sim_report.txt</text>
+
+          <rect x="15" y="120" width="180" height="52" rx="10" fill="#ffffff" stroke="#d9dee3" stroke-width="1.5"/>
+          <text x="105" y="140" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">verdi target</text>
+          <text x="105" y="157" text-anchor="middle" font-size="10.5" fill="#66727d">chip_tb_top.vf 波形</text>
+
+          <rect x="205" y="185" width="180" height="45" rx="10" fill="#ffffff" stroke="#d9dee3" stroke-width="1.5"/>
+          <text x="295" y="203" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">TOP_COV 分支</text>
+          <text x="295" y="220" text-anchor="middle" font-size="10.5" fill="#66727d">simv.vdb → urg 报告</text>
+
+          <line x1="165" y1="60" x2="201" y2="60" stroke="#66727d" stroke-width="1.5" marker-end="url(#am9)"/>
+          <line x1="395" y1="60" x2="431" y2="60" stroke="#66727d" stroke-width="1.5" marker-end="url(#am9)"/>
+          <line x1="585" y1="60" x2="621" y2="60" stroke="#66727d" stroke-width="1.5" marker-end="url(#am9)"/>
+          <line x1="700" y1="90" x2="700" y2="116" stroke="#66727d" stroke-width="1.5" marker-end="url(#am9)"/>
+          <line x1="625" y1="146" x2="589" y2="146" stroke="#66727d" stroke-width="1.5" marker-end="url(#am9)"/>
+          <line x1="435" y1="146" x2="199" y2="146" stroke="#66727d" stroke-width="1.5" marker-end="url(#am9)"/>
+          <line x1="300" y1="90" x2="300" y2="181" stroke="#66727d" stroke-width="1.5" marker-end="url(#am9)"/>
+        </svg>

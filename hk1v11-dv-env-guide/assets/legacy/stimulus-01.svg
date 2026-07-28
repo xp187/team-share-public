@@ -1,0 +1,31 @@
+<svg viewBox="0 0 920 150" width="920" role="img" aria-label="激励帧结构图">
+          <defs>
+            <marker id="am4" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="#66727d"></path>
+            </marker>
+          </defs>
+          <rect x="15" y="45" width="130" height="60" rx="10" fill="#ffffff" stroke="#d9dee3" stroke-width="1.5"/>
+          <text x="80" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="#1b232b">Link Training</text>
+          <text x="80" y="88" text-anchor="middle" font-size="11" fill="#66727d">TBK 码</text>
+
+          <rect x="175" y="45" width="80" height="60" rx="10" fill="#ffffff" stroke="#d9dee3" stroke-width="1.5"/>
+          <text x="215" y="80" text-anchor="middle" font-size="12" font-weight="700" fill="#1b232b">LSP</text>
+
+          <rect x="285" y="45" width="165" height="60" rx="10" fill="#dff3ee" stroke="#087e6b" stroke-width="1.5"/>
+          <text x="367" y="66" text-anchor="middle" font-size="12" font-weight="700" fill="#1b232b">CTRL_F</text>
+          <text x="367" y="84" text-anchor="middle" font-size="11" fill="#66727d">K4 + 60 字节寄存器</text>
+
+          <rect x="480" y="35" width="250" height="80" rx="10" fill="#dff3ee" stroke="#087e6b" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <text x="605" y="58" text-anchor="middle" font-size="12" font-weight="700" fill="#1b232b">行循环 ×N（VBP/VACT/VFP）</text>
+          <text x="605" y="78" text-anchor="middle" font-size="11" fill="#1b232b">K1 + CTRL_L(5B) + 像素 + K2</text>
+          <text x="605" y="98" text-anchor="middle" font-size="11" fill="#66727d">CTRL_L 来自 cfg_frameN.txt</text>
+
+          <rect x="760" y="45" width="145" height="60" rx="10" fill="#dff3ee" stroke="#087e6b" stroke-width="1.5"/>
+          <text x="832" y="66" text-anchor="middle" font-size="12" font-weight="700" fill="#1b232b">帧尾 CTRL_F</text>
+          <text x="832" y="84" text-anchor="middle" font-size="11" fill="#66727d">checksum 观测点</text>
+
+          <line x1="145" y1="75" x2="171" y2="75" stroke="#66727d" stroke-width="1.5" marker-end="url(#am4)"/>
+          <line x1="255" y1="75" x2="281" y2="75" stroke="#66727d" stroke-width="1.5" marker-end="url(#am4)"/>
+          <line x1="450" y1="75" x2="476" y2="75" stroke="#66727d" stroke-width="1.5" marker-end="url(#am4)"/>
+          <line x1="730" y1="75" x2="756" y2="75" stroke="#66727d" stroke-width="1.5" marker-end="url(#am4)"/>
+        </svg>

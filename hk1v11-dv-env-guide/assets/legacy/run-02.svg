@@ -1,0 +1,26 @@
+<svg viewBox="0 0 920 150" width="920" role="img" aria-label="覆盖率收集流程图">
+          <defs>
+            <marker id="am11" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="#66727d"></path>
+            </marker>
+          </defs>
+          <rect x="15" y="45" width="170" height="60" rx="10" fill="#dff3ee" stroke="#087e6b" stroke-width="1.5"/>
+          <text x="100" y="70" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">run_tc.sh TOP_COV</text>
+          <text x="100" y="88" text-anchor="middle" font-size="10.5" fill="#66727d">-cm line+fsm+tgl+cond+assert+branch</text>
+
+          <rect x="230" y="45" width="200" height="60" rx="10" fill="#ffffff" stroke="#d9dee3" stroke-width="1.5"/>
+          <text x="330" y="70" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">-cm_hier hier.cfg</text>
+          <text x="330" y="88" text-anchor="middle" font-size="10.5" fill="#66727d">只收 digital_top 子树，排除 TB</text>
+
+          <rect x="475" y="45" width="180" height="60" rx="10" fill="#ffffff" stroke="#d9dee3" stroke-width="1.5"/>
+          <text x="565" y="70" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">每个用例 simv.vdb</text>
+          <text x="565" y="88" text-anchor="middle" font-size="10.5" fill="#66727d">TOP_TCON_C_COV/&lt;case&gt;/</text>
+
+          <rect x="700" y="45" width="205" height="60" rx="10" fill="#e0f3eb" stroke="#16805f" stroke-width="1.5"/>
+          <text x="802" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1b232b">merge_coverage.py（urg）</text>
+          <text x="802" y="84" text-anchor="middle" font-size="10.5" fill="#66727d">合并全部 vdb → mergedReport</text>
+
+          <line x1="185" y1="75" x2="226" y2="75" stroke="#66727d" stroke-width="1.5" marker-end="url(#am11)"/>
+          <line x1="430" y1="75" x2="471" y2="75" stroke="#66727d" stroke-width="1.5" marker-end="url(#am11)"/>
+          <line x1="655" y1="75" x2="696" y2="75" stroke="#66727d" stroke-width="1.5" marker-end="url(#am11)"/>
+        </svg>
