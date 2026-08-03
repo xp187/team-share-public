@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" width="1200" height="640">
+<style>text{font-family:"Microsoft YaHei","Segoe UI",sans-serif;}</style>
+<defs>
+<pattern id="xhatch" width="9" height="9" patternUnits="userSpaceOnUse"><rect width="9" height="9" fill="#eff6ff"/><path d="M0,0 L9,9 M9,0 L0,9" stroke="#2563eb" stroke-width="1"/></pattern>
+</defs>
+<rect width="1200" height="640" fill="#ffffff"/>
+<text x="600" y="32" font-size="17" fill="#111827" text-anchor="middle" font-weight="bold">HS 传输 SoT / EoT 时序（TX 侧）</text>
+<text x="600" y="54" font-size="12" fill="#6b7280" text-anchor="middle">LP-11 → LP-01 → LP-00 → HS-0 → Sync 00011101 → Payload → 翻转保持 → LP-11（括注数值来自 Table 14）</text>
+<line x1="160" y1="112" x2="160" y2="368" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,4"/>
+<line x1="230" y1="112" x2="230" y2="368" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,4"/>
+<line x1="330" y1="112" x2="330" y2="368" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,4"/>
+<line x1="430" y1="112" x2="430" y2="368" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,4"/>
+<line x1="606" y1="112" x2="606" y2="368" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,4"/>
+<line x1="830" y1="112" x2="830" y2="368" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,4"/>
+<line x1="920" y1="112" x2="920" y2="368" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,4"/>
+<line x1="950" y1="112" x2="950" y2="368" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,4"/>
+<path d="M230,86 V80 H330 V86" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="280" y="74" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">THS-PREPARE = 40ns+4UI ~ 85ns+6UI</text>
+<path d="M830,86 V80 H920 V86" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="875" y="74" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">THS-TRAIL ≥ max(n·8UI, 60ns+n·4UI)</text>
+<path d="M160,108 V102 H230 V108" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="195" y="96" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">TLPX ≥ 50ns</text>
+<path d="M330,108 V102 H430 V108" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="380" y="96" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">THS-ZERO</text>
+<path d="M430,108 V102 H606 V108" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="518" y="96" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">Sync = 00011101（LSB 先传）</text>
+<path d="M950,108 V102 H1140 V108" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="1045" y="96" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">THS-EXIT ≥ 100ns</text>
+<path d="M60,130 L160,130 L160,170 L330,170 L330,160 L430,160 L430,160 L452,160 L452,160 L474,160 L474,160 L496,160 L496,144 L518,144 L518,144 L540,144 L540,144 L562,144 L562,160 L584,160 L584,144 L606,144" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<path d="M60,210 L230,210 L230,250 L330,250 L330,224 L430,224 L430,224 L452,224 L452,224 L474,224 L474,224 L496,224 L496,240 L518,240 L518,240 L540,240 L540,240 L562,240 L562,224 L584,224 L584,240 L606,240" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<path d="M606,144 L610,140" fill="none" stroke="#374151" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M606,240 L610,252" fill="none" stroke="#374151" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M826,140 L830,160" fill="none" stroke="#374151" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M826,252 L830,224" fill="none" stroke="#374151" stroke-width="1.5" stroke-linejoin="round"/>
+<rect x="610" y="140" width="216" height="112" fill="url(#xhatch)" stroke="#2563eb" stroke-width="1.5"/>
+<path d="M830,160 L920,160 L950,130 L1140,130" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<path d="M830,224 L920,224 L950,210 L1140,210" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<text x="44" y="152" font-size="13" fill="#111827" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">Dp</text>
+<text x="44" y="232" font-size="13" fill="#111827" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">Dn</text>
+<text x="441" y="192" font-size="12" fill="#2563eb" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">0</text>
+<text x="463" y="192" font-size="12" fill="#2563eb" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">0</text>
+<text x="485" y="192" font-size="12" fill="#2563eb" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">0</text>
+<text x="507" y="192" font-size="12" fill="#2563eb" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">1</text>
+<text x="529" y="192" font-size="12" fill="#2563eb" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">1</text>
+<text x="551" y="192" font-size="12" fill="#2563eb" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">1</text>
+<text x="573" y="192" font-size="12" fill="#2563eb" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">0</text>
+<text x="595" y="192" font-size="12" fill="#2563eb" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">1</text>
+<text x="862" y="192" font-size="12" fill="#374151" text-anchor="start">翻转保持</text>
+<text x="110" y="272" font-size="12" fill="#6b7280" text-anchor="middle">LP-11（Stop）</text>
+<text x="280" y="272" font-size="12" fill="#6b7280" text-anchor="middle">LP-00（Bridge）</text>
+<text x="718" y="272" font-size="12" fill="#6b7280" text-anchor="middle">Payload（整数字节，LSB 先传）</text>
+<text x="1045" y="272" font-size="12" fill="#6b7280" text-anchor="middle">LP-11（Stop）</text>
+<text x="195" y="290" font-size="12" fill="#6b7280" text-anchor="middle">LP-01（HS-Rqst）</text>
+<text x="380" y="290" font-size="12" fill="#6b7280" text-anchor="middle" font-family="Consolas,monospace">HS-0</text>
+<path d="M60,320 L150,320 L150,360 L250,360 L250,320 L272,360 L294,320 L316,360 L338,320 L360,360 L382,320 L404,360 L426,320 L448,360 L470,320 L492,360 L514,320 L536,360 L558,320 L580,360 L602,320 L624,360 L646,320 L668,360 L690,320 L712,360 L734,320 L756,360 L778,320 L800,360 L822,320 L844,360 L866,320 L888,360 L910,320 L932,360 L954,320 L976,360 L998,320 L998,360 L1010,360 L1070,360 L1090,320 L1140,320" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linejoin="round"/>
+<text x="44" y="342" font-size="13" fill="#7c3aed" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">CLK</text>
+<path d="M150,382 V388 H185 V382" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="167" y="402" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">TLPX</text>
+<path d="M250,382 V388 H430 V382" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="340" y="402" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">TCLK-PRE ≥ 8UI</text>
+<path d="M950,382 V388 H1010 V382" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="980" y="402" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">TCLK-POST ≥ 60ns+52UI</text>
+<path d="M185,408 V414 H225 V408" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="205" y="428" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">TCLK-PREPARE</text>
+<path d="M1010,408 V414 H1070 V408" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="1040" y="428" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">TCLK-TRAIL ≥ 60ns</text>
+<text x="60" y="450" font-size="12" fill="#6b7280" text-anchor="start">DDR 时钟：1 个时钟周期 = 2 UI，上升沿位于数据比特中心（正交），双沿采样；TX 保证 burst 第一个 payload bit 期间出现时钟上升沿。</text>
+<rect x="40" y="468" width="1120" height="86" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+<text x="56" y="490" font-size="12" fill="#374151" text-anchor="start">RX 侧：检测到 LP-00 后经 TD-TERM-EN（Dn 达 VTERM-EN，≤ 35ns+4UI）使能端接；在 THS-SETTLE（85ns+6UI ~ 145ns+10UI）窗口内忽略过渡，</text>
+<text x="56" y="512" font-size="12" fill="#374151" text-anchor="start">搜索并锁定 Leader 序列 011101（容忍任意单比特错误）；EoT 时以 THS-SKIP（40ns ~ 55ns+4UI）回溯忽略末段过渡比特，确定最后有效字节。</text>
+<text x="56" y="534" font-size="12" fill="#374151" text-anchor="start">组合约束：THS-PREPARE+THS-ZERO ≥ 145ns+10UI；TEOT ≤ 105ns+n·12UI（n=1 正向 / n=4 反向）；TCLK-MISS ≤ 60ns 检测时钟消失。</text>
+<rect x="60" y="590" width="26" height="14" fill="url(#xhatch)" stroke="#2563eb" stroke-width="1"/>
+<text x="94" y="602" font-size="12" fill="#6b7280" text-anchor="start">HS 数据段（差分，影线 = 0/1 切换）</text>
+<path d="M360,597 L396,597" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<text x="404" y="602" font-size="12" fill="#6b7280" text-anchor="start">LP / HS 电平（直角跳变）</text>
+<line x1="600" y1="590" x2="600" y2="604" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,4"/>
+<text x="608" y="602" font-size="12" fill="#6b7280" text-anchor="start">相位边界</text>
+<path d="M690,598 V592 H720 V598" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="728" y="602" font-size="12" fill="#6b7280" text-anchor="start">时序参数（Table 14）</text>
+</svg>

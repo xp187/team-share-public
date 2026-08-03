@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="1200" height="680">
+<style>text{font-family:"Microsoft YaHei","Segoe UI",sans-serif;}</style>
+<rect width="1200" height="680" fill="#ffffff"/>
+<text x="600" y="32" font-size="17" fill="#111827" text-anchor="middle" font-weight="bold">Escape Mode：进入序列、Spaced-One-Hot 编码与 Entry Command</text>
+<text x="600" y="54" font-size="12" fill="#6b7280" text-anchor="middle">进入序列 LP-11 → LP-10 → LP-00 → LP-01 → LP-00；Mark 后必跟 Space；Escape 不依赖 Clock Lane，时钟 = Dp ⊕ Dn</text>
+<text x="60" y="86" font-size="13" fill="#111827" text-anchor="start" font-weight="bold">① 进入序列（Control → Escape）</text>
+<path d="M90,110 L270,110 L270,150 L540,150" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<path d="M90,180 L180,180 L180,220 L360,220 L360,180 L450,180 L450,220 L540,220" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<path d="M540,150 L590,150" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round" stroke-dasharray="4,3"/>
+<path d="M540,220 L590,220" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round" stroke-dasharray="4,3"/>
+<text x="44" y="132" font-size="13" fill="#111827" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">Dp</text>
+<text x="44" y="202" font-size="13" fill="#111827" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">Dn</text>
+<text x="600" y="140" font-size="12" fill="#7c3aed" text-anchor="start">→ Escape Mode（Space 态）</text>
+<text x="600" y="160" font-size="12" fill="#7c3aed" text-anchor="start">随后必须发 8-bit entry command</text>
+<text x="135" y="244" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-11</text>
+<text x="225" y="244" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-10</text>
+<text x="315" y="244" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-00</text>
+<text x="405" y="244" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-01</text>
+<text x="495" y="244" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-00</text>
+<text x="135" y="262" font-size="12" fill="#6b7280" text-anchor="middle" font-family="Consolas,monospace">Stop</text>
+<text x="225" y="262" font-size="12" fill="#6b7280" text-anchor="middle" font-family="Consolas,monospace">LP-Rqst</text>
+<text x="495" y="262" font-size="12" fill="#6b7280" text-anchor="middle" font-family="Consolas,monospace">Space</text>
+<path d="M90,266 V272 H540 V266" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="315" y="288" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">每个 LP 相位 ≥ TLPX（min 50ns）</text>
+<rect x="860" y="80" width="300" height="190" rx="8" ry="8" fill="#faf5ff" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="875" y="102" font-size="13" fill="#7c3aed" text-anchor="start" font-weight="bold">Spaced-One-Hot 编码</text>
+<text x="875" y="126" font-size="12" fill="#374151" text-anchor="start" font-family="Consolas,monospace">Mark-1 = LP-10 → bit 1</text>
+<text x="875" y="150" font-size="12" fill="#374151" text-anchor="start" font-family="Consolas,monospace">Mark-0 = LP-01 → bit 0</text>
+<text x="875" y="174" font-size="12" fill="#374151" text-anchor="start">Space = LP-00（每个 Mark 后必跟）</text>
+<text x="875" y="198" font-size="12" fill="#374151" text-anchor="start">退出前最后相位 = 不带 Space 的 Mark-1</text>
+<text x="875" y="222" font-size="12" fill="#374151" text-anchor="start">时钟 = Dp ⊕ Dn（自定时）</text>
+<text x="875" y="246" font-size="12" fill="#374151" text-anchor="start">Stop（LP-11）出现即退出 Escape</text>
+<text x="60" y="312" font-size="13" fill="#111827" text-anchor="start" font-weight="bold">② 示例：发送 entry command 0x87（LPDT），位模式 11100001（发送顺序，先发位 = LSB）</text>
+<path d="M90,336 L145,336 L145,376 L190,376 L190,336 L245,336 L245,376 L290,376 L290,336 L345,336 L345,376 L390,376 L390,376 L445,376 L445,376 L490,376 L490,376 L545,376 L545,376 L590,376 L590,376 L645,376 L645,376 L690,376 L690,376 L745,376 L745,376 L790,376 L790,336 L845,336 L845,376 L890,376" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<path d="M90,446 L145,446 L145,446 L190,446 L190,446 L245,446 L245,446 L290,446 L290,446 L345,446 L345,446 L390,446 L390,406 L445,406 L445,446 L490,446 L490,406 L545,406 L545,446 L590,446 L590,406 L645,406 L645,446 L690,446 L690,406 L745,406 L745,446 L790,446 L790,446 L845,446 L845,446 L890,446" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<path d="M90,476 L145,476 L145,506 L190,506 L190,476 L245,476 L245,506 L290,506 L290,476 L345,476 L345,506 L390,506 L390,476 L445,476 L445,506 L490,506 L490,476 L545,476 L545,506 L590,506 L590,476 L645,476 L645,506 L690,506 L690,476 L745,476 L745,506 L790,506 L790,476 L845,476 L845,506 L890,506" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linejoin="round"/>
+<path d="M890,376 L935,376" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round" stroke-dasharray="4,3"/>
+<path d="M890,446 L935,446" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round" stroke-dasharray="4,3"/>
+<path d="M890,506 L935,506" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linejoin="round" stroke-dasharray="4,3"/>
+<text x="44" y="358" font-size="13" fill="#111827" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">Dp</text>
+<text x="44" y="428" font-size="13" fill="#111827" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">Dn</text>
+<text x="44" y="498" font-size="12" fill="#7c3aed" text-anchor="middle" font-family="Consolas,monospace">Dp⊕Dn</text>
+<text x="117" y="330" font-size="12" fill="#7c3aed" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">1</text>
+<text x="217" y="330" font-size="12" fill="#7c3aed" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">1</text>
+<text x="317" y="330" font-size="12" fill="#7c3aed" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">1</text>
+<text x="417" y="330" font-size="12" fill="#7c3aed" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">0</text>
+<text x="517" y="330" font-size="12" fill="#7c3aed" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">0</text>
+<text x="617" y="330" font-size="12" fill="#7c3aed" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">0</text>
+<text x="717" y="330" font-size="12" fill="#7c3aed" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">0</text>
+<text x="817" y="330" font-size="12" fill="#7c3aed" text-anchor="middle" font-weight="bold" font-family="Consolas,monospace">1</text>
+<text x="945" y="372" font-size="12" fill="#6b7280" text-anchor="start">随后按命令进入</text>
+<text x="945" y="392" font-size="12" fill="#6b7280" text-anchor="start">对应模式（Mark-1 + Stop 结束）</text>
+<path d="M90,524 V530 H190 V524" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="140" y="546" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">bit 1 = Mark-1 + Space</text>
+<path d="M490,524 V530 H590 V524" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="540" y="546" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">bit 0 = Mark-0 + Space</text>
+<text x="60" y="566" font-size="13" fill="#111827" text-anchor="start" font-weight="bold">③ Entry Command 一览（D-PHY Table 8）</text>
+<rect x="60" y="574" width="202" height="20" rx="0" ry="0" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+<text x="161" y="588" font-size="12" fill="#111827" text-anchor="middle" font-weight="bold">命令</text>
+<rect x="262" y="574" width="72" height="20" rx="0" ry="0" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+<text x="298" y="588" font-size="12" fill="#111827" text-anchor="middle" font-weight="bold">类型</text>
+<rect x="334" y="574" width="150" height="20" rx="0" ry="0" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+<text x="409" y="588" font-size="12" fill="#111827" text-anchor="middle" font-weight="bold">位模式（发送顺序）</text>
+<rect x="484" y="574" width="56" height="20" rx="0" ry="0" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+<text x="512" y="588" font-size="12" fill="#111827" text-anchor="middle" font-weight="bold">Hex</text>
+<rect x="60" y="594" width="202" height="20" rx="0" ry="0" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+<rect x="262" y="594" width="72" height="20" rx="0" ry="0" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+<rect x="334" y="594" width="150" height="20" rx="0" ry="0" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+<rect x="484" y="594" width="56" height="20" rx="0" ry="0" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+<text x="68" y="608" font-size="12" fill="#111827" text-anchor="start">LPDT（低功耗数据传输）</text>
+<rect x="262" y="594" width="72" height="20" rx="0" ry="0" fill="#faf5ff" stroke="#d1d5db" stroke-width="1"/>
+<text x="298" y="608" font-size="12" fill="#7c3aed" text-anchor="middle" font-family="Consolas,monospace">mode</text>
+<text x="409" y="608" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">11100001</text>
+<text x="512" y="608" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">0x87</text>
+<rect x="60" y="614" width="202" height="20" rx="0" ry="0" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+<rect x="262" y="614" width="72" height="20" rx="0" ry="0" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+<rect x="334" y="614" width="150" height="20" rx="0" ry="0" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+<rect x="484" y="614" width="56" height="20" rx="0" ry="0" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+<text x="68" y="628" font-size="12" fill="#111827" text-anchor="start">ULPS（超低功耗态）</text>
+<rect x="262" y="614" width="72" height="20" rx="0" ry="0" fill="#faf5ff" stroke="#d1d5db" stroke-width="1"/>
+<text x="298" y="628" font-size="12" fill="#7c3aed" text-anchor="middle" font-family="Consolas,monospace">mode</text>
+<text x="409" y="628" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">00011110</text>
+<text x="512" y="628" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">0x78</text>
+<rect x="60" y="634" width="202" height="20" rx="0" ry="0" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+<rect x="262" y="634" width="72" height="20" rx="0" ry="0" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+<rect x="334" y="634" width="150" height="20" rx="0" ry="0" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+<rect x="484" y="634" width="56" height="20" rx="0" ry="0" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+<text x="68" y="648" font-size="12" fill="#111827" text-anchor="start">Undefined-1（未定义）</text>
+<rect x="262" y="634" width="72" height="20" rx="0" ry="0" fill="#faf5ff" stroke="#d1d5db" stroke-width="1"/>
+<text x="298" y="648" font-size="12" fill="#7c3aed" text-anchor="middle" font-family="Consolas,monospace">mode</text>
+<text x="409" y="648" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">10011111</text>
+<text x="512" y="648" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">0xF9</text>
+<rect x="60" y="654" width="202" height="20" rx="0" ry="0" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+<rect x="262" y="654" width="72" height="20" rx="0" ry="0" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+<rect x="334" y="654" width="150" height="20" rx="0" ry="0" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+<rect x="484" y="654" width="56" height="20" rx="0" ry="0" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+<text x="68" y="668" font-size="12" fill="#111827" text-anchor="start">Undefined-2（未定义）</text>
+<rect x="262" y="654" width="72" height="20" rx="0" ry="0" fill="#faf5ff" stroke="#d1d5db" stroke-width="1"/>
+<text x="298" y="668" font-size="12" fill="#7c3aed" text-anchor="middle" font-family="Consolas,monospace">mode</text>
+<text x="409" y="668" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">11011110</text>
+<text x="512" y="668" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">0x7B</text>
+<rect x="620" y="574" width="202" height="20" rx="0" ry="0" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+<text x="721" y="588" font-size="12" fill="#111827" text-anchor="middle" font-weight="bold">命令</text>
+<rect x="822" y="574" width="72" height="20" rx="0" ry="0" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+<text x="858" y="588" font-size="12" fill="#111827" text-anchor="middle" font-weight="bold">类型</text>
+<rect x="894" y="574" width="150" height="20" rx="0" ry="0" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+<text x="969" y="588" font-size="12" fill="#111827" text-anchor="middle" font-weight="bold">位模式（发送顺序）</text>
+<rect x="1044" y="574" width="56" height="20" rx="0" ry="0" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1"/>
+<text x="1072" y="588" font-size="12" fill="#111827" text-anchor="middle" font-weight="bold">Hex</text>
+<rect x="620" y="594" width="202" height="20" rx="0" ry="0" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+<rect x="822" y="594" width="72" height="20" rx="0" ry="0" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+<rect x="894" y="594" width="150" height="20" rx="0" ry="0" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+<rect x="1044" y="594" width="56" height="20" rx="0" ry="0" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+<text x="628" y="608" font-size="12" fill="#111827" text-anchor="start">Reset-Trigger（远程复位）</text>
+<rect x="822" y="594" width="72" height="20" rx="0" ry="0" fill="#fff7ed" stroke="#d1d5db" stroke-width="1"/>
+<text x="858" y="608" font-size="12" fill="#ea580c" text-anchor="middle" font-family="Consolas,monospace">Trigger</text>
+<text x="969" y="608" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">01100010</text>
+<text x="1072" y="608" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">0x46</text>
+<rect x="620" y="614" width="202" height="20" rx="0" ry="0" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+<rect x="822" y="614" width="72" height="20" rx="0" ry="0" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+<rect x="894" y="614" width="150" height="20" rx="0" ry="0" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+<rect x="1044" y="614" width="56" height="20" rx="0" ry="0" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+<text x="628" y="628" font-size="12" fill="#111827" text-anchor="start">HS Test Mode（进入序列）</text>
+<rect x="822" y="614" width="72" height="20" rx="0" ry="0" fill="#fff7ed" stroke="#d1d5db" stroke-width="1"/>
+<text x="858" y="628" font-size="12" fill="#ea580c" text-anchor="middle" font-family="Consolas,monospace">Trigger</text>
+<text x="969" y="628" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">01011101</text>
+<text x="1072" y="628" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">0xBA</text>
+<rect x="620" y="634" width="202" height="20" rx="0" ry="0" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+<rect x="822" y="634" width="72" height="20" rx="0" ry="0" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+<rect x="894" y="634" width="150" height="20" rx="0" ry="0" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+<rect x="1044" y="634" width="56" height="20" rx="0" ry="0" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+<text x="628" y="648" font-size="12" fill="#111827" text-anchor="start">Unknown-4（未知）</text>
+<rect x="822" y="634" width="72" height="20" rx="0" ry="0" fill="#fff7ed" stroke="#d1d5db" stroke-width="1"/>
+<text x="858" y="648" font-size="12" fill="#ea580c" text-anchor="middle" font-family="Consolas,monospace">Trigger</text>
+<text x="969" y="648" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">00100001</text>
+<text x="1072" y="648" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">0x84</text>
+<rect x="620" y="654" width="202" height="20" rx="0" ry="0" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+<rect x="822" y="654" width="72" height="20" rx="0" ry="0" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+<rect x="894" y="654" width="150" height="20" rx="0" ry="0" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+<rect x="1044" y="654" width="56" height="20" rx="0" ry="0" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+<text x="628" y="668" font-size="12" fill="#111827" text-anchor="start">Unknown-5（未知）</text>
+<rect x="822" y="654" width="72" height="20" rx="0" ry="0" fill="#fff7ed" stroke="#d1d5db" stroke-width="1"/>
+<text x="858" y="668" font-size="12" fill="#ea580c" text-anchor="middle" font-family="Consolas,monospace">Trigger</text>
+<text x="969" y="668" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">10100000</text>
+<text x="1072" y="668" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">0x05</text>
+</svg>

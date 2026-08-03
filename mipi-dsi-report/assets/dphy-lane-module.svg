@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" width="960" height="640">
+<style>text{font-family:"Microsoft YaHei","Segoe UI",sans-serif;}</style>
+<defs>
+<marker id="a-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
+<marker id="a-blue-s" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#2563eb"/></marker>
+<marker id="a-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#059669"/></marker>
+<marker id="a-green-s" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#059669"/></marker>
+<marker id="a-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#7c3aed"/></marker>
+<marker id="a-purple-s" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#7c3aed"/></marker>
+<marker id="a-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
+<marker id="a-gray-s" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#6b7280"/></marker>
+<marker id="a-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
+<marker id="a-orange-s" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#ea580c"/></marker>
+<marker id="a-dark" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#374151"/></marker>
+<marker id="a-dark-s" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#374151"/></marker>
+</defs>
+<rect width="960" height="640" fill="#ffffff"/>
+<text x="480" y="34" font-size="17" fill="#111827" text-anchor="middle" font-weight="bold">D-PHY 链路架构：Lane Module 组成</text>
+<text x="480" y="56" font-size="12" fill="#6b7280" text-anchor="middle">1 条 Clock Lane + 1~4 条 Data Lane；HS 仅 Forward 单向，LP 可双向（反向仅使用 Data Lane 0）</text>
+<rect x="40" y="80" width="300" height="480" rx="10" ry="10" fill="#fafafa" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="6,3"/>
+<text x="190" y="100" font-size="14" fill="#111827" text-anchor="middle" font-weight="bold">Host（Master）</text>
+<rect x="620" y="80" width="300" height="480" rx="10" ry="10" fill="#fafafa" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="6,3"/>
+<text x="770" y="100" font-size="14" fill="#111827" text-anchor="middle" font-weight="bold">Peripheral（Slave）</text>
+<rect x="60" y="112" width="260" height="44" rx="8" ry="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+<text x="190" y="130" font-size="12" fill="#111827" text-anchor="middle" font-weight="bold">Protocol Layer</text>
+<text x="190" y="147" font-size="12" fill="#6b7280" text-anchor="middle">（DSI / CSI-2 协议层）</text>
+<rect x="60" y="168" width="260" height="36" rx="8" ry="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+<text x="190" y="191" font-size="12" fill="#111827" text-anchor="middle">PPI（PHY Protocol Interface）</text>
+<line x1="190" y1="156" x2="190" y2="164" stroke="#6b7280" stroke-width="1.5" marker-end="url(#a-gray)"/>
+<rect x="640" y="112" width="260" height="44" rx="8" ry="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+<text x="770" y="130" font-size="12" fill="#111827" text-anchor="middle" font-weight="bold">Protocol Layer</text>
+<text x="770" y="147" font-size="12" fill="#6b7280" text-anchor="middle">（DSI / CSI-2 协议层）</text>
+<rect x="640" y="168" width="260" height="36" rx="8" ry="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+<text x="770" y="191" font-size="12" fill="#111827" text-anchor="middle">PPI（PHY Protocol Interface）</text>
+<line x1="770" y1="156" x2="770" y2="164" stroke="#6b7280" stroke-width="1.5" marker-end="url(#a-gray)"/>
+<line x1="67" y1="204" x2="67" y2="508" stroke="#9ca3af" stroke-width="1.2"/>
+<line x1="893" y1="204" x2="893" y2="508" stroke="#9ca3af" stroke-width="1.2"/>
+<line x1="67" y1="248" x2="75" y2="248" stroke="#9ca3af" stroke-width="1.2"/>
+<line x1="885" y1="248" x2="893" y2="248" stroke="#9ca3af" stroke-width="1.2"/>
+<rect x="75" y="220" width="260" height="56" rx="6" ry="6" fill="#ffffff" stroke="#9ca3af" stroke-width="1.5"/>
+<text x="85" y="236" font-size="12" fill="#111827" text-anchor="start" font-weight="bold" font-family="Consolas,monospace">Clock Lane · MCNN</text>
+<rect x="146" y="242" width="56" height="26" rx="4" ry="4" fill="#eff6ff" stroke="#60a5fa" stroke-width="1.2"/>
+<text x="174" y="259" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">HS-TX</text>
+<rect x="208" y="242" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="236" y="259" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-TX</text>
+<rect x="625" y="220" width="260" height="56" rx="6" ry="6" fill="#ffffff" stroke="#9ca3af" stroke-width="1.5"/>
+<text x="635" y="236" font-size="12" fill="#111827" text-anchor="start" font-weight="bold" font-family="Consolas,monospace">Clock Lane · SCNN</text>
+<rect x="696" y="242" width="56" height="26" rx="4" ry="4" fill="#eff6ff" stroke="#60a5fa" stroke-width="1.2"/>
+<text x="724" y="259" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">HS-RX</text>
+<rect x="758" y="242" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="786" y="259" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-RX</text>
+<line x1="335" y1="245" x2="625" y2="245" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="335" y1="251" x2="625" y2="251" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="345" y1="238" x2="612" y2="238" stroke="#2563eb" stroke-width="2" marker-end="url(#a-blue)"/>
+<text x="480" y="231" font-size="12" fill="#2563eb" text-anchor="middle">HS（DDR CLK）</text>
+<text x="480" y="272" font-size="12" fill="#6b7280" text-anchor="middle">Dp / Dn 差分对</text>
+<line x1="67" y1="312" x2="75" y2="312" stroke="#9ca3af" stroke-width="1.2"/>
+<line x1="885" y1="312" x2="893" y2="312" stroke="#9ca3af" stroke-width="1.2"/>
+<rect x="75" y="284" width="260" height="56" rx="6" ry="6" fill="#ffffff" stroke="#9ca3af" stroke-width="1.5"/>
+<text x="85" y="300" font-size="12" fill="#111827" text-anchor="start" font-weight="bold" font-family="Consolas,monospace">Data Lane 0 · MFAA</text>
+<rect x="84" y="306" width="56" height="26" rx="4" ry="4" fill="#eff6ff" stroke="#60a5fa" stroke-width="1.2"/>
+<text x="112" y="323" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">HS-TX</text>
+<rect x="146" y="306" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="174" y="323" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-TX</text>
+<rect x="208" y="306" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="236" y="323" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-RX</text>
+<rect x="270" y="306" width="56" height="26" rx="4" ry="4" fill="#fff7ed" stroke="#fb923c" stroke-width="1.2"/>
+<text x="298" y="323" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-CD</text>
+<rect x="625" y="284" width="260" height="56" rx="6" ry="6" fill="#ffffff" stroke="#9ca3af" stroke-width="1.5"/>
+<text x="635" y="300" font-size="12" fill="#111827" text-anchor="start" font-weight="bold" font-family="Consolas,monospace">Data Lane 0 · SFAA</text>
+<rect x="634" y="306" width="56" height="26" rx="4" ry="4" fill="#eff6ff" stroke="#60a5fa" stroke-width="1.2"/>
+<text x="662" y="323" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">HS-RX</text>
+<rect x="696" y="306" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="724" y="323" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-RX</text>
+<rect x="758" y="306" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="786" y="323" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-TX</text>
+<rect x="820" y="306" width="56" height="26" rx="4" ry="4" fill="#fff7ed" stroke="#fb923c" stroke-width="1.2"/>
+<text x="848" y="323" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-CD</text>
+<line x1="335" y1="309" x2="625" y2="309" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="335" y1="315" x2="625" y2="315" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="345" y1="302" x2="612" y2="302" stroke="#2563eb" stroke-width="2" marker-end="url(#a-blue)"/>
+<text x="480" y="295" font-size="12" fill="#2563eb" text-anchor="middle">HS</text>
+<line x1="345" y1="324" x2="612" y2="324" stroke="#059669" stroke-width="2" marker-end="url(#a-green)" marker-start="url(#a-green-s)"/>
+<text x="480" y="339" font-size="12" fill="#059669" text-anchor="middle">LP 双向（反向仅此 Lane）</text>
+<line x1="67" y1="376" x2="75" y2="376" stroke="#9ca3af" stroke-width="1.2"/>
+<line x1="885" y1="376" x2="893" y2="376" stroke="#9ca3af" stroke-width="1.2"/>
+<rect x="75" y="348" width="260" height="56" rx="6" ry="6" fill="#ffffff" stroke="#9ca3af" stroke-width="1.5"/>
+<text x="85" y="364" font-size="12" fill="#111827" text-anchor="start" font-weight="bold" font-family="Consolas,monospace">Data Lane 1 · MFAA</text>
+<rect x="84" y="370" width="56" height="26" rx="4" ry="4" fill="#eff6ff" stroke="#60a5fa" stroke-width="1.2"/>
+<text x="112" y="387" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">HS-TX</text>
+<rect x="146" y="370" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="174" y="387" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-TX</text>
+<rect x="208" y="370" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="236" y="387" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-RX</text>
+<rect x="270" y="370" width="56" height="26" rx="4" ry="4" fill="#fff7ed" stroke="#fb923c" stroke-width="1.2"/>
+<text x="298" y="387" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-CD</text>
+<rect x="625" y="348" width="260" height="56" rx="6" ry="6" fill="#ffffff" stroke="#9ca3af" stroke-width="1.5"/>
+<text x="635" y="364" font-size="12" fill="#111827" text-anchor="start" font-weight="bold" font-family="Consolas,monospace">Data Lane 1 · SFAA</text>
+<rect x="634" y="370" width="56" height="26" rx="4" ry="4" fill="#eff6ff" stroke="#60a5fa" stroke-width="1.2"/>
+<text x="662" y="387" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">HS-RX</text>
+<rect x="696" y="370" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="724" y="387" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-RX</text>
+<rect x="758" y="370" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="786" y="387" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-TX</text>
+<rect x="820" y="370" width="56" height="26" rx="4" ry="4" fill="#fff7ed" stroke="#fb923c" stroke-width="1.2"/>
+<text x="848" y="387" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-CD</text>
+<line x1="335" y1="373" x2="625" y2="373" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="335" y1="379" x2="625" y2="379" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="345" y1="366" x2="612" y2="366" stroke="#2563eb" stroke-width="2" marker-end="url(#a-blue)"/>
+<text x="480" y="359" font-size="12" fill="#2563eb" text-anchor="middle">HS</text>
+<line x1="345" y1="388" x2="612" y2="388" stroke="#059669" stroke-width="2" marker-end="url(#a-green)"/>
+<text x="480" y="403" font-size="12" fill="#059669" text-anchor="middle">LP</text>
+<line x1="67" y1="440" x2="75" y2="440" stroke="#9ca3af" stroke-width="1.2"/>
+<line x1="885" y1="440" x2="893" y2="440" stroke="#9ca3af" stroke-width="1.2"/>
+<rect x="75" y="412" width="260" height="56" rx="6" ry="6" fill="#ffffff" stroke="#9ca3af" stroke-width="1.5"/>
+<text x="85" y="428" font-size="12" fill="#111827" text-anchor="start" font-weight="bold" font-family="Consolas,monospace">Data Lane 2 · MFAA</text>
+<rect x="84" y="434" width="56" height="26" rx="4" ry="4" fill="#eff6ff" stroke="#60a5fa" stroke-width="1.2"/>
+<text x="112" y="451" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">HS-TX</text>
+<rect x="146" y="434" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="174" y="451" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-TX</text>
+<rect x="208" y="434" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="236" y="451" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-RX</text>
+<rect x="270" y="434" width="56" height="26" rx="4" ry="4" fill="#fff7ed" stroke="#fb923c" stroke-width="1.2"/>
+<text x="298" y="451" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-CD</text>
+<rect x="625" y="412" width="260" height="56" rx="6" ry="6" fill="#ffffff" stroke="#9ca3af" stroke-width="1.5"/>
+<text x="635" y="428" font-size="12" fill="#111827" text-anchor="start" font-weight="bold" font-family="Consolas,monospace">Data Lane 2 · SFAA</text>
+<rect x="634" y="434" width="56" height="26" rx="4" ry="4" fill="#eff6ff" stroke="#60a5fa" stroke-width="1.2"/>
+<text x="662" y="451" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">HS-RX</text>
+<rect x="696" y="434" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="724" y="451" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-RX</text>
+<rect x="758" y="434" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="786" y="451" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-TX</text>
+<rect x="820" y="434" width="56" height="26" rx="4" ry="4" fill="#fff7ed" stroke="#fb923c" stroke-width="1.2"/>
+<text x="848" y="451" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-CD</text>
+<line x1="335" y1="437" x2="625" y2="437" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="335" y1="443" x2="625" y2="443" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="345" y1="430" x2="612" y2="430" stroke="#2563eb" stroke-width="2" marker-end="url(#a-blue)"/>
+<text x="480" y="423" font-size="12" fill="#2563eb" text-anchor="middle">HS</text>
+<line x1="345" y1="452" x2="612" y2="452" stroke="#059669" stroke-width="2" marker-end="url(#a-green)"/>
+<text x="480" y="467" font-size="12" fill="#059669" text-anchor="middle">LP</text>
+<line x1="67" y1="504" x2="75" y2="504" stroke="#9ca3af" stroke-width="1.2"/>
+<line x1="885" y1="504" x2="893" y2="504" stroke="#9ca3af" stroke-width="1.2"/>
+<rect x="75" y="476" width="260" height="56" rx="6" ry="6" fill="#ffffff" stroke="#9ca3af" stroke-width="1.5"/>
+<text x="85" y="492" font-size="12" fill="#111827" text-anchor="start" font-weight="bold" font-family="Consolas,monospace">Data Lane 3 · MFAA</text>
+<rect x="84" y="498" width="56" height="26" rx="4" ry="4" fill="#eff6ff" stroke="#60a5fa" stroke-width="1.2"/>
+<text x="112" y="515" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">HS-TX</text>
+<rect x="146" y="498" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="174" y="515" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-TX</text>
+<rect x="208" y="498" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="236" y="515" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-RX</text>
+<rect x="270" y="498" width="56" height="26" rx="4" ry="4" fill="#fff7ed" stroke="#fb923c" stroke-width="1.2"/>
+<text x="298" y="515" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-CD</text>
+<rect x="625" y="476" width="260" height="56" rx="6" ry="6" fill="#ffffff" stroke="#9ca3af" stroke-width="1.5"/>
+<text x="635" y="492" font-size="12" fill="#111827" text-anchor="start" font-weight="bold" font-family="Consolas,monospace">Data Lane 3 · SFAA</text>
+<rect x="634" y="498" width="56" height="26" rx="4" ry="4" fill="#eff6ff" stroke="#60a5fa" stroke-width="1.2"/>
+<text x="662" y="515" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">HS-RX</text>
+<rect x="696" y="498" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="724" y="515" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-RX</text>
+<rect x="758" y="498" width="56" height="26" rx="4" ry="4" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+<text x="786" y="515" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-TX</text>
+<rect x="820" y="498" width="56" height="26" rx="4" ry="4" fill="#fff7ed" stroke="#fb923c" stroke-width="1.2"/>
+<text x="848" y="515" font-size="12" fill="#111827" text-anchor="middle" font-family="Consolas,monospace">LP-CD</text>
+<line x1="335" y1="501" x2="625" y2="501" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="335" y1="507" x2="625" y2="507" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="345" y1="494" x2="612" y2="494" stroke="#2563eb" stroke-width="2" marker-end="url(#a-blue)"/>
+<text x="480" y="487" font-size="12" fill="#2563eb" text-anchor="middle">HS</text>
+<line x1="345" y1="516" x2="612" y2="516" stroke="#059669" stroke-width="2" marker-end="url(#a-green)"/>
+<text x="480" y="531" font-size="12" fill="#059669" text-anchor="middle">LP</text>
+<line x1="40" y1="586" x2="70" y2="586" stroke="#2563eb" stroke-width="2" marker-end="url(#a-blue)"/>
+<text x="78" y="590" font-size="12" fill="#6b7280" text-anchor="start">HS：Host → Peripheral（单向）</text>
+<line x1="330" y1="586" x2="360" y2="586" stroke="#059669" stroke-width="2" marker-end="url(#a-green)" marker-start="url(#a-green-s)"/>
+<text x="368" y="590" font-size="12" fill="#6b7280" text-anchor="start">LP：可双向（反向仅 Lane 0）</text>
+<line x1="610" y1="583" x2="648" y2="583" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="610" y1="589" x2="648" y2="589" stroke="#6b7280" stroke-width="1.5"/>
+<text x="656" y="590" font-size="12" fill="#6b7280" text-anchor="start">Dp / Dn 差分对（每 Lane 一对）</text>
+<text x="40" y="614" font-size="12" fill="#6b7280" text-anchor="start">注：含 HS-TX 必含 LP-TX，含 HS-RX 必含 LP-RX；LP-CD 仅双向 Lane 需要；反向 HS 带宽 = 正向 1/4。</text>
+<text x="40" y="634" font-size="12" fill="#6b7280" text-anchor="start">CIL = Control and Interface Logic（与 PPI 对接）；Clock Lane 永远 Host 驱动，仅支持 ULPS（无常规 Escape）。</text>
+</svg>

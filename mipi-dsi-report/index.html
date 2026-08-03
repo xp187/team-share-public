@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIPI 协议技术报告 — DSI v1.1 / D-PHY v2.0（数字验证视角）</title>
+<style>
+  /* Design tokens from fireworks-tech-graph style-1-flat-icon */
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1e40af;
+    --orange: #ea580c;
+    --green: #059669;
+    --purple: #7c3aed;
+    --gray: #6b7280;
+    --ink: #111827;
+    --ink-2: #374151;
+    --line: #e5e7eb;
+    --line-2: #d1d5db;
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --blue-tint: #eff6ff;
+    --green-tint: #f0fdf4;
+    --purple-tint: #faf5ff;
+    --orange-tint: #fff7ed;
+    --sidebar-w: 264px;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(17,24,39,.07), 0 4px 14px rgba(17,24,39,.05);
+    --mono: Consolas, "Courier New", monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, "PingFang SC",
+      "Microsoft YaHei", "Microsoft JhengHei", "SimHei", sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.75;
+    font-size: 15px;
+  }
+  code {
+    font-family: var(--mono);
+    background: var(--blue-tint);
+    color: var(--primary-dark);
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: .92em;
+    white-space: nowrap;
+  }
+  /* allow long inline code to wrap on narrow screens */
+  @media (max-width: 1023px) {
+    code { white-space: normal; overflow-wrap: anywhere; }
+  }
+  /* ---------- sidebar ---------- */
+  #sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: var(--sidebar-w);
+    background: #fff;
+    border-right: 1px solid var(--line);
+    padding: 22px 14px;
+    overflow-y: auto;
+    z-index: 40;
+    transition: transform .25s ease;
+  }
+  #sidebar .brand {
+    font-weight: 700; font-size: 15px; color: var(--primary-dark);
+    padding: 0 10px 14px; border-bottom: 1px solid var(--line);
+    margin-bottom: 10px;
+  }
+  #sidebar .brand small { display:block; font-weight:400; color:var(--gray); font-size:11px; margin-top:2px; }
+  #sidebar nav a {
+    display: block;
+    padding: 8px 10px;
+    margin: 2px 0;
+    border-radius: 8px;
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 13.5px;
+    border-left: 3px solid transparent;
+    transition: background .15s, color .15s;
+  }
+  #sidebar nav a .idx { color: var(--gray); font-family: var(--mono); font-size: 11px; margin-right: 6px; }
+  #sidebar nav a:hover { background: var(--blue-tint); color: var(--primary-dark); }
+  #sidebar nav a.active {
+    background: var(--blue-tint);
+    color: var(--primary-dark);
+    border-left-color: var(--primary);
+    font-weight: 600;
+  }
+  /* ---------- top bar (mobile) ---------- */
+  #topbar {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 52px;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    z-index: 50;
+    align-items: center;
+    padding: 0 14px;
+    gap: 12px;
+  }
+  #topbar .t { font-weight: 700; color: var(--primary-dark); font-size: 14px; }
+  #hamburger {
+    border: 1px solid var(--line-2);
+    background: #fff;
+    border-radius: 8px;
+    width: 38px; height: 34px;
+    cursor: pointer;
+    display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px;
+  }
+  #hamburger span { display:block; width:16px; height:2px; background:var(--ink-2); border-radius:2px; }
+  #scrim {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(17,24,39,.4);
+    z-index: 35;
+  }
+  /* ---------- main ---------- */
+  main {
+    margin-left: var(--sidebar-w);
+    padding: 0 28px 80px;
+    max-width: 1240px;
+  }
+  section { scroll-margin-top: 24px; }
+  /* ---------- hero ---------- */
+  .hero {
+    margin: 28px 0 8px;
+    padding: 34px 36px;
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 55%, #faf5ff 100%);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+  }
+  .hero h1 { margin: 0 0 6px; font-size: 30px; letter-spacing: .5px; }
+  .hero .sub { font-size: 16px; color: var(--primary-dark); font-weight: 600; margin-bottom: 16px; }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .badge {
+    font-size: 12px; font-weight: 600;
+    padding: 4px 12px; border-radius: 999px;
+    border: 1px solid;
+  }
+  .badge.b-blue { color: var(--primary-dark); background: var(--blue-tint); border-color: #bfdbfe; }
+  .badge.b-purple { color: var(--purple); background: var(--purple-tint); border-color: #ddd6fe; }
+  .badge.b-green { color: var(--green); background: var(--green-tint); border-color: #bbf7d0; }
+  .badge.b-orange { color: var(--orange); background: var(--orange-tint); border-color: #fed7aa; }
+  .hero .note {
+    background: #fff; border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 16px; font-size: 13.5px; color: var(--ink-2);
+  }
+  .hero .note b { color: var(--ink); }
+  /* ---------- section cards ---------- */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--primary);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 26px 30px;
+    margin: 26px 0;
+  }
+  .card h2 {
+    margin: 0 0 4px; font-size: 21px;
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .card h2 .no {
+    font-family: var(--mono); font-size: 13px; color: #fff;
+    background: var(--primary); border-radius: 6px; padding: 2px 8px;
+  }
+  .card h2 .en { font-size: 12px; color: var(--gray); font-weight: 400; font-family: var(--mono); }
+  .card h3 {
+    margin: 26px 0 8px; font-size: 16.5px;
+    padding-left: 10px; border-left: 3px solid var(--primary);
+  }
+  .card h4 { margin: 18px 0 6px; font-size: 15px; color: var(--ink-2); }
+  .card p { margin: 8px 0; }
+  .card ul, .card ol { margin: 8px 0; padding-left: 22px; }
+  .card li { margin: 4px 0; }
+  .lead { color: var(--ink-2); }
+  /* ---------- tables ---------- */
+  .tbl-wrap { overflow-x: auto; margin: 12px 0 16px; border-radius: 10px; border: 1px solid var(--line); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  thead th {
+    background: var(--ink);
+    color: #fff;
+    text-align: left;
+    padding: 9px 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  tbody td { padding: 8px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+  tbody tr:nth-child(even) { background: #f8fafc; }
+  tbody tr:hover { background: var(--blue-tint); }
+  td code { white-space: nowrap; }
+  /* ---------- figures ---------- */
+  figure {
+    margin: 18px 0;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    text-align: center;
+  }
+  figure img { max-width: 100%; height: auto; }
+  figcaption { margin-top: 10px; font-size: 13px; color: var(--gray); }
+  figcaption b { color: var(--ink-2); }
+  /* ---------- callouts ---------- */
+  .callout {
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 13.5px;
+    border: 1px solid;
+  }
+  .callout.warn { background: var(--orange-tint); border-color: #fed7aa; }
+  .callout.warn b { color: var(--orange); }
+  .callout.info { background: var(--blue-tint); border-color: #bfdbfe; }
+  .callout.info b { color: var(--primary-dark); }
+  .callout.ok { background: var(--green-tint); border-color: #bbf7d0; }
+  .callout.ok b { color: var(--green); }
+  /* ---------- code blocks ---------- */
+  pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 18px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+  pre .cm { color: #7c8aa5; }
+  /* ---------- checklist ---------- */
+  .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; }
+  .check-grid li { list-style: none; position: relative; padding-left: 24px; }
+  .check-grid li::before {
+    content: "";
+    position: absolute; left: 0; top: 7px;
+    width: 13px; height: 13px;
+    border: 2px solid var(--primary);
+    border-radius: 4px;
+    background: var(--blue-tint);
+  }
+  /* ---------- misc ---------- */
+  .kvi { display:inline-block; font-family:var(--mono); font-size:12px; background:#f3f4f6; border:1px solid var(--line-2); border-radius:6px; padding:1px 8px; margin:2px 2px; }
+  footer { color: var(--gray); font-size: 12.5px; text-align: center; margin-top: 40px; }
+  /* ---------- responsive ---------- */
+  @media (max-width: 1023px) {
+    #topbar { display: flex; }
+    #sidebar { transform: translateX(-100%); top: 52px; width: 280px; box-shadow: var(--shadow); }
+    body.nav-open #sidebar { transform: translateX(0); }
+    body.nav-open #scrim { display: block; }
+    main { margin-left: 0; padding: 64px 14px 60px; }
+    section { scroll-margin-top: 64px; }
+    .hero { padding: 24px 20px; margin-top: 12px; }
+    .hero h1 { font-size: 23px; }
+    .card { padding: 18px 16px; }
+    .check-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Mobile top bar with hamburger -->
+<div id="topbar">
+  <button id="hamburger" aria-label="打开目录" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="t">MIPI 协议技术报告</div>
+</div>
+<div id="scrim"></div>
+
+<!-- Fixed sidebar navigation (desktop) / drawer (mobile) -->
+<aside id="sidebar">
+  <div class="brand">MIPI 协议技术报告<small>DSI v1.1 / D-PHY v2.0 · 数字验证视角</small></div>
+  <nav id="toc">
+    <a href="#overview"><span class="idx">01</span>概述</a>
+    <a href="#link"><span class="idx">02</span>链路架构</a>
+    <a href="#phy-state"><span class="idx">03</span>D-PHY 线状态与模式</a>
+    <a href="#phy-xfer"><span class="idx">04</span>D-PHY 传输流程</a>
+    <a href="#packet"><span class="idx">05</span>DSI 包协议</a>
+    <a href="#datatype"><span class="idx">06</span>Data Type 编码</a>
+    <a href="#video"><span class="idx">07</span>Video Mode</a>
+    <a href="#command"><span class="idx">08</span>Command Mode 与双向传输</a>
+    <a href="#error"><span class="idx">09</span>错误处理与争用</a>
+    <a href="#pixel"><span class="idx">10</span>像素格式</a>
+    <a href="#dv"><span class="idx">11</span>数字验证视角</a>
+    <a href="#appendix"><span class="idx">12</span>附录</a>
+  </nav>
+</aside>
+
+<main>
+
+<!-- ============ Hero ============ -->
+<header class="hero">
+  <h1>MIPI 协议技术报告</h1>
+  <div class="sub">DSI v1.1 / D-PHY v2.0 · 数字验证视角</div>
+  <div class="badges">
+    <span class="badge b-blue">MIPI DSI v1.1 · 2012-04-06 发布</span>
+    <span class="badge b-purple">MIPI D-PHY v2.0 · 2016-03-08 Adopted</span>
+    <span class="badge b-green">面向数字 IC 验证工程师</span>
+    <span class="badge b-orange">不含电气特性内容</span>
+  </div>
+  <div class="note">
+    <b>读者定位：</b>本报告面向数字 IC 验证工程师，聚焦协议结构、状态机、时序参数、包格式、错误处理与验证检查点。
+    <b>内容边界：</b>全文不涉及电气特性（电压、阻抗、抖动预算、眼图等一律略去），涉及时仅从数字逻辑视角给出速率档位、时序参数与状态编码。
+    <b>资料来源：</b>内容整理自两份可读规范原文（mipi-DSI-specification-v1.1.pdf、mipi_d-phy_specification_v2-0.pdf），关键数值（ECC/CRC 测试向量）均经独立复算验证；另有 7 份加密资料未能读取，详见<a href="#appendix">附录</a>的资料来源声明。
+  </div>
+</header>
+
+<!-- ============ 01 overview ============ -->
+<section id="overview">
+  <div class="card">
+    <h2><span class="no">01</span>概述 <span class="en">overview</span></h2>
+    <p class="lead">MIPI Alliance（Mobile Industry Processor Interface Alliance）制定的移动设备内部互连接口规范族中，DSI（Display Serial Interface）定义 host processor 与显示模组（peripheral）之间的协议与信号时序关系。DSI 是协议层规范，物理层由 D-PHY 提供。</p>
+
+    <h3>MIPI 协议族定位</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>规范</th><th>定位（一句话）</th></tr></thead>
+        <tbody>
+          <tr><td><code>DSI</code></td><td>显示屏串行接口协议层规范：host→peripheral 半双工双向，传像素流与命令。</td></tr>
+          <tr><td><code>CSI-2</code></td><td>摄像头串行接口：HS 单向、数据方向 peripheral→host，控制走 I2C 旁路。</td></tr>
+          <tr><td><code>DPI-2</code></td><td>并行像素接口（Display Pixel Interface），Video Mode 的像素格式取自它。</td></tr>
+          <tr><td><code>DBI-2</code></td><td>并行命令接口（Display Bus Interface），legacy 接口，不在 DSI 范围内。</td></tr>
+          <tr><td><code>DCS</code></td><td>Display Command Set，Command Mode 的命令集来源。</td></tr>
+          <tr><td><code>D-PHY</code></td><td>源同步高速低功耗物理层：1 Clock Lane + N Data Lane，HS/LP 两种模式。</td></tr>
+          <tr><td><code>C-PHY</code></td><td>三线嵌入式时钟物理层（本报告不涉及）。</td></tr>
+          <tr><td><code>M-PHY</code></td><td>面向更高速通用场景的另一物理层（本报告不涉及）。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>本报告依据</h3>
+    <ul>
+      <li><b>DSI v1.1</b>：Version 1.1（2011-11-22），MIPI Board Approved 2012-03-14，首页标注发布日期 2012-04-06。</li>
+      <li><b>D-PHY v2.0</b>：Version 2.0（2015-11-23），MIPI Board Adopted 2016-03-08，是首个 Board adopted 的 v2.0 release。</li>
+    </ul>
+
+    <h3>DSI 版本历史</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>日期</th><th>版本</th><th>主要变更</th></tr></thead>
+        <tbody>
+          <tr><td>2006-04-19</td><td><code>v1.00a</code></td><td>首个 MIPI Board 批准发布。</td></tr>
+          <tr><td>2008-02-21</td><td><code>v1.01.00</code></td><td>大改：新增系统上电初始化、EoTp、Short Write、DCS Write、Generic Read / Long Write、Color Mode Command、ECC 要求。</td></tr>
+          <tr><td>2010-06-28</td><td><code>v1.02.00</code></td><td>新增 30bpp / 36bpp 像素格式、隔行视频 VC 用法澄清、可上报错误更新。</td></tr>
+          <tr><td>2012-04-06</td><td><code>v1.1</code></td><td>新增立体显示格式（SDF）支持：帧首 VSS 短包可携带 3D Control payload（Data 0 bit3=1 表示存在，Data 1 内含 3DMODE[1:0]、3DFMT[1:0]、3DVSYNC、3DL/R）。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>两种基本工作模式</h3>
+    <ul>
+      <li><b>Command Mode</b>：transaction 以向带 display controller（含本地寄存器与 frame buffer）的 peripheral 发命令/参数为主，host 可读写寄存器与 frame memory。<b>要求双向接口</b>。</li>
+      <li><b>Video Mode</b>：host→peripheral 为实时像素流，只能用 HS mode 传视频；仅 Video Mode 的系统可用单向数据路径。部分模组带 timing controller + 局部 frame buffer，可低功耗自刷新。</li>
+    </ul>
+    <h3>Virtual Channel（VC）</h3>
+    <p>DI 字节的 <code>DI[7:6]</code> 两位标识虚拟通道，最多 <code>4</code> 个，以 packet 为单位交织服务多个外设。典型用法：多 driver IC 拼大屏、一路 Command + 一路 Video、隔行视频两个 field 各用一个 VC（建议第一 field <code>VC=0b00</code>、第二 field <code>VC=0b01</code>）。</p>
+
+    <figure>
+      <img src="assets/dsi-layers.svg" alt="DSI 分层架构图：Host 与 Peripheral 双列，Application / PLI / Lane Management / PHY 四层">
+      <figcaption><b>图 1</b>　DSI 分层架构：Application（像素 DPI-2 / 命令 DCS）→ PLI（packet 组成、ECC/CRC、VC 交织）→ Lane Management（分发/合并）→ PHY（D-PHY，SoT/EoT、HS/LP）。DSI 规范覆盖上三层，PHY 属 D-PHY。</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ 02 link ============ -->
+<section id="link">
+  <div class="card">
+    <h2><span class="no">02</span>链路架构 <span class="en">link</span></h2>
+    <p class="lead">一条 Link = <code>1</code> 条 Clock Lane + <code>1~4</code> 条 Data Lane；最少 4 根线，N 条 Data Lane 需要 <code>2×(N+1)</code> 根线。每条 Lane 由两侧 Lane Module 经 Dp/Dn 两线点对点互连。</p>
+
+    <h3>方向与驱动规则</h3>
+    <ul>
+      <li><b>HS 单向</b>：仅 Forward 方向（Forward = 时钟方向 = host→peripheral）；反向 HS 带宽为正向 1/4（Slave 比特周期 = 4·UIINST），且为可选能力。</li>
+      <li><b>LP 可双向</b>：方向控制用令牌传递（token passing，即 BTA）。</li>
+      <li><b>反向只用 Lane 0 的 LP Mode</b>：前向 LP 传输也只能用 Lane 0；多 lane 系统反向同样只用 Lane 0。所有 Trigger message 走 Lane 0。</li>
+      <li><b>Clock Lane 永远由 host 驱动</b>（Forward），仅支持 Stop / HS 时钟发送 / ULPS 三种主状态，无常规 Escape mode。</li>
+      <li>Master/Slave 身份不因 Turnaround 改变；高频时钟由 PHY 外部 Clock Multiplier Unit（PLL）产生。</li>
+    </ul>
+
+    <h3>Lane Module 组成与 CIL 类型</h3>
+    <p>Lane Module 内含 <code>HS-TX</code>/<code>HS-RX</code>（差分高速收发）、<code>LP-TX</code>/<code>LP-RX</code>/<code>LP-CD</code>（低功耗收发与竞争检测）、<code>CIL</code>（Control and Interface Logic，与协议层 PPI 对接）。含 HS-TX 必含 LP-TX，含 HS-RX 必含 LP-RX；LP-RX 上电即常开监听；LP-CD 仅双向 Lane 需要。</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>CIL 代码</th><th>模块组成</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td><code>CIL-MFAA</code></td><td>HS-TX, LP-TX, LP-RX, LP-CD</td><td>Command Mode host 的 Data Lane（双向）</td></tr>
+          <tr><td><code>CIL-SFAA</code></td><td>HS-RX, LP-RX, LP-TX, LP-CD</td><td>Command Mode peripheral 的 Data Lane（双向）</td></tr>
+          <tr><td><code>CIL-MFAN</code></td><td>HS-TX, LP-TX</td><td>Video Mode host 的 Data Lane（单向）</td></tr>
+          <tr><td><code>CIL-SFAN</code></td><td>HS-RX, LP-RX</td><td>Video Mode peripheral 的 Data Lane（单向）</td></tr>
+          <tr><td><code>CIL-MCNN</code></td><td>HS-TX, LP-TX</td><td>host 侧 Clock Lane</td></tr>
+          <tr><td><code>CIL-SCNN</code></td><td>HS-RX, LP-RX</td><td>peripheral 侧 Clock Lane</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>D-PHY 侧命名规律：<code>MFXN/SFXN</code> 为单向 Data Lane，<code>MFXY/SFXY</code> 为双向 Data Lane（无 HS 反向），<code>MRXX/SRXX</code> 为含 HS 反向的双向 Lane，<code>MCNN/SCNN</code> 为 Clock Lane（仅支持 ULPS）。</p>
+
+    <h3>Command / Video Mode 对 Lane 的最低要求</h3>
+    <ul>
+      <li><b>Command Mode</b>：Data Lane 0 必须双向（支持反向 Escape Mode：LPDT、ACK、TE Trigger），其余 lane 必须单向。</li>
+      <li><b>Video Mode</b>：Lane 0 可双向可单向，其余单向。</li>
+      <li>所有 Data Lane 必须支持 Forward HS 与 Forward Escape（至少 ULPS + Trigger）；反向 Escape、反向 HS、LPDT 均为可选。</li>
+    </ul>
+
+    <figure>
+      <img src="assets/dphy-lane-module.svg" alt="D-PHY Lane Module 架构：Host 侧 Protocol Layer 经 PPI 连接 1 条 Clock Lane 与 4 条 Data Lane，Peripheral 侧镜像">
+      <figcaption><b>图 2</b>　D-PHY 链路架构：Host（Master）与 Peripheral（Slave）各含 Lane Module，中间 Dp/Dn 差分对互连；HS 箭头单向（Host→Peripheral），LP 仅 Lane 0 双向。</figcaption>
+    </figure>
+
+    <h3>多 Lane 分发与合并（Lane Distributor / Merger）</h3>
+    <ul>
+      <li>发送端 Lane Distributor 缓冲 N 字节（N = lane 数），按 <b>round-robin</b> 并行发出：2 lane 时 byte0→Lane0、byte1→Lane1、byte2→Lane0……接收端 merger 合并恢复原始字节序。</li>
+      <li>所有 lane <b>同时并行执行 SoT</b>；但各 lane <b>独立结束</b>——总字节数不是 lane 数整数倍时，先耗尽数据的 lane 提前一个字节发 EoT 进入 LPS；末尾不足 N 字节时 Lane Management layer 对无数据的 lane 撤销 valid data。</li>
+      <li>Lane 数为<b>静态参数</b>，设计/初始配置时固定，不得动态改变；N-lane 能力的 host 必须能用 1…N 中任意 lane 数工作；多 lane 共用单一公共 clock。</li>
+      <li>PHY 层只规定每条 Lane payload 为整数字节（≥1）、LSB 先传、不支持数据节流；字节如何在 Lane 间分配属上层协议（DSI 的 PHY Adapter）。</li>
+    </ul>
+
+    <figure>
+      <img src="assets/dsi-lane-dist.svg" alt="Lane Distributor 字节 round-robin 分发与三种 EoT 结束情形">
+      <figcaption><b>图 3</b>　Lane 分发：字节流 round-robin 分配到各 Lane；各 Lane 同时 SoT、按剩余字节数独立 EoT，错位处多 1 字节。</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ 03 phy-state ============ -->
+<section id="phy-state">
+  <div class="card">
+    <h2><span class="no">03</span>D-PHY 线状态与模式 <span class="en">phy-state</span></h2>
+    <p class="lead">D-PHY 每条 Lane 在任意时刻处于 HS 差分状态或四种 LP 单端状态之一。三种工作模式——<b>Burst（HS）</b>、<b>Control</b>、<b>Escape</b>——用同一组线状态编码表达不同含义。</p>
+
+    <h3>Lane 状态编码（Table 2）</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>状态码</th><th>Dp 电平</th><th>Dn 电平</th><th>HS Burst Mode</th><th>Control Mode</th><th>Escape Mode</th></tr></thead>
+        <tbody>
+          <tr><td><code>HS-0</code></td><td>HS Low</td><td>HS High</td><td>Differential-0</td><td>N/A</td><td>N/A</td></tr>
+          <tr><td><code>HS-1</code></td><td>HS High</td><td>HS Low</td><td>Differential-1</td><td>N/A</td><td>N/A</td></tr>
+          <tr><td><code>LP-00</code></td><td>LP Low</td><td>LP Low</td><td>N/A</td><td>Bridge</td><td>Space</td></tr>
+          <tr><td><code>LP-01</code></td><td>LP Low</td><td>LP High</td><td>N/A</td><td>HS-Rqst</td><td>Mark-0</td></tr>
+          <tr><td><code>LP-10</code></td><td>LP High</td><td>LP Low</td><td>N/A</td><td>LP-Rqst</td><td>Mark-1</td></tr>
+          <tr><td><code>LP-11</code></td><td>LP High</td><td>LP High</td><td>N/A</td><td>Stop</td><td>N/A（出现即返回 Control Stop）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li>HS 传输期间，LP 接收器始终把差分 HS 状态看作 <code>LP-00</code>。</li>
+      <li><b>Stop（LP-11）的中心地位</b>：线上出现 Stop 达到最小要求时间，PHY 状态机无论之前处于何状态都必须回到 Stop。</li>
+      <li>所有 LP 状态持续期 <code>TLPX ≥ 50 ns</code>；对 <code>Dp ⊕ Dn</code> 做异或可重建 LP 时钟（Escape mode 不依赖 Clock Lane 的原因）。</li>
+    </ul>
+
+    <figure>
+      <img src="assets/dphy-line-states.svg" alt="LP-11/LP-10/LP-01/LP-00 与 HS 差分波形及三种模式含义对照">
+      <figcaption><b>图 4</b>　线状态编码：4 组 LP 电平组合 + 1 组 HS 差分，右表给出状态码在 Burst / Control / Escape 三种模式下的含义。</figcaption>
+    </figure>
+
+    <h3>三种请求序列（Control mode 下从 Stop 出发）</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>请求</th><th>线状态序列</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>进入 HS</td><td><code>LP-11 → LP-01 → LP-00</code></td><td>HS-Rqst → Bridge，随后进入 HS 模式，直到收到 LP-11。</td></tr>
+          <tr><td>进入 Escape</td><td><code>LP-11 → LP-10 → LP-00 → LP-01 → LP-00</code></td><td>LP-Rqst → … → 最终 Bridge 后进入 Escape（Space 态），随后必须发 8-bit entry command。</td></tr>
+          <tr><td>Turnaround</td><td><code>LP-11 → LP-10 → LP-00 → LP-10 → LP-00</code></td><td>用于双向 Lane 的总线方向翻转（BTA）。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>任一序列中若在最终 Bridge 前检测到 <code>LP-11</code>，则中止并回到/等待 Stop。</p>
+
+    <figure>
+      <img src="assets/dphy-state-machine.svg" alt="以 Stop(LP-11) 为中心的 PHY 状态机：HS Burst、Escape Mode、Turnaround 三条路径">
+      <figcaption><b>图 5</b>　PHY 状态机：Stop 为中心，三条出边分别通向 HS Burst（蓝）、Escape Mode（紫，含 LPDT/ULPS/Trigger）、Turnaround（绿）；任意状态见到满足时长的 Stop 即回流。</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ 04 phy-xfer ============ -->
+<section id="phy-xfer">
+  <div class="card">
+    <h2><span class="no">04</span>D-PHY 传输流程 <span class="en">phy-xfer</span></h2>
+
+    <h3>HS 数据速率档位（v2.0 核心扩展）</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>速率档位</th><th>能力要求</th></tr></thead>
+        <tbody>
+          <tr><td>80 Mbps ~ 1.5 Gbps/lane</td><td>基础范围，无需 deskew；<code>UIINST max = 12.5 ns</code>（对应最低 80 Mbps），<code>ΔUI = ±10%</code>。</td></tr>
+          <tr><td>≤ 2.5 Gbps/lane</td><td>&gt;1.5 Gbps <b>必须支持 deskew 校准</b>。</td></tr>
+          <tr><td>≤ 4.5 Gbps/lane</td><td>&gt;2.5 Gbps 必须支持均衡（de-emphasis）且 SSC 必须可用。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>LP 模式最大 <code>10 Mbps</code>。反向 HS 速率为正向 1/4。静态 lane 间 skew：≤1.5 Gbps 时 Data Lane 与 Clock Lane 延迟差 <code>&lt; UI/50</code>。</p>
+
+    <h3>DDR 时钟与数据关系</h3>
+    <ul>
+      <li>Clock Lane 发送 <b>DDR（半速率）时钟</b>，与数据成正交相位：时钟上升沿位于数据比特中心，数据在时钟上升沿<b>和</b>下降沿均被采样；1 个 DDR 时钟周期 = 2 个瞬时 UI。</li>
+      <li>TX 必须保证 burst 第一个 payload bit 期间出现时钟上升沿。</li>
+      <li>HS burst 期间 Clock Lane 必须处于 HS 模式提供 DDR 时钟；burst 载荷为整数个字节、最少 1 字节、无 PHY 级上限。</li>
+    </ul>
+
+    <h3>SoT / EoT 序列</h3>
+    <h4>SoT（TX 侧，6 步）</h4>
+    <ol>
+      <li>驱动 Stop（<code>LP-11</code>）；</li>
+      <li>驱动 HS-Rqst（<code>LP-01</code>）持续 <code>TLPX</code>；</li>
+      <li>驱动 Bridge（<code>LP-00</code>）持续 <code>THS-PREPARE</code>；</li>
+      <li>使能 HS 驱动器、关闭 LP 驱动器，驱动 <code>HS-0</code> 持续 <code>THS-ZERO</code>；</li>
+      <li>在时钟上升沿插入 HS Sync 序列 <code>00011101</code>；</li>
+      <li>继续发送 payload。</li>
+    </ol>
+    <h4>SoT（RX 侧）</h4>
+    <p>观察 <code>LP-11→LP-01→LP-00</code>；经 <code>TD-TERM-EN</code> 使能端接；等待 <code>THS-SETTLE</code> 忽略过渡；搜索并锁定 Leader 序列 <code>011101</code>（<b>允许任意单比特错误</b>），之后接收 payload。</p>
+    <h4>EoT（TX / RX 侧）</h4>
+    <ul>
+      <li>TX：发完 payload 后立即<b>翻转差分状态</b>并保持 <code>THS-TRAIL</code>，然后关 HS-TX、开 LP-TX，驱动 Stop（<code>LP-11</code>）持续 <code>THS-EXIT</code>。</li>
+      <li>RX：检测线离开 <code>LP-00</code> 进入 <code>LP-11</code> 并断开端接；用 <code>THS-SKIP</code> 忽略末段过渡比特，回溯确定最后一个有效字节。</li>
+    </ul>
+
+    <figure>
+      <img src="assets/dphy-sot-eot.svg" alt="SoT/EoT 时序波形：LP-11 经 LP-01/LP-00/HS-0 到 Sync 00011101 与数据，再经 THS-TRAIL 回 LP-11">
+      <figcaption><b>图 6</b>　HS SoT / EoT 波形与关键时序参数标注，下方为 DDR Clock 轨；RX 侧 TD-TERM-EN / THS-SETTLE / THS-SKIP 窗口见图注。</figcaption>
+    </figure>
+
+    <h3>Escape Mode</h3>
+    <ul>
+      <li><b>进入序列</b>：<code>LP-11 → LP-10 → LP-00 → LP-01 → LP-00</code>，最终 Bridge 后进入 Space 态，随后 TX 必须发送 8-bit entry command。</li>
+      <li><b>位编码 Spaced-One-Hot</b>：每个 Mark（Mark-0 = <code>LP-01</code> 表 0，Mark-1 = <code>LP-10</code> 表 1）后必须跟一个 Space（<code>LP-00</code>）；退出前最后一个相位必须是不带 Space 的 Mark-1。时钟 = <code>Dp ⊕ Dn</code>，与 Clock Lane 无关。</li>
+      <li><code>LP-11</code>（Stop）立即退出 Escape 回到 Control mode；不识别的命令被忽略并等待 Stop。</li>
+    </ul>
+    <h4>Escape Entry Commands（Table 8）</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>类型</th><th>位模式（发送顺序）</th><th>hex（先发位 = LSB）</th></tr></thead>
+        <tbody>
+          <tr><td>Low-Power Data Transmission (LPDT)</td><td>mode</td><td><code>11100001</code></td><td><code>0x87</code></td></tr>
+          <tr><td>Ultra-Low Power State (ULPS)</td><td>mode</td><td><code>00011110</code></td><td><code>0x78</code></td></tr>
+          <tr><td>Undefined-1</td><td>mode</td><td><code>10011111</code></td><td><code>0xF9</code></td></tr>
+          <tr><td>Undefined-2</td><td>mode</td><td><code>11011110</code></td><td><code>0x7B</code></td></tr>
+          <tr><td>Reset-Trigger [Remote Application]</td><td>Trigger</td><td><code>01100010</code></td><td><code>0x46</code></td></tr>
+          <tr><td>Entry sequence for HS Test Mode</td><td>Trigger</td><td><code>01011101</code></td><td><code>0xBA</code></td></tr>
+          <tr><td>Unknown-4</td><td>Trigger</td><td><code>00100001</code></td><td><code>0x84</code></td></tr>
+          <tr><td>Unknown-5</td><td>Trigger</td><td><code>10100000</code></td><td><code>0x05</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li><b>LPDT</b>：入口命令后跟 Spaced-One-Hot 数据，自定时、可变速率；Space 态可暂停；Mark-1 + Stop 结束。</li>
+      <li><b>ULPS</b>：发送 ULPS 命令后 Lane 进入超低功耗态，线保持 Space（<code>LP-00</code>）；退出 = Mark-1 持续 <code>TWAKEUP = 1 ms</code> + Stop（<code>LP-11</code>）。</li>
+      <li><b>Clock Lane ULPS</b>：进入 <code>LP-11 → LP-10</code>（TX-ULPS-Rqst，TLPX）<code>→ LP-00</code>（TX-ULPS）；退出 Mark-1（<code>LP-10</code>，TX-ULPS-Exit）持续 <code>TWAKEUP = 1 ms</code> → <code>LP-11</code>。Clock Lane 无常规 Escape mode，仅 ULPS。</li>
+    </ul>
+
+    <figure>
+      <img src="assets/dphy-escape.svg" alt="Escape 进入序列波形、Spaced-One-Hot 编码与 8 个 entry command 表">
+      <figcaption><b>图 7</b>　Escape Mode：进入序列、Spaced-One-Hot 逐位波形（示例字节 0x87 LPDT）与 8 个 entry command 编码表。</figcaption>
+    </figure>
+
+    <h3>Bus Turnaround（BTA，双向 Lane）</h3>
+    <h4>原 TX 侧（令牌移交，6 步）</h4>
+    <ol>
+      <li><code>LP-11</code>（Stop）；</li>
+      <li><code>LP-10</code> 持续 <code>TLPX</code>；</li>
+      <li><code>LP-00</code> 持续 <code>TLPX</code>；</li>
+      <li><code>LP-10</code> 持续 <code>TLPX</code>；</li>
+      <li><code>LP-00</code>（Bridge）持续 <code>TTA-GO = 4·TLPX</code>；</li>
+      <li>停止驱动，用 LP-RX 观察确认。</li>
+    </ol>
+    <h4>原 RX 侧（接管方）</h4>
+    <p>观察到 Bridge 后等待 <code>TTA-SURE</code>（<code>TLPX ~ 2·TLPX</code>），然后驱动 <code>LP-00</code> 持续 <code>TTA-GET = 5·TLPX</code>，再驱动 <code>LP-10</code> 持续 <code>TLPX</code>，最后 <code>LP-11</code> 持续 <code>TLPX</code> 完成。</p>
+    <p>两侧 LP 时钟匹配约束：<code>TLPX(MASTER)/TLPX(SLAVE) ∈ [2/3, 3/2]</code>（即 host LP 时钟频率须为 peripheral 的 67% ~ 150%）；Master/Slave 身份不因 Turnaround 改变。</p>
+
+    <figure>
+      <img src="assets/dphy-bta-ulps.svg" alt="BTA 令牌移交时序与 ULPS 进入/退出波形">
+      <figcaption><b>图 8</b>　上半：BTA 握手（TTA-GO / TTA-SURE / TTA-GET 与令牌移交方向）；下半：ULPS 进入与退出（TWAKEUP = 1 ms），含 Clock Lane ULPS 注记。</figcaption>
+    </figure>
+
+    <h3>Clock Lane 启动 / 停止</h3>
+    <ul>
+      <li><b>HS 时钟启动</b>：<code>LP-11 → LP-01</code>（TLPX）<code>→ LP-00</code>（TCLK-PREPARE）<code>→ HS-0</code>（TCLK-ZERO）→ DDR 时钟先跑 <code>TCLK-PRE ≥ 8 UI</code> 才允许任何 Data Lane 启动。</li>
+      <li><b>HS 时钟停止</b>：最后一个 Data Lane 转入 LP 后，时钟继续 <code>TCLK-POST ≥ 60 ns + 52·UI</code> 并以 HS-0 结束，再驱动 HS-0 持续 <code>TCLK-TRAIL ≥ 60 ns</code>，然后 <code>LP-11</code>（THS-EXIT）；RX 侧以 <code>TCLK-MISS ≤ 60 ns</code> 超时检测时钟消失。</li>
+      <li><b>连续 / 非连续时钟</b>：规范允许 Clock Lane 在两次 burst 之间回 LP（非连续时钟用法）；协议只能在所有 Data Lane 都无 HS 活动时停时钟。所有 DSI 收发器必须支持 continuous clock，non-continuous 可选，由 host 控制。</li>
+    </ul>
+
+    <h3>初始化 TINIT</h3>
+    <p>上电后 TX 驱动 Stop（<code>LP-11</code>）至少 <code>TINIT ≥ 100 µs</code>；RX 在检测到至少 TINIT 长的 Stop 之前忽略线上一切状态。DSI 侧要求 host 在 TINIT 期间向所有 Lane 持续驱动 LP-11；peripheral 可用 ±30% 精度 R-C timer 检测；host 的 <code>tINIT_MASTER</code> 应编程为 &gt; <code>tINIT_SLAVE + tINTERNAL_DELAY</code>。</p>
+
+    <h3>Deskew 校准（HS Skew Calibration，&gt;1.5 Gbps 必须）</h3>
+    <ul>
+      <li>&gt;1.5 Gbps 时正常 HS 传输前必须先发送 <b>initial deskew</b> 序列；≤1.5 Gbps 时 initial deskew 可选；periodic deskew 任何速率均可选。</li>
+      <li><b>序列结构</b>：SoT 同普通 burst，但 Sync pattern = 全 1（<code>16'hFFFF</code>），持续 <code>TSKEWCAL-SYNC = 16 UI</code>；随后 payload 为 <code>01010101…</code> 时钟 pattern。</li>
+      <li><b>时长约束</b>：initial <code>≥ 2^15 UI 且 ≤ 100 µs</code>；periodic <code>≥ 2^10 UI 且 ≤ 10 µs</code>。</li>
+      <li>所有活跃 Lane 同时发送；RX 检测全 1 sync 后启动 clock-data deskew。从 ULPS 切回 HS 且此前已做过 initial deskew 时，deskew 可选。</li>
+    </ul>
+    <h4>版本互操作要点（Table 19）</h4>
+    <ul>
+      <li>v2.0 TX ↔ v2.0 RX：可达 4.5 Gbps，需 deskew 初始化。</li>
+      <li>v2.0 TX + v1.2 RX：至 1.5 Gbps 无需 deskew；至 2.5 Gbps 需 deskew 初始化。</li>
+      <li>LP 时钟失配约束即 TLPX 比值 <code>[2/3, 3/2]</code>。</li>
+    </ul>
+
+    <figure>
+      <img src="assets/dphy-clock-deskew.svg" alt="Clock Lane HS 启动/停止波形与 deskew 校准 burst 结构">
+      <figcaption><b>图 9</b>　上半：Clock Lane 启动（TCLK-PRE ≥ 8 UI）与停止（TCLK-POST ≥ 60 ns + 52·UI、TCLK-MISS ≤ 60 ns）；下半：deskew burst（全 1 sync 16 UI + 0101… pattern）与速率档位阶梯。</figcaption>
+    </figure>
+
+    <h3>全局时序参数表（Table 14 全表）</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>参数</th><th>定义</th><th>Min</th><th>Max</th><th>单位</th><th>侧</th></tr></thead>
+        <tbody>
+          <tr><td><code>TCLK-MISS</code></td><td>RX 检测时钟消失并关闭 HS-RX 的超时</td><td>—</td><td>60</td><td>ns</td><td>RX</td></tr>
+          <tr><td><code>TCLK-POST</code></td><td>最后 Data Lane 转 LP 后 TX 继续发 HS 时钟的时间</td><td>60 ns + 52·UI</td><td>—</td><td>ns</td><td>TX</td></tr>
+          <tr><td><code>TCLK-PRE</code></td><td>任何 Data Lane 启动前 TX 先驱动 HS 时钟的时间</td><td>8</td><td>—</td><td>UI</td><td>TX</td></tr>
+          <tr><td><code>TCLK-PREPARE</code></td><td>HS 传输前驱动 Clock Lane LP-00 的时间</td><td>38</td><td>95</td><td>ns</td><td>TX</td></tr>
+          <tr><td><code>TCLK-SETTLE</code></td><td>HS RX 忽略时钟跳变的窗口</td><td>95</td><td>300</td><td>ns</td><td>RX</td></tr>
+          <tr><td><code>TCLK-TERM-EN</code></td><td>Clock Lane RX 使能端接的时间</td><td>Dn 达 VTERM-EN</td><td>38</td><td>ns</td><td>RX</td></tr>
+          <tr><td><code>TCLK-TRAIL</code></td><td>最后 payload 时钟位后驱动 HS-0 的时间</td><td>60</td><td>—</td><td>ns</td><td>TX</td></tr>
+          <tr><td><code>TCLK-PREPARE+TCLK-ZERO</code></td><td>LP-00 + 启动时钟前 HS-0 的总时间</td><td>300</td><td>—</td><td>ns</td><td>TX</td></tr>
+          <tr><td><code>TD-TERM-EN</code></td><td>Data Lane RX 使能端接的时间</td><td>Dn 达 VTERM-EN</td><td>35 ns + 4·UI</td><td>ns</td><td>RX</td></tr>
+          <tr><td><code>TEOT</code></td><td>THS-TRAIL 起点到 HS burst 后 LP-11 起点</td><td>—</td><td>105 ns + n·12·UI</td><td>ns</td><td>n=1 正向 / n=4 反向</td></tr>
+          <tr><td><code>THS-EXIT</code></td><td>HS burst 后驱动 LP-11 的时间</td><td>100</td><td>—</td><td>ns</td><td>TX</td></tr>
+          <tr><td><code>THS-PREPARE</code></td><td>HS 传输前驱动 Data Lane LP-00 的时间</td><td>40 ns + 4·UI</td><td>85 ns + 6·UI</td><td>ns</td><td>TX</td></tr>
+          <tr><td><code>THS-PREPARE+THS-ZERO</code></td><td>LP-00 + 发 Sync 前 HS-0 的总时间</td><td>145 ns + 10·UI</td><td>—</td><td>ns</td><td>TX</td></tr>
+          <tr><td><code>THS-SETTLE</code></td><td>HS RX 忽略数据跳变的窗口</td><td>85 ns + 6·UI</td><td>145 ns + 10·UI</td><td>ns</td><td>RX</td></tr>
+          <tr><td><code>THS-SKIP</code></td><td>RX burst 后回溯忽略的窗口</td><td>40</td><td>55 ns + 4·UI</td><td>ns</td><td>RX</td></tr>
+          <tr><td><code>THS-TRAIL</code></td><td>最后 payload 位后驱动翻转差分态的时间</td><td>max(n·8·UI, 60 ns + n·4·UI)</td><td>—</td><td>ns</td><td>TX</td></tr>
+          <tr><td><code>TINIT</code></td><td>初始化 Stop 时长</td><td>100</td><td>—</td><td>µs</td><td>TX/RX</td></tr>
+          <tr><td><code>TLPX</code></td><td>任一 LP 状态周期长度</td><td>50</td><td>—</td><td>ns</td><td>TX</td></tr>
+          <tr><td><code>TLPX 比值</code></td><td>TLPX(MASTER)/TLPX(SLAVE)</td><td>2/3</td><td>3/2</td><td>—</td><td>—</td></tr>
+          <tr><td><code>TTA-GET</code></td><td>Turnaround 中新 TX 驱动 Bridge 的时间</td><td>5·TLPX</td><td>—</td><td>ns</td><td>—</td></tr>
+          <tr><td><code>TTA-GO</code></td><td>Turnaround 中释放控制前驱动 Bridge 的时间</td><td>4·TLPX</td><td>—</td><td>ns</td><td>—</td></tr>
+          <tr><td><code>TTA-SURE</code></td><td>新 TX 在 LP-10 后、驱动 Bridge 前的等待</td><td>TLPX</td><td>2·TLPX</td><td>ns</td><td>—</td></tr>
+          <tr><td><code>TWAKEUP</code></td><td>ULPS 退出时 Mark-1 的驱动时长</td><td>1</td><td>—</td><td>ms</td><td>TX</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 05 packet ============ -->
+<section id="packet">
+  <div class="card">
+    <h2><span class="no">05</span>DSI 包协议 <span class="en">packet</span></h2>
+    <p class="lead">DSI 一次 HS/LP transmission 由一个或多个 packet 级联而成。Short Packet 固定 <code>4</code> 字节；Long Packet <code>6 ~ 65,541</code> 字节（payload <code>0 ~ 65535</code> 字节）。协议<b>没有</b> packet start/end 同步码，接收端靠 header 中的 WC 数到 packet 结束，因此 header 必须显式给出长度。</p>
+
+    <h3>Long Packet 结构</h3>
+    <pre>| DI (1B) | WC LSB (1B) | WC MSB (1B) | ECC (1B) | Data 0 … Data WC-1 (WC B) | CRC LSB (1B) | CRC MSB (1B) |
+|&lt;------ 32-bit Packet Header (PH) ------&gt;|&lt;-- Payload WC bytes --&gt;|&lt;- 16-bit Packet Footer -&gt;|</pre>
+    <ul>
+      <li><b>DI</b>：<code>DI[7:6]</code> = Virtual Channel（0–3），<code>DI[5:0]</code> = Data Type。</li>
+      <li><b>WC</b>（16-bit）：payload 字节数，接收端依此定界。</li>
+      <li><b>ECC</b>（8-bit）：保护整个 4 字节 header，可纠 1 bit、检 2 bit。</li>
+      <li><b>Checksum</b>（16-bit CRC）：host 发送 Long packet 必须计算并发送；peripheral 可选——不支持时反向必须发 <code>0x0000</code> 占位；payload 长度为 0 时 Checksum = <code>0xFFFF</code>。</li>
+    </ul>
+
+    <h3>Short Packet 结构</h3>
+    <pre>| DI (1B) | Data 0 (1B) | Data 1 (1B) | ECC (1B) |     <span class="cm">-- no Packet Footer, 4 bytes total</span></pre>
+    <p>用于大多数 Command Mode 命令及 H/V Sync 等事件。单参数命令参数放 Data 0，Data 1 置 <code>0x00</code>。</p>
+
+    <h3>字节序规则</h3>
+    <ul>
+      <li>每个字节 <b>LSB 先发送</b>；多字节字段（WC、Checksum）<b>低字节先发</b>。</li>
+      <li>示例：DI=<code>0x29</code>、WC=<code>0x0001</code>、ECC=<code>0x06</code>、Data=<code>0x01</code>、CRC=<code>0x1E0E</code>，线上字节序为 <code>29 01 00 06 01 0E 1E</code>。</li>
+      <li>一次 HS/LP transmission 可级联多个 packet；HS 模式下 packet 间若有时间空隙则必须拆成独立 transmission（各带 SoT/EoT）；LP transmission 无此限制。</li>
+      <li>协议层与 PHY 之间<b>无握手反压</b>：packet 一旦开始必须完整不间断发完；两端协议层与缓冲带宽须 ≥ PHY 带宽。</li>
+    </ul>
+
+    <figure>
+      <img src="assets/dsi-packet.svg" alt="Long/Short Packet 字节布局、DI 字段展开与字节序示例">
+      <figcaption><b>图 10</b>　包结构比特布局：Long Packet（32-bit PH + Payload + 16-bit PF）与 Short Packet；DI = VC[7:6] + DT[5:0]；字节序实例 <code>29 01 00 06 01 0E 1E</code>。</figcaption>
+    </figure>
+
+    <h3>ECC（Hamming 修改码 (30,24)）</h3>
+    <p>5+1 bit Hamming 修改码：纠 1 bit + 检 2 bit，保护 24 bit header 数据；header 固定 24 bit，<code>P7 = P6 = 0</code>。发送端 parity 方程（D0 = header 第 0 bit = DI 的 LSB，已用规范示例逐一复算验证）：</p>
+    <pre>P7 = 0
+P6 = 0
+P5 = D10^D11^D12^D13^D14^D15^D16^D17^D18^D19^D21^D22^D23
+P4 = D4^D5^D6^D7^D8^D9^D16^D17^D18^D19^D20^D22^D23
+P3 = D1^D2^D3^D7^D8^D9^D13^D14^D15^D19^D20^D21^D23
+P2 = D0^D2^D3^D5^D6^D9^D11^D12^D15^D18^D20^D21^D22
+P1 = D0^D1^D3^D4^D6^D8^D10^D12^D14^D17^D20^D21^D22^D23
+P0 = D0^D1^D2^D4^D5^D7^D10^D11^D13^D16^D20^D21^D22^D23</pre>
+    <h4>接收端 syndrome 纠错流程</h4>
+    <ol>
+      <li>计算 syndrome <code>S = 收到的 ECC ⊕ 对收到 24 bit 重算的 ECC</code>；</li>
+      <li><code>S = 0</code> → 无错；</li>
+      <li>S 命中 syndrome 矩阵（64 项，如 D0→<code>0x07</code>、D1→<code>0x0B</code>、D2→<code>0x0D</code>、D3→<code>0x0E</code>、D4→<code>0x13</code>、D5→<code>0x15</code>、D6→<code>0x16</code>、D7→<code>0x19</code>…）→ 对应数据位取反纠正；</li>
+      <li>S 为单位矩阵行 → 错在 parity 位本身；</li>
+      <li>S 无法识别 → multi-bit error，置 Multi-bit Error Flag（不可纠正）。</li>
+    </ol>
+    <p>ECC 义务：host 永远生成并发送 ECC；peripheral 两个方向都要支持；host 还须能针对旧版不支持 ECC 的 peripheral 关闭 ECC 检查。</p>
+
+    <h3>Checksum（CRC-16）</h3>
+    <ul>
+      <li>生成多项式 <code>x^16 + x^12 + x^5 + x^0</code>（<code>0x1021</code>，反射实现 <code>0x8408</code>），初值 <code>0xFFFF</code>，payload 按 LSB first 逐比特进入，算完后 CRC <b>低字节先发</b>。只检错不纠错。</li>
+    </ul>
+    <div class="callout warn">
+      <b>规范校注（引用时注意）：</b>
+      ① Annex B 代码注释把多项式写成 <code>x^16+x^15+x^5+x^0</code>，与正文矛盾，实测 <code>x^12</code> 版才能复现全部测试向量；
+      ② §8.8.18 的 36-bit 示例 packet CRC 印为 <code>0x1C4C</code>，实算为 <code>0xC1C4</code>，疑为排版错误。
+    </div>
+
+    <h3>黄金测试向量（已独立复算吻合）</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>类别</th><th>输入</th><th>期望输出</th></tr></thead>
+        <tbody>
+          <tr><td>ECC</td><td>DI=<code>0x37</code>, WC=<code>0x01F0</code></td><td><code>0x3F</code></td></tr>
+          <tr><td>ECC</td><td>DI=<code>0x29</code>, WC=<code>0x0001</code></td><td><code>0x06</code></td></tr>
+          <tr><td>ECC</td><td>EoTp header（<code>08 0F 0F</code>）</td><td><code>0x01</code></td></tr>
+          <tr><td>ECC</td><td>DI=<code>0x0D</code>, WC=<code>0x0001</code></td><td><code>0x1E</code></td></tr>
+          <tr><td>ECC</td><td>DI=<code>0x1D</code>, WC=<code>0x0001</code></td><td><code>0x0D</code></td></tr>
+          <tr><td>CRC-16</td><td><code>00</code></td><td><code>0x0F87</code></td></tr>
+          <tr><td>CRC-16</td><td><code>01</code></td><td><code>0x1E0E</code></td></tr>
+          <tr><td>CRC-16</td><td>24 字节流 <code>FF 00 00 00 1E F0 1E C7 4F 82 78 C5 82 E0 8C 70 D2 3C 78 E9 FF 00 00 01</code></td><td><code>0xE569</code></td></tr>
+          <tr><td>完整包</td><td>30bpp 单像素全 1 示例 packet</td><td><code>0D 01 00 1E FF FF FF 3F B4 36</code></td></tr>
+          <tr><td>完整包</td><td>EoTp 固定字节</td><td><code>08 0F 0F 01</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <figure>
+      <img src="assets/dsi-ecc-crc.svg" alt="ECC 发送/接收流程与 CRC-16 LFSR 示意">
+      <figcaption><b>图 11</b>　左：ECC 发送端 P0~P5 异或方程与接收端 syndrome 分支（无错 / 纠 1 bit / 纠 parity / multi-bit 报错），示例 0x37/0x01F0→0x3F；右：CRC-16 LFSR（x^16+x^12+x^5+x^0，初值 0xFFFF），测试向量 <code>01</code>→<code>0x1E0E</code>。</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ 06 datatype ============ -->
+<section id="datatype">
+  <div class="card">
+    <h2><span class="no">06</span>Data Type 编码 <span class="en">datatype</span></h2>
+
+    <h3>DT 编码约束</h3>
+    <p><code>DT[3:0] = 0000</code> 或 <code>1111</code>（即 <code>0xX0</code>、<code>0xXF</code>）<b>禁止使用</b>。原因：该编码约束保证每个 packet 前 4 bit 内至少有一次跳变——EoT 序列是全 1 或全 0，接收端可据此在 4 bit 内区分「新 packet 开始」与「EoT」。</p>
+
+    <h3>Processor-sourced（host → peripheral）</h3>
+    <h4>Video Mode 同步 / 控制（均 Short）</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>DT (hex)</th><th>DT (binary)</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td><code>0x01</code></td><td><code>00 0001</code></td><td>Sync Event, V Sync Start (VSS)</td></tr>
+          <tr><td><code>0x11</code></td><td><code>01 0001</code></td><td>Sync Event, V Sync End (VSE)</td></tr>
+          <tr><td><code>0x21</code></td><td><code>10 0001</code></td><td>Sync Event, H Sync Start (HSS)</td></tr>
+          <tr><td><code>0x31</code></td><td><code>11 0001</code></td><td>H Sync End (HSE)</td></tr>
+          <tr><td><code>0x08</code></td><td><code>00 1000</code></td><td>End of Transmission packet (EoTp)</td></tr>
+          <tr><td><code>0x02</code></td><td><code>00 0010</code></td><td>Color Mode (CM) Off Command</td></tr>
+          <tr><td><code>0x12</code></td><td><code>01 0010</code></td><td>Color Mode (CM) On Command</td></tr>
+          <tr><td><code>0x22</code></td><td><code>10 0010</code></td><td>Shut Down Peripheral Command</td></tr>
+          <tr><td><code>0x32</code></td><td><code>11 0010</code></td><td>Turn On Peripheral Command</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h4>Command Mode 通用 / DCS</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>DT (hex)</th><th>含义</th><th>长度</th></tr></thead>
+        <tbody>
+          <tr><td><code>0x03</code> / <code>0x13</code> / <code>0x23</code></td><td>Generic Short WRITE，0 / 1 / 2 参数</td><td>Short</td></tr>
+          <tr><td><code>0x04</code> / <code>0x14</code> / <code>0x24</code></td><td>Generic READ，0 / 1 / 2 参数</td><td>Short</td></tr>
+          <tr><td><code>0x05</code> / <code>0x15</code></td><td>DCS Short WRITE，0 / 1 参数</td><td>Short</td></tr>
+          <tr><td><code>0x06</code></td><td>DCS READ，无参数</td><td>Short</td></tr>
+          <tr><td><code>0x37</code></td><td>Set Maximum Return Packet Size</td><td>Short</td></tr>
+          <tr><td><code>0x09</code></td><td>Null Packet, no data</td><td>Long</td></tr>
+          <tr><td><code>0x19</code></td><td>Blanking Packet, no data</td><td>Long</td></tr>
+          <tr><td><code>0x29</code></td><td>Generic Long Write</td><td>Long</td></tr>
+          <tr><td><code>0x39</code></td><td>DCS Long Write / write_LUT</td><td>Long</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h4>像素流（均 Long，Video Mode）</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>DT (hex)</th><th>格式</th></tr></thead>
+        <tbody>
+          <tr><td><code>0x0C</code></td><td>Loosely Packed Pixel Stream, 20-bit YCbCr 4:2:2</td></tr>
+          <tr><td><code>0x1C</code></td><td>Packed Pixel Stream, 24-bit YCbCr 4:2:2（每分量 12 bit）</td></tr>
+          <tr><td><code>0x2C</code></td><td>Packed Pixel Stream, 16-bit YCbCr 4:2:2</td></tr>
+          <tr><td><code>0x0D</code></td><td>Packed Pixel Stream, 30-bit RGB 10-10-10</td></tr>
+          <tr><td><code>0x1D</code></td><td>Packed Pixel Stream, 36-bit RGB 12-12-12</td></tr>
+          <tr><td><code>0x3D</code></td><td>Packed Pixel Stream, 12-bit YCbCr 4:2:0</td></tr>
+          <tr><td><code>0x0E</code></td><td>Packed Pixel Stream, 16-bit RGB 5-6-5</td></tr>
+          <tr><td><code>0x1E</code></td><td>Packed Pixel Stream, 18-bit RGB 6-6-6（packed）</td></tr>
+          <tr><td><code>0x2E</code></td><td>Loosely Packed Pixel Stream, 18-bit RGB 6-6-6（3 字节/像素）</td></tr>
+          <tr><td><code>0x3E</code></td><td>Packed Pixel Stream, 24-bit RGB 8-8-8</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout warn">
+      <b>常见误传校注：</b>DSI v1.1 中 <code>0x3E</code> = 24-bit RGB888、<code>0x0E</code> = RGB565、<code>0x2E</code> = 18-bit loosely packed（3 字节/像素）。与其他版本/资料交叉引用时务必核对。
+    </div>
+
+    <h3>EoTp（DT = 0x08）</h3>
+    <ul>
+      <li>固定格式：DT = <code>0b001000</code>、VC 固定 <code>0b00</code>、Payload = <code>0x0F0F</code>、ECC = <code>0x01</code>（线上固定字节 <code>08 0F 0F 01</code>）；多 lane 时 EoTp 字节同样按 lane 分发。</li>
+      <li>作用：协议层标示 HS transmission 结束，与 PHY 层 EoT 序列解耦，增强鲁棒性；代价是每次 transmission 多 4 字节。</li>
+      <li>兼容性：v1.1 设备必须具备 EoTp 生成/检测能力，同时必须提供 enable/disable 手段兼容旧设备。<b>HS 模式 shall 发送；LP 模式 should not 发送；接收端 HS/LP 都 shall 检测。</b></li>
+    </ul>
+
+    <h3>Peripheral-sourced（peripheral → host）</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>DT (hex)</th><th>含义</th><th>长度</th></tr></thead>
+        <tbody>
+          <tr><td><code>0x02</code></td><td>Acknowledge and Error Report</td><td>Short</td></tr>
+          <tr><td><code>0x08</code></td><td>EoTp</td><td>Short</td></tr>
+          <tr><td><code>0x11</code> / <code>0x12</code></td><td>Generic Short READ Response，返回 1 / 2 字节</td><td>Short</td></tr>
+          <tr><td><code>0x1A</code></td><td>Generic Long READ Response</td><td>Long</td></tr>
+          <tr><td><code>0x1C</code></td><td>DCS Long READ Response</td><td>Long</td></tr>
+          <tr><td><code>0x21</code> / <code>0x22</code></td><td>DCS Short READ Response，返回 1 / 2 字节</td><td>Short</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout warn">
+      <b>规范笔误校注：</b>§8.10.5 正文把 DCS Short Read Response 的 DT 误印为 <code>01 0001</code> / <code>01 0010</code>，应为 <code>10 0001</code> / <code>10 0010</code>。
+    </div>
+  </div>
+</section>
+
+<!-- ============ 07 video ============ -->
+<section id="video">
+  <div class="card">
+    <h2><span class="no">07</span>Video Mode <span class="en">video</span></h2>
+
+    <h3>帧 / 行结构</h3>
+    <ul>
+      <li>一帧时间 = <code>tL × (VSA + VBP + VACT + VFP)</code>；行时间 <code>tL = tHSA + tHBP + tHACT + tHFP</code>。</li>
+      <li>每帧<b>第一行</b>以 <b>VSS</b> 开始；其余所有行以 <b>VSE 或 HSS</b> 开始。</li>
+      <li>VSS 隐含「VSA 第一行的 HSS」；VSE 隐含「VSA 最后一行的 HSS」。</li>
+      <li>正常一行 RGB 用一个 packet 发完整 scanline；必要时一行可拆多个 packet，但<b>单个像素不得跨包拆分</b>。</li>
+    </ul>
+
+    <figure>
+      <img src="assets/dsi-video-frame.svg" alt="Video Mode 二维帧结构：VSA/VBP/VACT/VFP 与行内 HSA/HBP/HACT/HFP">
+      <figcaption><b>图 12</b>　帧结构：纵轴 VSA/VBP/VACT/VFP（行），横轴行内 HSA→HBP→HACT（像素包）→HFP；每帧第一行 VSS 开始、其余行 VSE/HSS 开始，每帧至少一次回 LP。</figcaption>
+    </figure>
+
+    <h3>三种 packet sequence（host 必须全部支持；peripheral 至少支持一种）</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>模式</th><th>特点</th><th>外设要求</th></tr></thead>
+        <tbody>
+          <tr><td><b>Non-Burst with Sync Pulses</b></td><td>精确重建 DPI 型时序：像素按 DPI 速率发送，sync 脉宽精确传递（每个 sync 发 Start+End 一对短包）；HSA/HBP/HFP 用 Blanking Packet（<code>0x19</code>）填充，时间充裕时可用定时 LP-11 代替以省电。</td><td>无需 line buffer，sync 精度最高</td></tr>
+          <tr><td><b>Non-Burst with Sync Events</b></td><td>简化版：每个 sync 只发 Start（单个 Sync Event），peripheral 自行重建脉宽；像素仍按 DPI 速率发。</td><td>无需 line buffer</td></tr>
+          <tr><td><b>Burst Mode</b></td><td>RGB 像素时间压缩成高速 burst 发出，每行腾出更多时间进 LP 省电或复用链路；burst 后总线可留 HS 发 blanking packet 或进 LP。若 peripheral 借此时段反向 LP 发送，其时长必须受限以免 line buffer underflow。</td><td><b>需要 line buffer</b>，最省电</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <figure>
+      <img src="assets/dsi-video-modes.svg" alt="三种 Video Mode 时序对比：Sync Pulses / Sync Events / Burst">
+      <figcaption><b>图 13</b>　三模式时序对比：(a) Non-Burst Sync Pulses（HSS…HSE 对 + 像素按 DPI 速率）；(b) Non-Burst Sync Events（仅 HSS）；(c) Burst Mode（像素压缩高速 burst + 大段 BLLP/LP）。</figcaption>
+    </figure>
+
+    <h3>BLLP 与消隐规则</h3>
+    <p>BLLP（Blanking or Low-Power Interval）期间链路可做 5 件事：</p>
+    <ol>
+      <li>保持 Idle（LP-11）；</li>
+      <li>Escape Mode 发非视频 packet；</li>
+      <li>HS Mode 发非视频 packet；</li>
+      <li>前次传输以 BTA 结束时 peripheral 用 Escape Mode 回传；</li>
+      <li>用不同 VC ID 向另一 peripheral 发 packet。</li>
+    </ol>
+    <ul>
+      <li>host <b>每帧至少应结束一次 HS 传输并回到 LP（LPM）</b>；推荐每行水平消隐期都回一次 LP。</li>
+      <li>HBP/HFP：peripheral 时序规格最小值为 0 时 Blanking Packet <b>may</b> 省略；最大值为 0 时 <b>shall</b> 省略。</li>
+    </ul>
+
+    <h3>外设时序参数（peripheral 厂商必须填写，host 必须满足）</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>参数</th><th>含义</th><th>单位</th></tr></thead>
+        <tbody>
+          <tr><td><code>brPHY</code></td><td>所有 lane 总比特率</td><td>Mbps</td></tr>
+          <tr><td><code>tL</code></td><td>行时间</td><td>s</td></tr>
+          <tr><td><code>tHSA</code> / <code>tHBP</code> / <code>tHACT</code> / <code>tHFP</code></td><td>行同步 / 后沿 / 图像数据 / 前沿时间</td><td>s</td></tr>
+          <tr><td><code>HACT</code></td><td>每行有效像素数</td><td>pixels</td></tr>
+          <tr><td><code>VSA</code> / <code>VBP</code> / <code>VACT</code> / <code>VFP</code></td><td>场同步 / 后沿 / 有效行 / 前沿行数</td><td>lines</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 08 command ============ -->
+<section id="command">
+  <div class="card">
+    <h2><span class="no">08</span>Command Mode 与双向传输 <span class="en">command</span></h2>
+
+    <h3>Generic / DCS 读写规则</h3>
+    <ul>
+      <li><b>Generic Short WRITE</b>（<code>0x03/0x13/0x23</code>）：DT[5:4] 表参数个数；单参数时 Data1 = <code>0x00</code>。</li>
+      <li><b>Generic READ</b>（<code>0x04/0x14/0x24</code>）：<b>必须是 transmission 中唯一或最后一个 packet</b>，之后 host 发 BTA。peripheral 响应：无错 → 返回 READ 数据；有错 → Acknowledge and Error Report；单 bit ECC 错已纠正 → READ 数据 + 追加 Error Report。返回数据超过 Set Maximum Return Packet Size 时须多次传输。</li>
+      <li><b>DCS Short WRITE</b>（<code>0x05/0x15</code>）：DI 后第一字节即 DCS Command Byte。后随 BTA 时，双向 peripheral 无错回 ACK Trigger Message，有错回 Error Report；单向 Video Mode 模组忽略 BTA。</li>
+      <li><b>DCS READ</b>（<code>0x06</code>）：规则同 Generic READ。</li>
+      <li><b>DCS Long Write / write_LUT</b>（<code>0x39</code>）：DI + 2B WC + ECC + DCS Command Byte + (WC−1) 字节 payload + 2B Checksum。</li>
+      <li><b>Set Maximum Return Packet Size</b>（<code>0x37</code>）：限定回传 Long packet 最大 payload；<b>上电 / Reset 后默认值为 1</b>；单向 peripheral 忽略。</li>
+      <li><b>Null Packet</b>（<code>0x09</code>，Long）：让 Data Lane 保持 HS 发哑数据，peripheral 不捕获 payload，但 ECC/Checksum 照常生成。</li>
+      <li><b>Blanking Packet</b>（<code>0x19</code>，Long）：承载消隐期时序；payload 可为任意数据。</li>
+      <li><b>Color Mode On/Off</b>（<code>0x12/0x02</code>）：Video Mode 模组进入/退出低色彩省电模式。<b>Shutdown Peripheral</b>（<code>0x22</code>）：关显示省电（接口保持供电）；<b>Turn On Peripheral</b>（<code>0x32</code>）：恢复正常显示。</li>
+    </ul>
+    <div class="callout info">
+      <b>响应唯一性规则：</b>host 一次 transmission 中最多只能有<b>一个</b>需要 peripheral 响应的 packet；READ 必须是唯一或最后一个 packet 并后随 BTA。
+    </div>
+
+    <h3>BTA 令牌机制</h3>
+    <ul>
+      <li>BTA 是 token-passing：host 在 transmission 最后一个 packet 期间向 PHY 置 <code>TurnRequest</code>，PHY 在 EoT 后发 BTA；peripheral 获得总线后发一个或多个 packet，再以自己的 <code>TurnRequest</code> 还权。<b>每次 peripheral→host transaction 之后都必须 BTA 还权。</b></li>
+      <li>反向只用 Lane 0 + LP Mode；反向 packet 结构与正向相同（peripheral 不算 Checksum 时 PF = <code>0x0000</code>）。</li>
+      <li>带 BTA 的非 READ 命令 → 无错回 <b>ACK Trigger</b>（单字节 <code>00100001</code>，first-bit→last-bit），有错回 4 字节 Acknowledge and Error Report。</li>
+      <li>peripheral→host 四类传输：<b>TE Trigger、ACK Trigger、Acknowledge and Error Report、READ Response</b>。</li>
+      <li>Acknowledge and Error Report 固定打 <code>VC = 0b00</code>。</li>
+    </ul>
+
+    <h3>Tearing Effect（TE）上报完整流程</h3>
+    <p>DSI 无 peripheral→host 中断能力，host 要么轮询（DCS <code>get_scan_line</code>），要么长期让出总线等 TE：</p>
+    <ol>
+      <li>host 发 DCS 命令 <code>set_tear_on</code>（以 DT=<code>0x15</code> 发送；<code>set_tear_scanline</code> 以 DT=<code>0x39</code> 发送；<code>set_tear_off</code> 关闭），该 transmission 以 BTA 结束，模组回普通 ACK 还权；</li>
+      <li>要使能 TE 上报，host 必须在<b>不附带任何 DSI 命令</b>的情况下再次 BTA 让出总线；</li>
+      <li>host 最多等待<b>一个视频帧周期</b>——期间 host <b>不能发任何新命令</b>；</li>
+      <li>TE 事件发生时模组：发 LP Escape Mode 序列 → 发 <b>TE Trigger</b> 字节 <code>01011101</code>（first-bit→last-bit）→ 还权 host。该 Trigger 为 TE 专用。</li>
+    </ol>
+
+    <figure>
+      <img src="assets/dsi-te-flow.svg" alt="TE 上报时序图：set_tear_on、两次 BTA、等待一帧、TE Trigger 01011101">
+      <figcaption><b>图 14</b>　TE 上报序列：set_tear_on（0x15）→ BTA → ACK Trigger → host 无条件 BTA → 等待 ≤1 帧（期间 host 不得发任何命令）→ peripheral Escape + TE Trigger（01011101）→ BTA 还权。</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ 09 error ============ -->
+<section id="error">
+  <div class="card">
+    <h2><span class="no">09</span>错误处理与争用 <span class="en">error</span></h2>
+
+    <h3>6 类低层协议错误（PHY 检测，peripheral 存为状态位）</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>错误</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>SoT Error</td><td>前导序列单 bit 错容错，检出后可继续但数据可信度降低。</td></tr>
+          <tr><td>2</td><td>SoT Sync Error</td><td>前导损坏到无法同步，<b>不得执行任何 WRITE</b>。</td></tr>
+          <tr><td>3</td><td>EoT Sync Error</td><td>EoT 时最后一字节不对齐字节边界。</td></tr>
+          <tr><td>4</td><td>Escape Mode Entry Command Error</td><td>Escape 进入命令不被识别。</td></tr>
+          <tr><td>5</td><td>LP Transmission Sync Error</td><td>LP 传输结束数据未对齐字节边界。</td></tr>
+          <tr><td>6</td><td>False Control Error</td><td>LP-10 后无合法 escape/turnaround 序列，或 LP-01 后无 LP-00 bridge。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Acknowledge and Error Report packet（DT = 0x02，4 字节 Short）</h3>
+    <p>格式：Byte0 = DI（VC + <code>0x02</code>）、Byte1 = Error Report bits 0–7、Byte2 = bits 8–15、Byte3 = ECC。固定打 <code>VC = 0b00</code>。</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Bit</th><th>含义</th><th>Bit</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td><code>0</code></td><td>SoT Error</td><td><code>8</code></td><td>ECC Error, single-bit（已纠正）</td></tr>
+          <tr><td><code>1</code></td><td>SoT Sync Error</td><td><code>9</code></td><td>ECC Error, multi-bit</td></tr>
+          <tr><td><code>2</code></td><td>EoT Sync Error</td><td><code>10</code></td><td>Checksum Error（仅 Long packet）</td></tr>
+          <tr><td><code>3</code></td><td>Escape Mode Entry Command Error</td><td><code>11</code></td><td>DSI Data Type Not Recognized</td></tr>
+          <tr><td><code>4</code></td><td>Low-Power Transmit Sync Error</td><td><code>12</code></td><td>DSI VC ID Invalid</td></tr>
+          <tr><td><code>5</code></td><td>Peripheral Timeout Error</td><td><code>13</code></td><td>Invalid Transmission Length</td></tr>
+          <tr><td><code>6</code></td><td>False Control Error</td><td><code>14</code></td><td>Reserved</td></tr>
+          <tr><td><code>7</code></td><td>Contention Detected</td><td><code>15</code></td><td>DSI Protocol Violation</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>错误累积 — 上报 — 清零机制</h3>
+    <ul>
+      <li>错误<b>跨多次传输累积</b>，直到某次 BTA 统一上报，上报后 Error Register <b>全部清零</b>；每次 BTA 只回一个 ACK 或一个 Error Report。</li>
+      <li>遇到不识别 Data Type 或 multi-bit ECC 错后，接收端<b>失去包界</b>，从出错点丢弃该次 transmission 剩余全部内容。</li>
+    </ul>
+
+    <h3>响应规则矩阵</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>检出情况</th><th>响应</th></tr></thead>
+        <tbody>
+          <tr><td>单 bit ECC 错已纠正（READ）</td><td>照常回 READ 数据 + 追加 Error Report（bit 8）</td></tr>
+          <tr><td>multi-bit ECC 错</td><td>不执行命令，只回 Error Report（bit 9）</td></tr>
+          <tr><td>SoT / SoT Sync / VC invalid / 协议违规 / 命令不识别</td><td>只回 Error Report（对应 bit）</td></tr>
+          <tr><td>EoT Sync / LP Sync / Checksum 错</td><td>只回 Error Report（对应 bit）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>定时器</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>定时器</th><th>含义</th><th>约束</th></tr></thead>
+        <tbody>
+          <tr><td><code>HRX_TO</code></td><td>peripheral HS RX 超时</td><td>必需</td></tr>
+          <tr><td><code>HTX_TO</code></td><td>host HS TX 超时</td><td>必需，应比 HRX_TO 长</td></tr>
+          <tr><td><code>LTX-P_TO</code></td><td>peripheral LP TX 占线超时</td><td>必需</td></tr>
+          <tr><td><code>LRX-H_TO</code></td><td>host LP RX 超时</td><td>必需，须 &gt; LTX-P_TO</td></tr>
+          <tr><td><code>TA_TO</code></td><td>Turnaround 超时</td><td>可选</td></tr>
+          <tr><td><code>PR_TO</code></td><td>Peripheral Reset 等待</td><td>可选（host 发 Reset Entry command 后等待复位完成）</td></tr>
+          <tr><td><code>PRESP_TO</code></td><td>peripheral 响应超时</td><td>可选，分 BTA / LPDT READ / LPDT WRITE / HS READ / HS WRITE 五种取值</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li>peripheral 检出 <code>HRX_TO</code> 或 <code>LTX-P_TO</code> 超时 → Error Report 置 <b>Peripheral Timeout Error（bit 5）</b>。</li>
+    </ul>
+
+    <h3>争用（Contention）与恢复</h3>
+    <ul>
+      <li>双方同时驱动总线时，LP-CD 检测 <b>LP High Fault / LP Low Fault</b>；检出错 → 置 <b>Contention Detected（bit 7）</b>。</li>
+      <li><b>common-mode fault</b> 无法被 LP-CD 区分，只能靠定时器（timeout）恢复。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 10 pixel ============ -->
+<section id="pixel">
+  <div class="card">
+    <h2><span class="no">10</span>像素格式 <span class="en">pixel</span></h2>
+
+    <h3>通用规则</h3>
+    <ul>
+      <li>分量顺序 <b>R→G→B</b>；YCbCr 按 BT.656：<code>Cb、Y、Cr、Y</code>；分量内 <b>LSB 先发</b>。</li>
+      <li>标清用 <b>BT.601</b>、高清用 <b>BT.709</b> 色彩空间；30/36 bpp 用 sRGB 色彩空间。</li>
+      <li>行内像素不足打包对齐要求时按 <b>fill pixel</b> 规则补齐（见下表）。</li>
+    </ul>
+
+    <h3>打包格式表</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>DT</th><th>格式</th><th>字节排列要点</th><th>WC 约束</th></tr></thead>
+        <tbody>
+          <tr><td><code>0x0E</code></td><td>RGB 5-6-5（16bpp）</td><td>2 字节/像素：byte0 = <code>{G[2:0],R[4:0]}</code>、byte1 = <code>{B[4:0],G[5:3]}</code></td><td>行宽 2 字节倍数</td></tr>
+          <tr><td><code>0x1E</code></td><td>RGB 6-6-6 packed（18bpp）</td><td>4 像素 = 9 字节紧凑位流</td><td>行宽 4 像素倍数，不足补 fill pixel</td></tr>
+          <tr><td><code>0x2E</code></td><td>RGB 6-6-6 loosely packed</td><td>3 字节/像素，每字节有效位 <code>[7:2]</code>，<code>[1:0]</code> 忽略</td><td>行宽 3 字节倍数</td></tr>
+          <tr><td><code>0x3E</code></td><td>RGB 8-8-8（24bpp）</td><td>3 字节/像素：byte0 = R、byte1 = G、byte2 = B</td><td>行宽 3 字节倍数</td></tr>
+          <tr><td><code>0x0D</code></td><td>RGB 10-10-10（30bpp）</td><td>4 像素 = 15 字节；示例单像素全 1 packet = <code>0D 01 00 1E FF FF FF 3F B4 36</code></td><td>行宽 15 字节倍数</td></tr>
+          <tr><td><code>0x1D</code></td><td>RGB 12-12-12（36bpp）</td><td>2 像素 = 9 字节</td><td>—</td></tr>
+          <tr><td><code>0x0C</code></td><td>YCbCr 4:2:2 20bpp loosely</td><td>每分量 10 bit 放 12 bit 字段；2 像素 = 6 字节</td><td>WC 必须非零且 6 的倍数</td></tr>
+          <tr><td><code>0x1C</code></td><td>YCbCr 4:2:2 24bpp</td><td>每分量 12 bit；2 像素 = 6 字节</td><td>WC 6 的倍数</td></tr>
+          <tr><td><code>0x2C</code></td><td>YCbCr 4:2:2 16bpp</td><td>每分量 8 bit；2 像素 = 4 字节，<code>Cb0 Y0 Cr0 Y1</code></td><td>WC 4 的倍数</td></tr>
+          <tr><td><code>0x3D</code></td><td>YCbCr 4:2:0 12bpp</td><td>奇数行发 Cb+Y、偶数行发 Cr+Y；2 像素 = 3 字节</td><td>WC 3 的倍数</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>合规要求</h3>
+    <ul>
+      <li>Video Mode <b>host 必须实现 4 种</b>：16bpp、18bpp packed、18bpp loosely packed、24bpp；<b>peripheral 至少一种</b>。</li>
+      <li>合规分辨率清单：QQVGA 160×120、QCIF 176×144、QCIF+ 176×208/220、QVGA 320×240、CIF 352×288、CIF+ 352×416/440、(1/2)VGA 320×480、(2/3)VGA 640×320、VGA 640×480、WVGA 800×480、SVGA 800×600、XVGA 1024×768。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 11 dv ============ -->
+<section id="dv">
+  <div class="card">
+    <h2><span class="no">11</span>数字验证视角 <span class="en">dv</span></h2>
+    <p class="lead">本章把前文协议点转化为可执行的验证清单：monitor/checker 检查点、错误注入场景矩阵、覆盖率建议与黄金参考模型要点。</p>
+
+    <h3>Monitor / Checker 检查点清单</h3>
+    <h4>PHY 层（D-PHY）</h4>
+    <ul class="check-grid">
+      <li>SoT 序列完整：<code>LP-11→LP-01(TLPX)→LP-00(THS-PREPARE)→HS-0(THS-ZERO)→Sync 00011101</code></li>
+      <li>RX 锁定 Leader <code>011101</code> 的单比特容错行为</li>
+      <li>EoT：末位翻转 + <code>THS-TRAIL</code> → <code>LP-11(THS-EXIT)</code></li>
+      <li>Escape 进入序列与 8 个 entry command 译码（<code>0x87/0x78/0x46/0xBA…</code>）</li>
+      <li>Spaced-One-Hot：每 Mark 后必跟 Space；退出前最后相位为不带 Space 的 Mark-1</li>
+      <li>ULPS 进出：Space 保持 → Mark-1 持续 <code>TWAKEUP = 1 ms</code> → LP-11（含 Clock Lane ULPS）</li>
+      <li>BTA 五步时序：<code>TTA-GO = 4·TLPX</code>、<code>TTA-SURE ∈ [1,2]·TLPX</code>、<code>TTA-GET = 5·TLPX</code>，且令牌必须归还</li>
+      <li>Clock Lane：<code>TCLK-PRE ≥ 8 UI</code>、<code>TCLK-POST ≥ 60 ns + 52·UI</code>、<code>TCLK-MISS ≤ 60 ns</code></li>
+      <li>Table 14 全集时序参数（TLPX ≥ 50 ns、THS-PREPARE/ZERO/SETTLE/SKIP/TRAIL 等 min/max）</li>
+      <li><code>TINIT ≥ 100 µs</code> 初始化 LP-11</li>
+      <li>&gt;1.5 Gbps 时 deskew 序列存在性：全 1 sync 16 UI + <code>0101…</code> pattern，initial ≥ 2^15 UI / periodic ≥ 2^10 UI</li>
+      <li>DDR 正交关系：时钟上升沿落在数据比特中心；第一个 payload bit 期间必有时钟上升沿</li>
+    </ul>
+    <h4>协议层（DSI）</h4>
+    <ul class="check-grid">
+      <li>header 4 字节重组：DI = VC[7:6] + DT[5:0]、WC、ECC</li>
+      <li>ECC 复算（P0~P5 方程）与 syndrome 分类：无错 / 纠 1 bit / parity 错 / multi-bit</li>
+      <li>CRC-16 复算（多项式 <code>0x1021</code> 反射 <code>0x8408</code>、初值 <code>0xFFFF</code>、低字节先发；payload 长度为 0 时期望 <code>0xFFFF</code>）</li>
+      <li>WC 定界：按 WC 数完 payload 后恰遇 CRC footer；无同步码依赖</li>
+      <li>DT 合法性：<code>DT[3:0]</code> 禁 <code>0000/1111</code>；DT 与方向（processor/peripheral-sourced）匹配</li>
+      <li>VC 合法性与 VC 交织下的包序</li>
+      <li>lane 分发 round-robin 与 lane 合并后的字节序还原；各 lane 同时 SoT、独立 EoT</li>
+      <li>EoTp：HS transmission 末尾存在 <code>08 0F 0F 01</code>（VC=0），LP 模式 should not 出现</li>
+      <li>READ 为唯一/最后一个 packet 且后随 BTA；一次 transmission 至多一个需响应 packet</li>
+      <li>反向只用 Lane 0 + LP；ACK Trigger <code>00100001</code>、TE Trigger <code>01011101</code> 字节序</li>
+      <li>Set Maximum Return Packet Size 上电默认 1；超限时 READ 分多次传输</li>
+      <li>Error Report 固定 VC=0；上报后 Error Register 清零</li>
+      <li>Video Mode：VSS 起帧、VSE/HSS 起行、单像素不跨包、每帧至少一次回 LP</li>
+      <li>像素包 WC 约束（各格式的倍数要求）与 fill pixel</li>
+    </ul>
+
+    <h3>错误注入场景矩阵</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>注入场景</th><th>注入方式</th><th>期望行为 / 上报</th></tr></thead>
+        <tbody>
+          <tr><td>SoT Error</td><td>SoT 前导中翻 1 bit（Leader 内单比特错）</td><td>容错继续接收，数据可信度降低；Error Report <b>bit 0</b></td></tr>
+          <tr><td>SoT Sync Error</td><td>破坏前导至无法锁定 <code>011101</code></td><td>不得执行任何 WRITE；Error Report <b>bit 1</b></td></tr>
+          <tr><td>EoT Sync Error</td><td>使 EoT 时末字节不对齐字节边界</td><td>只回 Error Report <b>bit 2</b></td></tr>
+          <tr><td>Escape Entry Command Error</td><td>发不在 Table 8 中的 entry command</td><td>命令被忽略并等待 Stop；Error Report <b>bit 3</b></td></tr>
+          <tr><td>LP Transmit Sync Error</td><td>LPDT 数据截断至非字节边界结束</td><td>只回 Error Report <b>bit 4</b></td></tr>
+          <tr><td>False Control Error</td><td>LP-10 后不给合法 escape/turnaround 序列（或 LP-01 后无 LP-00）</td><td>Error Report <b>bit 6</b></td></tr>
+          <tr><td>ECC single-bit（READ）</td><td>header 24 bit 中任翻 1 bit（逐位遍历）</td><td>syndrome 命中矩阵 → 纠正；READ 照常回数据 + 追加 Error Report <b>bit 8</b></td></tr>
+          <tr><td>ECC single-bit（parity）</td><td>ECC 字节自身翻 1 bit</td><td>syndrome 命中单位矩阵行 → 判 parity 位错，数据可信</td></tr>
+          <tr><td>ECC multi-bit</td><td>header 翻 ≥2 bit</td><td>不执行命令，只回 Error Report <b>bit 9</b>；失去包界，丢弃剩余 transmission</td></tr>
+          <tr><td>Checksum Error</td><td>Long packet payload 翻 bit 或 CRC 域篡改</td><td>只回 Error Report <b>bit 10</b></td></tr>
+          <tr><td>非法 DT</td><td>发 <code>DT[3:0]=0000/1111</code> 或未定义编码</td><td>Error Report <b>bit 11</b>；失去包界</td></tr>
+          <tr><td>VC invalid</td><td>发超出配置范围的 VC ID</td><td>Error Report <b>bit 12</b></td></tr>
+          <tr><td>Invalid Transmission Length</td><td>WC 与实际 payload 字节数不符</td><td>Error Report <b>bit 13</b></td></tr>
+          <tr><td>Peripheral Timeout</td><td>HS burst 中途停发触发 <code>HRX_TO</code>；或 LP 占线超 <code>LTX-P_TO</code></td><td>Error Report <b>bit 5</b></td></tr>
+          <tr><td>Contention</td><td>host 未等 BTA 完成即驱动（模拟双向同时驱动）</td><td>LP-CD 检出 High/Low Fault → Error Report <b>bit 7</b>；common-mode fault 靠定时器恢复</td></tr>
+          <tr><td>Protocol Violation</td><td>READ 非末位、一次 transmission 两个需响应 packet 等</td><td>Error Report <b>bit 15</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>覆盖率建议</h3>
+    <ul>
+      <li><b>DT 全编码 × VC(0–3) × 包长边界</b>：WC = 0 / 1 / 65535，Short/Long 全覆盖，含 EoTp、Null、Blanking。</li>
+      <li><b>三种 Video Mode</b>（Sync Pulses / Sync Events / Burst）× 像素格式全集（10 种 DT）× lane 数 <b>1/2/3/4</b>。</li>
+      <li><b>lane 结束错位</b>：总字节数 % N == 0 / ≠ 0 的各 lane EoT 错位组合。</li>
+      <li><b>BTA 回环</b>：READ（0/1/2 参数）、带 BTA 的 WRITE、TE 全流程（含无条件 BTA 后等一帧）。</li>
+      <li><b>ULPS 进出</b>：Data Lane + Clock Lane，含 ULPS 回 HS 后 deskew 可选分支。</li>
+      <li><b>deskew 序列</b>：initial / periodic / ≤1.5 Gbps 无 deskew 三档。</li>
+      <li><b>ECC/CRC 边界</b>：payload 长度 0（CRC = <code>0xFFFF</code>）、peripheral 不算 CRC 时 PF = <code>0x0000</code> 占位。</li>
+      <li><b>时序档位</b>：Table 14 各参数 min / typ / max 角点；TINIT / TWAKEUP 边界。</li>
+    </ul>
+
+    <h3>黄金参考模型要点</h3>
+    <ul>
+      <li><b>ECC</b>：实现 P0~P5 异或方程（<code>P7=P6=0</code>），内置 64 项 syndrome 表（D0→<code>0x07</code> 起）做单比特纠错与 multi-bit 判定；用 5 组黄金向量自检（<code>0x37/0x01F0→0x3F</code> 等）。</li>
+      <li><b>CRC-16</b>：反射算法——多项式反射 <code>0x8408</code>、初值 <code>0xFFFF</code>、payload LSB first 逐比特进入、结果低字节先发；用 3 组向量自检（<code>00→0x0F87</code>、<code>01→0x1E0E</code>、24 字节流→<code>0xE569</code>）。</li>
+      <li><b>lane 分发</b>：round-robin（byte i → Lane (i mod N)），各 lane 同时 SoT、按 <code>ceil/floor(total/N)</code> 字节数独立 EoT；merger 侧按同规则还原并校验包界。</li>
+      <li><b>包解析</b>：靠 WC 定界，遇非法 DT 或 multi-bit ECC 即丢包界、丢弃剩余 transmission，与 DUT 行为逐拍对齐。</li>
+    </ul>
+    <pre><span class="cm"># Reference model skeleton (Python, self-check with golden vectors)</span>
+def dsi_ecc(h24):              <span class="cm"># h24: 24-bit header int, D0 = LSB of DI</span>
+    d = [(h24 >> i) &amp; 1 for i in range(24)]
+    def x(*idx): return __import__('functools').reduce(int.__xor__, (d[i] for i in idx))
+    p5 = x(10,11,12,13,14,15,16,17,18,19,21,22,23)
+    p4 = x(4,5,6,7,8,9,16,17,18,19,20,22,23)
+    p3 = x(1,2,3,7,8,9,13,14,15,19,20,21,23)
+    p2 = x(0,2,3,5,6,9,11,12,15,18,20,21,22)
+    p1 = x(0,1,3,4,6,8,10,12,14,17,20,21,22,23)
+    p0 = x(0,1,2,4,5,7,10,11,13,16,20,21,22,23)
+    return (p5&lt;&lt;5)|(p4&lt;&lt;4)|(p3&lt;&lt;3)|(p2&lt;&lt;2)|(p1&lt;&lt;1)|p0   <span class="cm"># P7=P6=0</span>
+
+def crc16_dsi(data):           <span class="cm"># reflected 0x8408, init 0xFFFF, LSB-first per byte</span>
+    crc = 0xFFFF
+    for b in data:
+        crc ^= b
+        for _ in range(8):
+            crc = (crc >> 1) ^ 0x8408 if crc &amp; 1 else crc >> 1
+    return crc                 <span class="cm"># transmit low byte first</span>
+
+assert dsi_ecc(0x01F037) == 0x3F        <span class="cm"># DI=0x37, WC=0x01F0</span>
+assert dsi_ecc(0x000129) == 0x06        <span class="cm"># DI=0x29, WC=0x0001</span>
+assert crc16_dsi(bytes([0x00])) == 0x0F87
+assert crc16_dsi(bytes([0x01])) == 0x1E0E
+assert crc16_dsi(bytes.fromhex('FF0000001EF01EC74F8278C582E08C70D23C78E9FF000001')) == 0xE569</pre>
+    <div class="callout ok">
+      <b>使用建议：</b>把上述模型作为 scoreboard 的 byte-level golden，先跑通黄金向量再接 DUT；Annex B 注释与 §8.8.18 示例的两处规范笔误（见第 5 章校注）不要抄进参考模型。
+    </div>
+  </div>
+</section>
+
+<!-- ============ 12 appendix ============ -->
+<section id="appendix">
+  <div class="card">
+    <h2><span class="no">12</span>附录 <span class="en">appendix</span></h2>
+
+    <h3>术语表</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>术语</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td><code>HS</code></td><td>High-Speed 模式，差分高速传输，仅 Forward 方向</td></tr>
+          <tr><td><code>LP</code></td><td>Low-Power 模式，单端低功耗传输，可双向</td></tr>
+          <tr><td><code>SoT / EoT</code></td><td>Start / End of Transmission，HS burst 的起止序列，均以 LP-11 界定</td></tr>
+          <tr><td><code>BTA</code></td><td>Bus Turnaround，总线方向翻转的令牌传递机制</td></tr>
+          <tr><td><code>ULPS</code></td><td>Ultra-Low Power State，超低功耗态（Escape 命令 <code>0x78</code> 进入）</td></tr>
+          <tr><td><code>LPDT</code></td><td>Low-Power Data Transmission，Escape 模式下的低功耗数据传输</td></tr>
+          <tr><td><code>EoTp</code></td><td>End of Transmission packet（DT=<code>0x08</code>），协议层标示 HS transmission 结束</td></tr>
+          <tr><td><code>BLLP</code></td><td>Blanking or Low-Power Interval，消隐或低功耗区间</td></tr>
+          <tr><td><code>DCS</code></td><td>Display Command Set，Command Mode 命令集</td></tr>
+          <tr><td><code>DPI / DBI</code></td><td>Display Pixel / Bus Interface，并行像素 / 命令接口（Video Mode 像素格式取自 DPI-2）</td></tr>
+          <tr><td><code>TE</code></td><td>Tearing Effect，外设上报的撕裂效应事件</td></tr>
+          <tr><td><code>VC</code></td><td>Virtual Channel，DI[7:6] 标识，最多 4 个</td></tr>
+          <tr><td><code>PLL</code></td><td>Clock Multiplier Unit，PHY 外部高频时钟源</td></tr>
+          <tr><td><code>PPI</code></td><td>PHY-Protocol Interface，协议层与 PHY 的对接接口</td></tr>
+          <tr><td><code>CIL</code></td><td>Control and Interface Logic，Lane Module 内的控制与接口逻辑</td></tr>
+          <tr><td><code>DI / WC / ECC / CRC</code></td><td>Data Identifier / Word Count / 纠错码（Hamming (30,24)）/ 16-bit 校验和</td></tr>
+          <tr><td><code>UI</code></td><td>Unit Interval，一个串行比特时间</td></tr>
+          <tr><td><code>SSC</code></td><td>Spread Spectrum Clocking，扩频时钟（&gt;2.5 Gbps 必须可用）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>规范引用清单（DSI v1.1 §3 / D-PHY v2.0 §3）</h3>
+    <ul>
+      <li>MIPI Alliance Specification for <b>DCS</b>（Display Command Set）</li>
+      <li>MIPI Alliance Specification for <b>DBI-2</b>（Display Bus Interface v2）</li>
+      <li>MIPI Alliance Specification for <b>DPI-2</b>（Display Pixel Interface v2）</li>
+      <li>MIPI Alliance Specification for <b>D-PHY</b>（DSI v1.1 引用 v1.1；D-PHY v2.0 引用 v1.0、C-PHY v1.0）</li>
+      <li>MIPI Alliance Specification for <b>SDF</b>（Stereoscopic Display Format）</li>
+      <li><b>CEA-861-E</b>；<b>ITU-R BT.601 / BT.656 / BT.709</b></li>
+    </ul>
+
+    <h3>资料来源声明</h3>
+    <div class="callout info">
+      <b>已读取并作为本报告依据的规范（2 份，位于 <code>C:\Users\xiapeng2\Desktop\MIPI</code>）：</b>
+      <ul>
+        <li><code>mipi-DSI-specification-v1.1.pdf</code> — DSI v1.1 全文（5323 行通读，ECC/CRC 示例数值经 Python 独立复算验证）</li>
+        <li><code>mipi_d-phy_specification_v2-0.pdf</code> — D-PHY v2.0 全文（7939 行通读）</li>
+      </ul>
+      <b>因企业透明加密无法读取、未纳入本报告的资料（7 份，同目录）：</b>
+      <ul>
+        <li>JD9165BA 数据手册</li>
+        <li>MIPI DSI 相关协议介绍.pptx</li>
+        <li>MIPI High speed interface.ppt</li>
+        <li>MIPI_DBI_Specification_v2.pdf</li>
+        <li>D-PHY v1.0 规范</li>
+        <li>D-PHY v1.2 规范</li>
+        <li>mipi_dsi_svt_uvm_user_guide.pdf</li>
+      </ul>
+      本报告所有数值均以两份可读规范总结为准，未从加密资料引入任何内容。
+    </div>
+  </div>
+</section>
+
+<footer>
+  MIPI 协议技术报告 · DSI v1.1 / D-PHY v2.0 · 数字验证视角 · 单页离线版（无外部依赖）
+</footer>
+
+</main>
+
+<script>
+// Sidebar drawer toggle for mobile + scrollspy for section highlighting
+(function () {
+  var body = document.body;
+  var burger = document.getElementById('hamburger');
+  var scrim = document.getElementById('scrim');
+
+  function closeNav() {
+    body.classList.remove('nav-open');
+    burger.setAttribute('aria-expanded', 'false');
+  }
+  burger.addEventListener('click', function () {
+    var open = body.classList.toggle('nav-open');
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  scrim.addEventListener('click', closeNav);
+
+  // Close drawer after clicking a nav link (mobile)
+  var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+  links.forEach(function (a) {
+    a.addEventListener('click', closeNav);
+  });
+
+  // Scrollspy via IntersectionObserver
+  var sections = Array.prototype.slice.call(document.querySelectorAll('main section[id]'));
+  var byId = {};
+  links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+
+  function setActive(id) {
+    links.forEach(function (a) { a.classList.remove('active'); });
+    if (byId[id]) byId[id].classList.add('active');
+  }
+
+  if ('IntersectionObserver' in window) {
+    var visible = new Map();
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) visible.set(e.target.id, e.intersectionRatio);
+        else visible.delete(e.target.id);
+      });
+      if (visible.size) {
+        // Pick the section nearest the viewport top among visible ones
+        var best = null, bestTop = Infinity;
+        sections.forEach(function (s) {
+          if (visible.has(s.id)) {
+            var t = Math.abs(s.getBoundingClientRect().top);
+            if (t < bestTop) { bestTop = t; best = s.id; }
+          }
+        });
+        if (best) setActive(best);
+      }
+    }, { rootMargin: '-20% 0px -60% 0px', threshold: [0, 0.1, 0.5] });
+    sections.forEach(function (s) { io.observe(s); });
+  } else {
+    // Fallback: scroll listener
+    window.addEventListener('scroll', function () {
+      var cur = sections[0] && sections[0].id;
+      sections.forEach(function (s) {
+        if (s.getBoundingClientRect().top <= 120) cur = s.id;
+      });
+      setActive(cur);
+    }, { passive: true });
+  }
+  setActive('overview');
+})();
+</script>
+
+</body>
+</html>

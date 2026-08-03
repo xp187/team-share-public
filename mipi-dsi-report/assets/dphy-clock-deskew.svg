@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="1200" height="720">
+<style>text{font-family:"Microsoft YaHei","Segoe UI",sans-serif;}</style>
+<defs>
+<marker id="a-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
+<pattern id="xhatch" width="9" height="9" patternUnits="userSpaceOnUse"><rect width="9" height="9" fill="#eff6ff"/><path d="M0,0 L9,9 M9,0 L0,9" stroke="#2563eb" stroke-width="1"/></pattern>
+</defs>
+<rect width="1200" height="720" fill="#ffffff"/>
+<text x="600" y="32" font-size="17" fill="#111827" text-anchor="middle" font-weight="bold">Clock Lane 时序与 HS Skew Calibration（Deskew）</text>
+<text x="600" y="54" font-size="12" fill="#6b7280" text-anchor="middle">HS 时钟先于数据启动（TCLK-PRE ≥ 8UI）、晚于数据停止（TCLK-POST ≥ 60ns+52UI）；>1.5Gbps 必须先 deskew</text>
+<text x="60" y="72" font-size="13" fill="#111827" text-anchor="start" font-weight="bold">① Clock Lane HS 启动 / 停止（连续与非连续时钟均经此流程）</text>
+<text x="44" y="140" font-size="12" fill="#111827" text-anchor="middle" font-weight="bold">Clock</text>
+<text x="44" y="156" font-size="12" fill="#111827" text-anchor="middle" font-weight="bold">Lane</text>
+<text x="44" y="230" font-size="12" fill="#111827" text-anchor="middle" font-weight="bold">Data</text>
+<text x="44" y="246" font-size="12" fill="#111827" text-anchor="middle" font-weight="bold">Lane</text>
+<path d="M100,124 L160,124 L160,164 L330,164 L330,124 L350,164 L370,124 L390,164 L410,124 L430,164 L450,124 L470,164 L490,124 L510,164 L530,124 L550,164 L570,124 L590,164 L610,124 L630,164 L650,124 L670,164 L690,124 L710,164 L730,124 L750,164 L770,124 L790,164 L810,124 L830,164 L850,124 L870,164 L890,124 L910,164 L916,171 L922,157 L928,171 L934,157 L940,164 L940,124 L960,124 L960,164 L980,164 L1040,164 L1060,124 L1160,124" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linejoin="round"/>
+<path d="M100,214 L490,214 L510,234" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<rect x="510" y="206" width="320" height="56" fill="url(#xhatch)" stroke="#2563eb" stroke-width="1.5"/>
+<path d="M830,234 L850,214 L1160,214" fill="none" stroke="#374151" stroke-width="2" stroke-linejoin="round"/>
+<text x="670" y="282" font-size="12" fill="#6b7280" text-anchor="middle">HS Burst（各 Data Lane 独立 SoT / EoT）</text>
+<line x1="490" y1="106" x2="490" y2="270" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="2,3"/>
+<line x1="850" y1="170" x2="850" y2="270" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="2,3"/>
+<text x="200" y="292" font-size="12" fill="#6b7280" text-anchor="start">Data Lane 须在 TCLK-PRE 满足后才允许 SoT</text>
+<text x="700" y="312" font-size="12" fill="#6b7280" text-anchor="start">最后的 Data Lane 转入 LP → 起算 TCLK-POST</text>
+<path d="M160,112 V106 H210 V112" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="185" y="100" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">TLPX</text>
+<path d="M210,112 V106 H280 V112" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="245" y="100" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">TCLK-PREPARE</text>
+<path d="M330,112 V106 H490 V112" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="410" y="100" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">TCLK-PRE ≥ 8UI</text>
+<path d="M850,112 V106 H980 V112" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="915" y="100" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">TCLK-POST ≥ 60ns+52UI</text>
+<path d="M980,90 V84 H1040 V90" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="1010" y="78" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">TCLK-TRAIL ≥ 60ns</text>
+<text x="60" y="334" font-size="12" fill="#6b7280" text-anchor="start">TCLK-PREPARE = 38~95ns；TCLK-PREPARE+TCLK-ZERO ≥ 300ns；TCLK-SETTLE = 95~300ns（RX）；TCLK-TERM-EN ≤ 38ns（RX）；TCLK-MISS ≤ 60ns（RX）</text>
+<rect x="60" y="346" width="22" height="14" fill="url(#xhatch)" stroke="#2563eb" stroke-width="1"/>
+<text x="90" y="358" font-size="12" fill="#6b7280" text-anchor="start">HS 数据 / 校准 pattern（影线）</text>
+<line x1="300" y1="348" x2="300" y2="360" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="2,3"/>
+<text x="308" y="358" font-size="12" fill="#6b7280" text-anchor="start">事件标记线</text>
+<text x="60" y="384" font-size="13" fill="#111827" text-anchor="start" font-weight="bold">② Deskew 校准 burst（>1.5Gbps 必须先发送 initial deskew）</text>
+<rect x="100" y="414" width="100" height="40" rx="0" ry="0" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="150" y="438" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">SoT</text>
+<rect x="200" y="414" width="140" height="40" rx="0" ry="0" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/>
+<text x="270" y="438" font-size="12" fill="#7c3aed" text-anchor="middle" font-family="Consolas,monospace">Sync = 16'hFFFF</text>
+<rect x="340" y="414" width="500" height="40" rx="0" ry="0" fill="#ffffff" stroke="#2563eb" stroke-width="1.2"/>
+<rect x="340" y="414" width="500" height="40" fill="url(#xhatch)" stroke="#2563eb" stroke-width="1.2"/>
+<rect x="340" y="421" width="500" height="26" fill="#ffffff" opacity="0.75"/>
+<text x="590" y="438" font-size="12" fill="#1d4ed8" text-anchor="middle">Payload = 0101…（clock pattern）</text>
+<rect x="840" y="414" width="60" height="40" rx="0" ry="0" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="870" y="438" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">EoT</text>
+<path d="M200,468 V474 H340 V468" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="270" y="488" font-size="12" fill="#374151" text-anchor="middle" font-family="Consolas,monospace">TSKEWCAL-SYNC = 16UI</text>
+<path d="M340,492 V498 H840 V492" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="590" y="512" font-size="12" fill="#374151" text-anchor="middle">initial deskew：pattern ≥ 2¹⁵ UI 且 ≤ 100µs</text>
+<path d="M340,516 V522 H840 V516" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+<text x="590" y="536" font-size="12" fill="#374151" text-anchor="middle">periodic deskew：pattern ≥ 2¹⁰ UI 且 ≤ 10µs</text>
+<rect x="880" y="404" width="280" height="190" rx="8" ry="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+<text x="896" y="426" font-size="12" fill="#111827" text-anchor="start" font-weight="bold">与普通 burst 对比：</text>
+<text x="896" y="446" font-size="12" fill="#374151" text-anchor="start" font-family="Consolas,monospace">· 普通 Sync = 00011101</text>
+<text x="896" y="466" font-size="12" fill="#374151" text-anchor="start">· deskew burst：Sync 全 1，</text>
+<text x="896" y="486" font-size="12" fill="#374151" text-anchor="start" font-family="Consolas,monospace">  payload = 0101… pattern</text>
+<text x="896" y="506" font-size="12" fill="#374151" text-anchor="start">· 所有活跃 Lane 同时发送</text>
+<text x="896" y="526" font-size="12" fill="#374151" text-anchor="start">· RX 检出全 1 Sync 后启动</text>
+<text x="896" y="546" font-size="12" fill="#374151" text-anchor="start" font-family="Consolas,monospace">  clock-data deskew</text>
+<text x="896" y="566" font-size="12" fill="#374151" text-anchor="start">· ULPS 恢复且已完成 initial 时可选</text>
+<text x="60" y="612" font-size="13" fill="#111827" text-anchor="start" font-weight="bold">③ HS 速率档位与 deskew 要求（per lane）</text>
+<rect x="100" y="650" width="330" height="36" rx="6" ry="6" fill="#f0fdf4" stroke="#059669" stroke-width="1.5"/>
+<text x="265" y="664" font-size="12" fill="#047857" text-anchor="middle" font-family="Consolas,monospace">80Mbps ~ 1.5Gbps</text>
+<text x="265" y="680" font-size="12" fill="#047857" text-anchor="middle">deskew 可选（无需）</text>
+<rect x="430" y="632" width="330" height="54" rx="6" ry="6" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+<text x="595" y="650" font-size="12" fill="#c2410c" text-anchor="middle" font-family="Consolas,monospace">>1.5Gbps ~ 2.5Gbps</text>
+<text x="595" y="666" font-size="12" fill="#c2410c" text-anchor="middle">必须 deskew</text>
+<text x="595" y="682" font-size="12" fill="#c2410c" text-anchor="middle">（正常 HS 前先 initial）</text>
+<rect x="760" y="614" width="340" height="72" rx="6" ry="6" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+<text x="930" y="636" font-size="12" fill="#b91c1c" text-anchor="middle" font-family="Consolas,monospace">>2.5Gbps ~ 4.5Gbps</text>
+<text x="930" y="654" font-size="12" fill="#b91c1c" text-anchor="middle">deskew + 均衡（de-emphasis）</text>
+<text x="930" y="672" font-size="12" fill="#b91c1c" text-anchor="middle">SSC 必须可用</text>
+<path d="M100,692 L1116,692" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-linejoin="round"/>
+<line x1="100" y1="692" x2="1116" y2="692" stroke="#6b7280" stroke-width="1.5" marker-end="url(#a-gray)"/>
+<text x="60" y="712" font-size="12" fill="#6b7280" text-anchor="start">HS 速率（per lane）递增 →</text>
+</svg>
