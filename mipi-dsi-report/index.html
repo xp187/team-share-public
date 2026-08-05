@@ -244,6 +244,27 @@
   /* ---------- misc ---------- */
   .kvi { display:inline-block; font-family:var(--mono); font-size:12px; background:#f3f4f6; border:1px solid var(--line-2); border-radius:6px; padding:1px 8px; margin:2px 2px; }
   footer { color: var(--gray); font-size: 12.5px; text-align: center; margin-top: 40px; }
+  /* ---------- full-text search ---------- */
+  #search-wrap { padding: 2px 10px 12px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  #site-search {
+    width: 100%; padding: 7px 10px;
+    border: 1px solid var(--line-2); border-radius: 8px;
+    font-size: 13px; outline: none; background: #fff;
+  }
+  #site-search:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
+  #search-meta { font-size: 11.5px; color: var(--gray); margin-top: 5px; min-height: 15px; line-height: 1.4; }
+  #search-results { display: none; max-height: 320px; overflow-y: auto; margin-top: 4px; }
+  #search-results .sr { display: block; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 12.5px; line-height: 1.5; }
+  #search-results .sr:hover, #search-results .sr.active { background: var(--blue-tint); }
+  #search-results .sr .t { color: var(--primary-dark); font-weight: 600; }
+  #search-results .sr .cnt {
+    display: inline-block; margin-left: 6px; font-size: 11px; font-family: var(--mono);
+    color: var(--orange); background: var(--orange-tint); border-radius: 999px; padding: 0 7px;
+  }
+  #search-results .sr .snip { display: block; color: var(--gray); font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #search-results .sr .snip b { color: var(--orange); font-weight: 600; }
+  mark.search-hit { background: #fde68a; color: inherit; padding: 0 1px; border-radius: 2px; }
+  mark.search-hit.current { background: #fb923c; outline: 1px solid #ea580c; }
   /* ---------- responsive ---------- */
   @media (max-width: 1023px) {
     #topbar { display: flex; }
@@ -273,6 +294,12 @@
 <!-- Fixed sidebar navigation (desktop) / drawer (mobile) -->
 <aside id="sidebar">
   <div class="brand">MIPI 协议技术报告<small>DSI v1.1 / D-PHY v2.0 · 数字验证视角</small></div>
+  <div id="search-wrap">
+    <input id="site-search" type="search" autocomplete="off"
+      placeholder="搜索全文…（/ 聚焦，Esc 清除）" aria-label="搜索全文">
+    <div id="search-meta"></div>
+    <div id="search-results" role="listbox" aria-label="搜索结果"></div>
+  </div>
   <nav id="toc">
     <a href="#overview"><span class="idx">01</span>概述</a>
     <a href="#link"><span class="idx">02</span>链路架构</a>
@@ -1302,6 +1329,166 @@ assert crc16_dsi(bytes.fromhex('FF0000001EF01EC74F8278C582E08C70D23C78E9FF000001
     }, { passive: true });
   }
   setActive('overview');
+})();
+
+// Full-text search: highlights matches in the document, lists hits per section
+(function () {
+  var input = document.getElementById('site-search');
+  var meta = document.getElementById('search-meta');
+  var results = document.getElementById('search-results');
+  var main = document.querySelector('main');
+  var marks = [];
+  var cur = -1;
+  var timer = null;
+
+  function clearSearch() {
+    Array.prototype.slice.call(main.querySelectorAll('mark.search-hit')).forEach(function (m) {
+      var t = document.createTextNode(m.textContent);
+      m.parentNode.replaceChild(t, m);
+    });
+    main.normalize();
+    marks = [];
+    cur = -1;
+    meta.textContent = '';
+    results.innerHTML = '';
+    results.style.display = 'none';
+  }
+
+  function setCurrent(i) {
+    if (!marks.length) return;
+    cur = ((i % marks.length) + marks.length) % marks.length;
+    marks.forEach(function (m, j) { m.classList.toggle('current', j === cur); });
+    marks[cur].scrollIntoView({ block: 'center', behavior: 'smooth' });
+    meta.textContent = '第 ' + (cur + 1) + ' / ' + marks.length + ' 处（Enter 下一个，Shift+Enter 上一个）';
+  }
+
+  function doSearch(q) {
+    clearSearch();
+    q = q.trim();
+    if (!q) return;
+    var qLow = q.toLowerCase();
+
+    // Collect candidate text nodes inside <main>
+    var walker = document.createTreeWalker(main, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (node) {
+        if (!node.nodeValue || node.nodeValue.toLowerCase().indexOf(qLow) < 0) return NodeFilter.FILTER_REJECT;
+        var p = node.parentNode;
+        if (p && /^(SCRIPT|STYLE)$/.test(p.nodeName)) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+
+    // Wrap every match in <mark class="search-hit">
+    nodes.forEach(function (node) {
+      var text = node.nodeValue, low = text.toLowerCase();
+      var frag = document.createDocumentFragment();
+      var pos = 0, idx = low.indexOf(qLow);
+      while (idx >= 0) {
+        if (idx > pos) frag.appendChild(document.createTextNode(text.slice(pos, idx)));
+        var m = document.createElement('mark');
+        m.className = 'search-hit';
+        m.textContent = text.slice(idx, idx + q.length);
+        frag.appendChild(m);
+        marks.push(m);
+        pos = idx + q.length;
+        idx = low.indexOf(qLow, pos);
+      }
+      frag.appendChild(document.createTextNode(text.slice(pos)));
+      node.parentNode.replaceChild(frag, node);
+    });
+
+    if (!marks.length) {
+      meta.textContent = '无匹配结果';
+      return;
+    }
+
+    // Group marks by section, in document order
+    var groups = []; // {id, title, count, firstMark, snip}
+    var gmap = {};
+    marks.forEach(function (m) {
+      var sec = m.closest('section[id]');
+      var id = sec ? sec.id : '(other)';
+      if (!gmap[id]) {
+        var link = sec && document.querySelector('#toc a[href="#' + id + '"]');
+        var title = link ? link.textContent.trim() : (sec ? sec.id : '页面头部');
+        gmap[id] = { id: id, title: title, count: 0, firstMark: m };
+        groups.push(gmap[id]);
+      }
+      gmap[id].count++;
+    });
+
+    meta.textContent = '共 ' + marks.length + ' 处匹配 · 分布在 ' + groups.length + ' 个章节';
+
+    // Result list with a context snippet per section
+    groups.forEach(function (g) {
+      var sec = g.firstMark.closest('section[id]');
+      var text = (sec ? sec.textContent : main.textContent).replace(/\s+/g, ' ');
+      var i = text.toLowerCase().indexOf(qLow);
+      var start = Math.max(0, i - 14);
+      var snip = (start > 0 ? '…' : '') + text.slice(start, i + q.length + 22) + '…';
+
+      var row = document.createElement('div');
+      row.className = 'sr';
+      row.setAttribute('role', 'option');
+      var t = document.createElement('span');
+      t.className = 't';
+      t.textContent = g.title;
+      var cnt = document.createElement('span');
+      cnt.className = 'cnt';
+      cnt.textContent = g.count;
+      var sn = document.createElement('span');
+      sn.className = 'snip';
+      // Bold the keyword inside the snippet (built via DOM to avoid HTML injection)
+      var snipLow = snip.toLowerCase();
+      var si = 0, hit = snipLow.indexOf(qLow);
+      while (hit >= 0) {
+        if (hit > si) sn.appendChild(document.createTextNode(snip.slice(si, hit)));
+        var b = document.createElement('b');
+        b.textContent = snip.slice(hit, hit + q.length);
+        sn.appendChild(b);
+        si = hit + q.length;
+        hit = snipLow.indexOf(qLow, si);
+      }
+      sn.appendChild(document.createTextNode(snip.slice(si)));
+      row.appendChild(t);
+      row.appendChild(cnt);
+      row.appendChild(sn);
+      row.addEventListener('click', function () {
+        setCurrent(marks.indexOf(g.firstMark));
+        document.body.classList.remove('nav-open'); // close drawer on mobile
+      });
+      results.appendChild(row);
+    });
+    results.style.display = 'block';
+
+    setCurrent(0);
+  }
+
+  input.addEventListener('input', function () {
+    clearTimeout(timer);
+    timer = setTimeout(function () { doSearch(input.value); }, 200);
+  });
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (marks.length) setCurrent(cur + (e.shiftKey ? -1 : 1));
+    } else if (e.key === 'Escape') {
+      input.value = '';
+      clearSearch();
+      input.blur();
+    }
+  });
+
+  // Global shortcut: "/" focuses the search box
+  document.addEventListener('keydown', function (e) {
+    if (e.key === '/' && !/^(INPUT|TEXTAREA)$/.test(document.activeElement.nodeName)) {
+      e.preventDefault();
+      input.focus();
+      input.select();
+    }
+  });
 })();
 </script>
 
