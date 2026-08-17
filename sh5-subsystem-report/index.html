@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SH5 待机子系统与 I2C 模块技术报告（AOSHAN / AOSHAN2 / HK6T62）</title>
+<style>
+  /* Design tokens from fireworks-tech-graph style-1-flat-icon */
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1e40af;
+    --orange: #ea580c;
+    --green: #059669;
+    --purple: #7c3aed;
+    --gray: #6b7280;
+    --ink: #111827;
+    --ink-2: #374151;
+    --line: #e5e7eb;
+    --line-2: #d1d5db;
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --blue-tint: #eff6ff;
+    --green-tint: #f0fdf4;
+    --purple-tint: #faf5ff;
+    --orange-tint: #fff7ed;
+    --sidebar-w: 264px;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(17,24,39,.07), 0 4px 14px rgba(17,24,39,.05);
+    --mono: Consolas, "Courier New", monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, "PingFang SC",
+      "Microsoft YaHei", "Microsoft JhengHei", "SimHei", sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.75;
+    font-size: 15px;
+  }
+  code {
+    font-family: var(--mono);
+    background: var(--blue-tint);
+    color: var(--primary-dark);
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: .92em;
+    white-space: nowrap;
+  }
+  @media (max-width: 1023px) {
+    code { white-space: normal; overflow-wrap: anywhere; }
+  }
+  /* ---------- sidebar ---------- */
+  #sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: var(--sidebar-w);
+    background: #fff;
+    border-right: 1px solid var(--line);
+    padding: 22px 14px;
+    overflow-y: auto;
+    z-index: 40;
+    transition: transform .25s ease;
+  }
+  #sidebar .brand {
+    font-weight: 700; font-size: 15px; color: var(--primary-dark);
+    padding: 0 10px 14px; border-bottom: 1px solid var(--line);
+    margin-bottom: 10px;
+  }
+  #sidebar .brand small { display:block; font-weight:400; color:var(--gray); font-size:11px; margin-top:2px; }
+  #sidebar nav a {
+    display: block;
+    padding: 8px 10px;
+    margin: 2px 0;
+    border-radius: 8px;
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 13.5px;
+    border-left: 3px solid transparent;
+  }
+  #sidebar nav a:hover { background: var(--blue-tint); }
+  #sidebar nav a.active {
+    background: var(--blue-tint);
+    color: var(--primary-dark);
+    border-left-color: var(--primary);
+    font-weight: 600;
+  }
+  #sidebar nav a.lvl2 { padding-left: 24px; font-size: 13px; color: var(--gray); }
+  #menu-toggle {
+    display: none;
+    position: fixed; top: 12px; left: 12px; z-index: 60;
+    width: 40px; height: 40px; border-radius: 10px;
+    border: 1px solid var(--line-2); background: #fff;
+    font-size: 18px; cursor: pointer; box-shadow: var(--shadow);
+  }
+  /* ---------- main ---------- */
+  main {
+    margin-left: var(--sidebar-w);
+    padding: 34px 44px 90px;
+    max-width: 1180px;
+  }
+  section { margin-bottom: 54px; scroll-margin-top: 18px; }
+  h1 { font-size: 26px; line-height: 1.4; margin: 0 0 6px; }
+  h2 {
+    font-size: 21px; margin: 0 0 16px; padding-bottom: 10px;
+    border-bottom: 2px solid var(--line);
+  }
+  h2 .no { color: var(--primary); margin-right: 8px; }
+  h3 { font-size: 16.5px; margin: 26px 0 10px; color: var(--ink); }
+  h3 .tag {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 1px 8px; border-radius: 20px; vertical-align: 2px; margin-left: 6px;
+  }
+  p { margin: 10px 0; color: var(--ink-2); }
+  ul, ol { color: var(--ink-2); padding-left: 22px; }
+  li { margin: 5px 0; }
+  .subtitle { color: var(--gray); font-size: 14px; margin-bottom: 26px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px 22px;
+    margin: 16px 0;
+  }
+  .figure {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 14px;
+    margin: 18px 0;
+    text-align: center;
+  }
+  .figure img { max-width: 100%; height: auto; }
+  .figure figcaption { color: var(--gray); font-size: 12.5px; margin-top: 8px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin: 14px 0;
+    font-size: 13.5px;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--blue-tint); color: var(--primary-dark); font-weight: 600; }
+  tr:nth-child(even) td { background: #fafbfc; }
+  .tbl-wrap { overflow-x: auto; }
+  .callout {
+    border-left: 4px solid var(--primary);
+    background: var(--blue-tint);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 16px;
+    margin: 14px 0;
+    color: var(--ink-2);
+    font-size: 14px;
+  }
+  .callout.warn { border-left-color: var(--orange); background: var(--orange-tint); }
+  .callout.purple { border-left-color: var(--purple); background: var(--purple-tint); }
+  .kbd {
+    display: inline-block; font-family: var(--mono); font-size: 12.5px;
+    background: #f3f4f6; border: 1px solid var(--line-2); border-bottom-width: 2px;
+    border-radius: 6px; padding: 0 7px; color: var(--ink);
+  }
+  .steps { counter-reset: step; padding-left: 0; list-style: none; }
+  .steps > li {
+    counter-increment: step;
+    position: relative;
+    padding-left: 40px;
+    margin: 10px 0;
+  }
+  .steps > li::before {
+    content: counter(step);
+    position: absolute; left: 0; top: 3px;
+    width: 24px; height: 24px;
+    background: var(--primary); color: #fff;
+    border-radius: 50%;
+    font-size: 12.5px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 1023px) {
+    #sidebar { transform: translateX(-100%); padding-top: 60px; }
+    #sidebar.open { transform: translateX(0); }
+    #menu-toggle { display: block; }
+    main { margin-left: 0; padding: 62px 16px 60px; }
+    .grid2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<button id="menu-toggle" aria-label="目录">☰</button>
+<aside id="sidebar">
+  <div class="brand">SH5 待机子系统技术报告<small>AOSHAN / AOSHAN2 / HK6T62 · 含 I2C 模块专题</small></div>
+  <nav id="toc">
+    <a href="#s1">1. 概述：SH5 是什么</a>
+    <a href="#s2">2. SH5 的作用</a>
+    <a href="#s3">3. 工作机制</a>
+    <a href="#s3-1" class="lvl2">3.1 电源域与三种状态</a>
+    <a href="#s3-2" class="lvl2">3.2 子系统组成</a>
+    <a href="#s3-3" class="lvl2">3.3 LEON3 处理器</a>
+    <a href="#s3-4" class="lvl2">3.4 PMU 状态机</a>
+    <a href="#s3-5" class="lvl2">3.5 时钟与复位</a>
+    <a href="#s3-6" class="lvl2">3.6 唤醒链路</a>
+    <a href="#s4">4. 使用方法</a>
+    <a href="#s4-1" class="lvl2">4.1 上电启动流程</a>
+    <a href="#s4-2" class="lvl2">4.2 电源模式切换</a>
+    <a href="#s4-3" class="lvl2">4.3 Boot Status</a>
+    <a href="#s4-4" class="lvl2">4.4 外设使用要点</a>
+    <a href="#s4-5" class="lvl2">4.5 封装与 Debug I2C</a>
+    <a href="#s4-6" class="lvl2">4.6 Debug 手段</a>
+    <a href="#s5">5. I2C 模块专题</a>
+    <a href="#s5-1" class="lvl2">5.1 DW_apb_i2c 控制器</a>
+    <a href="#s5-2" class="lvl2">5.2 MI2C</a>
+    <a href="#s5-3" class="lvl2">5.3 DDC / EDDC</a>
+    <a href="#s5-4" class="lvl2">5.4 DBGI2C 调试桥</a>
+    <a href="#s5-5" class="lvl2">5.5 DDC 直通系统总线</a>
+    <a href="#s5-6" class="lvl2">5.6 附：DBGSPI</a>
+    <a href="#s6">6. 三项目差异速查</a>
+    <a href="#s7">7. 资料来源与边界</a>
+  </nav>
+</aside>
+
+<main>
+<h1>SH5 待机子系统（SH5_STBY）与 I2C 模块技术报告</h1>
+<p class="subtitle">基于 AOSHAN / AOSHAN2 / HK6T62 三个项目的 sh5 文档集整理 · 2026-08-14 · 全文中文，寄存器/信号名保留英文</p>
+
+<!-- ================= 1 ================= -->
+<section id="s1">
+<h2><span class="no">1</span>概述：SH5 是什么</h2>
+<p><strong>SH5 是芯片 Standby（待机）域子系统的模块名</strong>，源文档中的正式写法为 <code>SH5_STBY</code>：</p>
+<div class="callout">“SH5_STBY：包含 LEON 及总线架构” ——《AOSHAN PMU Application Note》</div>
+<p>它不是单个 IP，而是一个完整的<strong>常开电微控制器子系统</strong>，包含：</p>
+<ul>
+  <li><strong>LEON3 CPU</strong>（SPARC V8 架构 32 位处理器）及 AHB/APB 总线架构；</li>
+  <li><strong>PMU 状态机</strong>与电源/复位/时钟控制寄存器；</li>
+  <li>待机域外设：GPIO、SAR-ADC、PWM、MI2C、DDC（HDMI/VGA）、AUX/CEC/Cable 唤醒检测等；</li>
+  <li>调试/烧录通道：DBGI2C、DBGSPI、DDC access system bus。</li>
+</ul>
+<p>三个项目的归档目录（<code>aoshan_sh5</code> / <code>aoshan2_sh5</code> / <code>HK6T62_sh5</code>）即该子系统的文档包：<code>CPU\</code> 为 LEON 相关文档，<code>Peripheral\</code> 为外设与调试接口文档。命名在各代有演化：AOSHAN 称 <code>SH5_STBY</code>，AOSHAN2 / HK6T62 的寄存器前缀已变为 <code>Sh6_top_reg__*</code>，归档沿用了 sh5 称呼。HK6T62 的 Standby QRG 与 AOSHAN2 内容完全一致（直接复用）。</p>
+</section>
+
+<!-- ================= 2 ================= -->
+<section id="s2">
+<h2><span class="no">2</span>SH5 的作用</h2>
+<p>整颗芯片划分为 <strong>AON / STBY / MAIN</strong> 三个工作区域。SH5 位于 STBY 域，核心职责是<strong>在 MAIN 域断电或复位时仍然保持工作，充当整机的“值班管家”</strong>：</p>
+<ol>
+  <li><strong>低功耗管理</strong>：配合 AON 域的 PMU 状态机，控制 STBY 域 OSC CLK/RST 与 MAIN 域的供电/复位/隔离，在 Active / Standby / OFF 三种状态间切换。</li>
+  <li><strong>唤醒源监控</strong>：主域断电期间监控全部唤醒事件 —— HDMI/DP/VGA 插拔、HDMI CEC、DP AUX 指令、Type-C、按键（SAR-ADC 电压检测）、DDC 主机访问等，事件经中断送 LEON，由 LEON 决定给 MAIN 域上电。</li>
+  <li><strong>待机期业务</strong>：LEON 运行待机固件，经 MI2C 读写外部 EEPROM 保存/恢复状态，PWM 控制呼吸灯，GPIO 做整机 IO。</li>
+  <li><strong>烧录与调试通道</strong>：整机厂/产线可通过 HDMI/VGA 的 DDC（I2C）或独立 DBGI2C/DBGSPI 引脚，经密码握手直接访问芯片内部总线地址空间，实现 CODE 升级与线上调试（含 CPU/总线/看门狗复位）。</li>
+</ol>
+</section>
+
+<!-- ================= 3 ================= -->
+<section id="s3">
+<h2><span class="no">3</span>工作机制</h2>
+
+<h3 id="s3-1">3.1 电源域与三种工作状态</h3>
+<div class="tbl-wrap"><table>
+  <tr><th>状态</th><th>AON 域</th><th>STBY 域（SH5）</th><th>MAIN 域</th><th>说明</th></tr>
+  <tr><td><strong>Active</strong></td><td>有电</td><td>有电、有时钟</td><td>有电</td><td>整机正常工作</td></tr>
+  <tr><td><strong>STBY</strong></td><td>有电</td><td>有电、有时钟</td><td>断电/复位</td><td>SH5 值守，监控唤醒源</td></tr>
+  <tr><td><strong>OFF</strong></td><td>有电</td><td>有电但<strong>无 OSC CLK</strong></td><td>断电</td><td>仅 PMU 状态机工作，等 Power Key</td></tr>
+</table></div>
+<ul>
+  <li>AOSHAN：AON 与 STBY 同一电源域、永不掉电；MAIN 域由外部 DCDC 独立供电（<code>Power_On</code> 控制），跨域有 isolation（<code>reg_stby_iso</code>）。</li>
+  <li>AOSHAN2 / HK6T62：<strong>整芯片同一电源域、永不掉电</strong>，低功耗靠关时钟/拉复位实现；仍保留 iso 时序“以防总线挂死”；Level Shift 为数字直连占位模块。</li>
+</ul>
+<figure class="figure">
+  <img src="assets/sh5-architecture.svg" alt="SH5 三电源域架构图">
+  <figcaption>图 1 · SH5（SH5_STBY）三电源域架构（AOSHAN）：AON 域 PMU 状态机管电源，STBY 域 LEON3 + 常开外设值守，MAIN 域可整体断电</figcaption>
+</figure>
+
+<h3 id="s3-2">3.2 子系统组成</h3>
+<div class="tbl-wrap"><table>
+  <tr><th>模块</th><th>功能</th></tr>
+  <tr><td>PMU State Machine</td><td>AON 域，27 MHz（AOSHAN2 为 27/13.5 MHz），与 APB 时钟异步；控制 STBY 域 OSC CLK/RST 与进出 OFF mode</td></tr>
+  <tr><td>LEON（SH5 核心）</td><td>27/600 MHz（AOSHAN2 为 27/350 MHz）；控制 MAIN 域上电/复位，运行待机固件</td></tr>
+  <tr><td>GPIO control</td><td>STBY 域 GPIO 输入/输出/中断（AOSHAN 33~34 个，AOSHAN2 36 个）</td></tr>
+  <tr><td>SAR-ADC</td><td>4 通道，检测 Key Board 模拟电压，越窗产生唤醒中断</td></tr>
+  <tr><td>AUX command detect</td><td>解析 AUX 差分输入指令，收到唤醒指令产生中断（AOSHAN：2 个 AUX PHY）</td></tr>
+  <tr><td>CABLE 检测</td><td>HDMI/DP/VGA 插拔中断（AOSHAN：5 个 CABLE 模块、2 HDMI + 2 DP + 1 VGA；AOSHAN2：3 个 CABLE、2 HDMI + 1 VGA）</td></tr>
+  <tr><td>HDMI CEC ×2 / TYPEC ×2</td><td>CEC / Type-C 事件中断（AOSHAN）</td></tr>
+  <tr><td>INT_VGA_GEN</td><td>VGA 插线后有/无信号检测中断</td></tr>
+  <tr><td>VGA DDC ×1 / HDMI DDC ×2</td><td>EDDC 从机，主机访问产生唤醒中断，兼作 CODE 烧录口</td></tr>
+  <tr><td>Pwr_ctrl</td><td>产生 MAIN 域控制信号：iso（<code>reg_stby_iso</code>）、复位（<code>reg_stb_sw_rst_n</code>）、上电（<code>reg_power_on</code>）</td></tr>
+  <tr><td>PWM</td><td>呼吸灯控制，输出到 <code>PAD_PWR_STATE_IO</code></td></tr>
+  <tr><td>MI2C</td><td>待机域 master I2C，LEON 控制，访问外部 EEPROM</td></tr>
+  <tr><td>RX_SHORT_STB / Level Shift</td><td>数字信号经 1.8V↔0.9V 电压转换送 RX PHY（AOSHAN2 中 Level Shift 为直连占位）</td></tr>
+  <tr><td>DBGSPI / DBGI2C</td><td>调试桥：外部 SPI/I2C → AHB/APB，访问芯片内部地址空间</td></tr>
+</table></div>
+
+<h3 id="s3-3">3.3 LEON3 处理器</h3>
+<ul>
+  <li><strong>LEON3</strong>：符合 IEEE-1754（SPARC V8）的 32 位核心；LEON-core、DSU、IRQ 控制器取自 <strong>GRLIB 1307（2014.4.16）</strong>，详见 <code>leon_grip_v4144.pdf</code>。</li>
+  <li>关键配置（<code>LEON_Feature.xlsx</code>，AOSHAN）：8 个寄存器窗口（兼容 Bare-C/RTEMS 编译器）、<strong>无 FPU / 无协处理器</strong>、支持 SPARC V8 硬件乘除、2 个 watchpoint、2 KB trace buffer、支持调试口/中断口、SRMMU（8 I-TLB + 2 D-TLB，文档注明可裁剪）、3 端口 2 KB register file。</li>
+  <li><strong>Cache</strong>：I-Cache 4 KB / 1 set / 32 B 行（每字一个 valid bit，streaming refill）；D-Cache 4 KB / 1 set / 16 B 行（write-through + 双字写缓冲，支持 AHB bus-snooping 保持一致性）。</li>
+  <li><strong>DSU 在线调试</strong>：DSU AHB slave 接口允许任意 AHB master 访问 CPU 寄存器与指令 trace buffer；进入 debug mode 的途径含断点指令、watchpoint、外部 break（<code>reg_dsu_break_n</code>）、DSU 控制寄存器 BN bit 等；debug mode 下流水线冻结、PC/nPC 保存、DSUACT 拉高、timer 可选冻结。</li>
+  <li><strong>中断</strong>：SPARC V8 模型共 15 路异步中断；各 IP 中断先送 <code>int_misc</code>（触发方式/屏蔽/使能/bypass），再送 LEON IRQ controller。</li>
+  <li><strong>启动</strong>：默认 <code>reg_leon_rstaddr = 0x1fc00_0000</code>，<code>reg_dsu_enable=1</code>、<code>reg_dsu_break_n=0</code>、<code>reg_qspi_xip_en=1</code>（QSPI XIP 模式）、小端；上电释放 PAD_RSTN_IO 后从 QSPI Flash 启动。</li>
+  <li>时钟/复位：工作在 <code>cpu_clk_stby</code>；配置寄存器 <code>reg_mcu_clk_en / reg_mcu_clk_sel / reg_mcu_clk_div_num / reg_src_clk_en / reg_cpu_src_sel</code>。</li>
+</ul>
+
+<h3 id="s3-4">3.4 PMU 状态机与 Power Key</h3>
+<ul>
+  <li>OFF mode 下给 <strong>Power_Key</strong> 一个脉冲 → PMU 状态机打开 STBY 域 OSC CLK/RST → LEON boot，芯片退出 OFF。</li>
+  <li>STBY / Active mode 下 Power_Key 脉冲（或软件触发）→ PMU 状态机产生中断给 LEON → LEON 做断电准备（把当前状态写入 EEPROM）→ 写 <code>reg_pmu_mcu_off_req=1</code> → 状态机关闭 STBY 域时钟/复位，进入 OFF。</li>
+  <li>状态标志回读：STBY 侧 <code>regr_stb_pwr_on</code>（AOSHAN2 叫 <code>regr_stb_clk_on</code>）、<code>regr_stb_rst_n</code>；MAIN 侧 <code>regr_power_on</code>、<code>regr_stb_sw_rst_n</code>、<code>regr_stby_iso</code>。</li>
+</ul>
+
+<h3 id="s3-5">3.5 时钟与复位（AOSHAN）</h3>
+<div class="tbl-wrap"><table>
+  <tr><th>域</th><th>信号</th><th>来源 / 用途</th></tr>
+  <tr><td>AON</td><td><code>osc_clk</code> 27 MHz</td><td>晶振，PMU 状态机</td></tr>
+  <tr><td>AON</td><td><code>apb_clk</code> 27 MHz / 166 MHz PLL</td><td>PMU 寄存器</td></tr>
+  <tr><td>AON</td><td><code>pmu_sw_rst_n</code></td><td>PMU 状态机复位</td></tr>
+  <tr><td>STBY</td><td><code>osc_clk</code> 27 MHz</td><td>低速外设</td></tr>
+  <tr><td>STBY</td><td><code>mcu_clk</code> 27 MHz / 600 MHz PLL</td><td>LEON</td></tr>
+  <tr><td>STBY</td><td><code>stb_rst_n</code></td><td>STBY 域系统复位</td></tr>
+</table></div>
+
+<h3 id="s3-6">3.6 唤醒链路</h3>
+<p>唤醒源（Cable / CEC / AUX / Type-C / ADC 按键 / DDC）→ 各模块产生中断 → <code>int_misc</code> → LEON IRQ → LEON 执行上电序列（<code>reg_power_on</code> → <code>reg_stby_iso=0</code> → <code>reg_stb_sw_rst_n=1</code> → 时钟切换）→ MAIN 域启动。另有 <code>irq_main / irq_stby</code> 双向中断线连接主域与待机域。</p>
+</section>
+
+<!-- ================= 4 ================= -->
+<section id="s4">
+<h2><span class="no">4</span>使用方法</h2>
+
+<h3 id="s4-1">4.1 上电启动流程（Power on flow）</h3>
+<ol class="steps">
+  <li>Bandgap 上电，OSC 27 MHz 初始化（模拟电路自举）。</li>
+  <li>（状态机控制）打开 STBY 域 OSC CLK，释放 <code>pmu_stby_rstn</code>，进入 standby mode。</li>
+  <li>（LEON 接管）LEON 从 SPI Flash boot，把 code 搬到 RAM 执行。</li>
+  <li>LEON 读 <code>Aon_reg__reg_first_start_flag</code>：为 1 表示第一次启动（读 EEPROM 恢复状态，随后软件清 0；不掉电则一直保持 0）。</li>
+  <li>LEON 读 EEPROM 中保存的状态，决定跳转方向（OFF / Normal）。</li>
+  <li>若为 LVR（低电压复位）启动 → 发起系统软件复位；若为 SW_RST 启动 → 软件流程正常执行。（针对鳌山上电 CPU 挂死现象的对策。）</li>
+</ol>
+
+<h3 id="s4-2">4.2 电源模式切换（寄存器级 sequence）</h3>
+<figure class="figure">
+  <img src="assets/power-mode-fsm.svg" alt="SH5 电源状态机">
+  <figcaption>图 2 · Active / Standby / OFF 三态转换：触发条件与每步动作（来自 AOSHAN_QRG_APP_Standby.vsdx 的 mode switch 页）</figcaption>
+</figure>
+<div class="grid2">
+<div class="card">
+<strong>Standby → Normal（唤醒上电）</strong>
+<ol>
+  <li>wake up 中断送 LEON（或上电时查询到 Normal 状态）。</li>
+  <li><code>POWER_ON</code> 拉高，外部 DCDC 给 MAIN 域供电。</li>
+  <li><code>reg_stby_iso</code> 配 0 —— 关 isolation。</li>
+  <li><code>reg_stb_sw_rst_n</code> 配 1 —— 释放 MAIN 复位。</li>
+  <li><code>Sh6_top_reg__reg_src_clk_en</code> 先 1、<code>Standby_mcu_reg__reg_src_clk_en</code> 再 1 —— 开 MAIN 时钟。</li>
+  <li><code>reg_apb_clk_sel / reg_qspi_clk_sel / reg_mcu_clk_sel</code> 配 0 —— STBY 侧时钟切到 MAIN 域高速时钟。</li>
+  <li><code>Sh6_top_reg__reg_apb/axi/cpu_clk_sel</code> 配 0 —— MAIN 切高速时钟。</li>
+</ol>
+</div>
+<div class="card">
+<strong>Normal → Standby（无信号超时关断）</strong>
+<ol>
+  <li>检测到无信号超时。</li>
+  <li><code>Sh6_top_reg__reg_cpu/axi/apb_clk_sel</code> 配 1 —— MAIN 切回 osc clk。</li>
+  <li><code>reg_mcu_clk_sel</code> 先 1、<code>reg_qspi_clk_sel</code>、<code>reg_apb_clk_sel</code> 配 1 —— STBY 侧切回 osc clk。</li>
+  <li><code>Standby_mcu_reg__reg_src_clk_en</code> 先 0、<code>Sh6_top_reg__reg_src_clk_en</code> 再 0 —— 关 MAIN 时钟。</li>
+  <li><code>reg_stb_sw_rst_n</code> 配 0 → <code>reg_stby_iso</code> 配 1 → <code>POWER_ON</code> 拉低断电。</li>
+</ol>
+</div>
+</div>
+<div class="grid2">
+<div class="card">
+<strong>Standby / Normal → OFF</strong>
+<ol>
+  <li>Power Key 响应；状态机中断通知 LEON。</li>
+  <li>LEON 把当前状态写入 EEPROM。</li>
+  <li>（Normal→OFF 先执行 Normal→Standby 的时钟/复位/iso/断电步骤。）</li>
+  <li>LEON 写 <code>Aon_reg__reg_pmu_mcu_off_req=1</code>。</li>
+  <li>状态机拉低 <code>pmu_stby_rstn</code>、关 STBY 域 OSC CLK → OFF。</li>
+</ol>
+</div>
+<div class="card">
+<strong>OFF → Normal</strong>
+<ol>
+  <li>Power Key → 状态机开 OSC CLK、释放 <code>pmu_stby_rstn</code>。</li>
+  <li>LEON boot（同 4.1）。</li>
+  <li>走 Standby→Normal 上电 sequence。</li>
+</ol>
+</div>
+</div>
+<div class="callout warn"><strong>假 OFF 变体（ADC 复用 Power Key）</strong>：STBY→OFF 时不写 <code>reg_pmu_mcu_off_req</code>，而是把 STBY 域内除 ADC 和 LEON 之外的 clk/rst 全部关闭，进入“假 OFF”（状态机仍停在 STBY 态）；OFF→STBY 时再打开。唤醒中断后需确认中断来自 PWR KEY 所在 ADC 通道且电压在合法窗口内，才视为有效 Power Key。</div>
+
+<h3 id="s4-3">4.3 Boot Status Register（启动原因追溯）</h3>
+<ul>
+  <li>MCU 读 AON 域 <code>regr_boot_status[1:0]</code>：<code>00</code>=初始值；<code>01</code>=看门狗触发；<code>10</code>=软件复位触发；<code>11</code>=PAD/LVR 触发。</li>
+  <li>读完必须 toggle <code>reg_boot_status_clr</code>（0→1→0）清回 <code>00</code>，以便记录下一次启动事件。</li>
+</ul>
+
+<h3 id="s4-4">4.4 外设使用要点</h3>
+<div class="grid2">
+<div class="card">
+<strong>SAR-ADC（按键检测）</strong>
+<ol>
+  <li>配阈值 <code>reg_adc0~3_l_th / reg_adc0~3_h_th</code>。</li>
+  <li>配轮询窗口 <code>reg_adc0~3_win_width</code>（0 = 该通道不采样）、<code>reg_adc0~3_mask_width</code>、rb 低/高电平周期 <code>reg_adc_rb_low_cycle</code>（6~16）/ <code>reg_adc_rb_high_cycle</code>（24~32）。</li>
+  <li>toggle <code>reg_adc_th_update</code>（[0]~[3] 对应四通道）使阈值生效，最后 <code>reg_adc_en=1</code>。</li>
+  <li>采样值落在 <code>[l_th, h_th]</code> 即产生该通道独立唤醒中断；<code>regr_adc_state</code> 可读当前窗口。</li>
+  <li>改窗口/rb 参数需先关 ADC（<code>reg_adc_en=0</code>）再配；改阈值只需 toggle 对应 bit。</li>
+</ol>
+</div>
+<div class="card">
+<strong>PWM（呼吸灯）</strong>
+<ol>
+  <li>配预分频 <code>reg_pwm_prescaler</code>、极性 <code>reg_pwm_pol</code>、输出使能 <code>reg_pwm_output_mode</code>。</li>
+  <li>配计数顶点 <code>reg_pwm_counter_top</code>、模式 <code>reg_pwm_cnt_mode</code>（up / up-down）。</li>
+  <li>配起止比较值与步长 <code>reg_pwm_cmp_start_val / end_val / step_val</code>（bit15 为符号位；比较值逐周期自动加/减、越界回初值 → 占空比自动变化形成呼吸效果）。</li>
+  <li>配输出周期数 <code>reg_pwm_cycle_num</code>（完毕产生中断），<code>reg_pwm_ch_en=1</code> 启动。不工作时默认输出高电平。</li>
+</ol>
+</div>
+</div>
+<p><strong>GPIO</strong>：STBY 域 GPIO 支持基本输入/输出/中断，直接经 standby 寄存器控制。</p>
+
+<h3 id="s4-5">4.5 Debug I2C 与封装的关系（AOSHAN）</h3>
+<div class="tbl-wrap"><table>
+  <tr><th>封装</th><th>BondPin</th><th>默认直通通路</th></tr>
+  <tr><td>176Pin（2D1H / 2H1D）</td><td><code>BOND_VALUE1=0, DEBUGI2C=1</code></td><td>内部 <strong>DDC0</strong> 直通系统总线</td></tr>
+  <tr><td>88Pin 1H1D</td><td><code>BOND_VALUE1=1, VALUE0=1, DEBUGI2C=0</code></td><td>内部 <strong>DDC1</strong> 直通系统总线</td></tr>
+  <tr><td>88Pin 1A1H</td><td><code>BOND_VALUE1=1, VALUE0=0, DEBUGI2C=0</code></td><td>内部 <strong>DDC1</strong> 直通系统总线</td></tr>
+</table></div>
+<ul>
+  <li><code>HDMI_RX0 / HDMI_RX1</code> pad 默认接内部 DDC0/DDC1 逻辑，整机可经此烧录 CODE。</li>
+  <li><code>PAD_MI2C_SCL/SDA</code>（SI2C）在不同封装下默认接 DDC0 或 DDC1；2H1D 场景 FW 运行后需切换为 MI2C 功能并关闭 DebugI2C。</li>
+  <li>与 AUX share 的 pad（HDMI_RX1、AON_GP8/9）在 DP 场景下 DDC1/GPIO 功能关闭、保留 AUX。</li>
+  <li>AOSHAN2：2H+1A 三路输入各有 DDC 通路，每路均可通过 <code>0xFC</code> 密钥握手访问系统总线；另有 <code>AON_GP0/AON_GP1</code> 作独立 DBGI2C 接口，默认直通系统总线。</li>
+</ul>
+
+<h3 id="s4-6">4.6 Debug 手段</h3>
+<ul>
+  <li>PMU / 工作状态：回读 AON reg（见 3.4）；LEON 中断状态回读 <code>standby_mcu_reg</code> 的 <code>int_gen</code> 寄存器；Level shift 状态同样可回读。</li>
+  <li>PIN 级 debug：<code>Reg_dbg_sel[3]=pwm_dbg</code>、<code>Reg_dbg_sel[2]=dbg_pmu</code>；<code>Reg_dbg_sel[3:0]=0</code> 时输出 <code>{14'h0, osc_clk_dbg, osc_div_dbg}</code>。</li>
+  <li>其余 IP 的 dbg path 见各 IP 自己的 QRG。</li>
+</ul>
+</section>
+
+<!-- ================= 5 ================= -->
+<section id="s5">
+<h2><span class="no">5</span>I2C 模块专题</h2>
+<p>SH5 资料里的“I2C”是一族用途不同的模块，先分清角色再看细节：</p>
+<div class="tbl-wrap"><table>
+  <tr><th>模块</th><th>角色</th><th>位置</th><th>用途</th></tr>
+  <tr><td>I2C0 / I2C1（DW_apb_i2c）</td><td>master / slave 控制器</td><td>APB_MAIN 总线（MAIN 域）</td><td>通用 I2C 外设接口</td></tr>
+  <tr><td>MI2C</td><td>master</td><td>STBY 域，LEON 控制</td><td>访问外部 EEPROM</td></tr>
+  <tr><td>DDC / EDDC（VGA×1、HDMI×2）</td><td>slave</td><td>STBY 域</td><td>显示器 DDC 通道：唤醒中断 + 烧录入口</td></tr>
+  <tr><td>DBGI2C（AHB + APB 两 IP）</td><td>slave 桥</td><td>STBY AHB / HOST_APB_STBY</td><td>外部 I2C → 内部总线，调试/烧录</td></tr>
+  <tr><td>DDC access system bus</td><td>握手机制</td><td>DDC ↔ DBGI2C 之间</td><td>密码把 DDC 通道切到系统总线</td></tr>
+</table></div>
+<figure class="figure">
+  <img src="assets/i2c-family.svg" alt="I2C 家族图">
+  <figcaption>图 3 · SH5 的 I2C 家族：五个模块的角色与数据通路</figcaption>
+</figure>
+
+<h3 id="s5-1">5.1 通用 I2C 控制器（DW_apb_i2c）<span class="tag" style="background:var(--blue-tint);color:var(--primary-dark)">MAIN 域</span></h3>
+<p><strong>作用</strong>：AOSHAN 中两路标准 I2C 控制器，挂 APB_MAIN 总线（MAIN 域）：</p>
+<ul>
+  <li>I2C0：<code>0x110A_3000 ~ 0x110A_3FFF</code>；I2C1：<code>0x110A_4000 ~ 0x110A_4FFF</code></li>
+  <li>IP 为 Synopsys <strong>DW_apb_i2c</strong>（databook v2.02a，2018-07），AMBA 2.0 APB slave。</li>
+  <li>项目裁剪（QRG）：<strong>standard 100 Kbps / fast 400 Kbps</strong>、master 与 slave、start/stop/repeated start/ACK、总线忙检测、clock stretch、DMA、<strong>BUS CLEAR（SCL/SDA 低电平超时检测与恢复）</strong>。</li>
+  <li>时钟 <code>apb_clk_main</code>，复位 <code>main_sw_rst_n</code>；时钟配置 <code>reg_apb_clk_sel / reg_apb_clk_div_num / reg_src_clk_en</code>。</li>
+</ul>
+<p><strong>工作机制</strong>：IP 内含 Master 状态机、Slave 状态机、寄存器堆、AMBA 总线接口、SCL 时钟发生器（高/低电平计数）、Tx/Rx shift、Rx 滤波、TX/RX FIFO、DMA handshaking（兼容 DW_ahb_dmac）与中断控制器。注意：<strong>只能配置为纯 master 或纯 slave，不能同时</strong>。databook 全量能力还含 HS 3.4 Mb/s、10-bit 寻址、SMBus/PMBus/ARP、Ultra-Fast mode —— 项目未用。</p>
+<p><strong>寄存器映射</strong>（offset 相对 I2C0/I2C1 基址）：</p>
+<div class="tbl-wrap"><table>
+  <tr><th>Offset</th><th>寄存器</th><th>说明</th></tr>
+  <tr><td>0x00</td><td><code>IC_CON</code></td><td>控制寄存器（仅 IP 禁用时可写）：master/slave 使能、速率、7/10bit、restart en</td></tr>
+  <tr><td>0x04</td><td><code>IC_TAR</code></td><td>目标从机地址</td></tr>
+  <tr><td>0x08</td><td><code>IC_SAR</code></td><td>本机 slave 地址</td></tr>
+  <tr><td>0x0C</td><td><code>IC_HS_MADDR</code></td><td>HS 模式 master code</td></tr>
+  <tr><td>0x10</td><td><code>IC_DATA_CMD</code></td><td>收发数据/命令口（写 = 填 TX FIFO / 发读命令；读 = 取 RX FIFO）</td></tr>
+  <tr><td>0x14/0x18</td><td><code>IC_SS_SCL_HCNT/LCNT</code></td><td>标准速率 SCL 高/低电平计数</td></tr>
+  <tr><td>0x1C/0x20</td><td><code>IC_FS_SCL_HCNT/LCNT</code></td><td>快速速率 SCL 高/低电平计数</td></tr>
+  <tr><td>0x24/0x28</td><td><code>IC_HS_SCL_HCNT/LCNT</code></td><td>HS 模式 SCL 计数</td></tr>
+  <tr><td>0x2C/0x30/0x34</td><td><code>IC_INTR_STAT/MASK/RAW_INTR_STAT</code></td><td>中断状态/屏蔽/原始状态</td></tr>
+  <tr><td>0x38/0x3C</td><td><code>IC_RX_TL / IC_TX_TL</code></td><td>RX/TX FIFO 阈值</td></tr>
+  <tr><td>0x40~0x68</td><td><code>IC_CLR_*</code></td><td>清各类中断（读清零）</td></tr>
+  <tr><td>0x6C</td><td><code>IC_ENABLE</code></td><td>IP 使能</td></tr>
+  <tr><td>0x70</td><td><code>IC_STATUS</code></td><td>传输状态（只读）</td></tr>
+  <tr><td>0x74/0x78</td><td><code>IC_TXFLR / IC_RXFLR</code></td><td>FIFO 内数据个数</td></tr>
+  <tr><td>0x7C</td><td><code>IC_SDA_HOLD</code></td><td>SDA 保持时间（tHD;DAT）</td></tr>
+  <tr><td>0x80</td><td><code>IC_TX_ABRT_SOURCE</code></td><td>发送中止原因（32 位）</td></tr>
+  <tr><td>0x88/0x8C/0x90</td><td><code>IC_DMA_CR / TDLR / RDLR</code></td><td>DMA 控制与收发水位</td></tr>
+  <tr><td>0x94</td><td><code>IC_SDA_SETUP</code></td><td>SDA 建立时间</td></tr>
+  <tr><td>0x98</td><td><code>IC_ACK_GENERAL_CALL</code></td><td>是否 ACK 广播呼叫</td></tr>
+  <tr><td>0x9C</td><td><code>IC_ENABLE_STATUS</code></td><td>使能状态回读</td></tr>
+  <tr><td>0xA0/0xA4</td><td><code>IC_FS_SPKLEN / IC_HS_SPKLEN</code></td><td>毛刺抑制上限（ic_clk 计）</td></tr>
+  <tr><td>0xAC/0xB0</td><td><code>IC_SCL/SDA_STUCK_AT_LOW_TIMEOUT</code></td><td>SCL/SDA 拉低超时门限（bus clear 用）</td></tr>
+  <tr><td>0xB4</td><td><code>IC_CLR_SCL_STUCK_DET</code></td><td>清 SCL stuck 中断</td></tr>
+  <tr><td>0xB8</td><td><code>IC_DEVICE_ID</code></td><td>器件 ID</td></tr>
+  <tr><td>0xBC~0xDC</td><td><code>IC_SMBUS_*</code></td><td>SMBus 超时/ARP/UDID（项目未用）</td></tr>
+  <tr><td>0xF0</td><td><code>REG_TIMEOUT_RST</code></td><td>超时计数复位</td></tr>
+  <tr><td>0xF4</td><td><code>IC_COMP_PARAM_1</code></td><td>配置参数回读（FIFO 深度等，只读）</td></tr>
+  <tr><td>0xF8 / 0xFC</td><td><code>IC_COMP_VERSION / IC_COMP_TYPE</code></td><td>组件版本 / 类型</td></tr>
+</table></div>
+<p><strong>使用方法（master 收发，databook 6.3 编程示例）</strong>：</p>
+<ol class="steps">
+  <li>写 <code>IC_ENABLE=0</code> 禁用 IP（<code>IC_CON</code> 只能在禁用时写）。</li>
+  <li>配 <code>IC_CON</code>：<code>IC_SLAVE_DISABLE=1</code>、<code>IC_RESTART_EN=1</code>、7-bit 寻址、<code>IC_MAX_SPEED_MODE=1</code>（standard）、<code>IC_MASTER_MODE=1</code>。</li>
+  <li>写 <code>IC_TAR</code> = 目标 slave 地址；配 <code>IC_SS_SCL_HCNT/LCNT</code>（或 FS 对应寄存器）得到目标速率。</li>
+  <li>按需开 <code>IC_INTR_MASK</code> 中断、配 <code>IC_RX_TL/IC_TX_TL</code>；用 DMA 则配 <code>IC_DMA_CR/TDLR/RDLR</code>。</li>
+  <li>写 <code>IC_ENABLE=1</code> 使能。</li>
+  <li>发送：向 <code>IC_DATA_CMD</code> 连续写数据字节（bit8=0）；接收：写读命令（bit8=1），再读 <code>IC_DATA_CMD</code> 取回数据。</li>
+  <li>中断中处理 <code>TX_ABRT</code>（读 <code>IC_TX_ABRT_SOURCE</code> 查因、<code>IC_CLR_TX_ABRT</code> 清除）、<code>RX_FULL</code>、<code>STOP_DET</code> 等。</li>
+  <li>Slave 用法：<code>IC_CON</code> 配 slave 使能 + master 关闭，写 <code>IC_SAR</code>，使能后响应 <code>RX_FULL</code>（收数）与 <code>RD_REQ</code>（发数）中断。</li>
+  <li><strong>Bus clear / 恢复</strong>：<code>IC_SCL/SDA_STUCK_AT_LOW_TIMEOUT</code> 设 stuck 门限，超时产生 stuck 中断，按 databook 6.4 流程恢复（禁能 IP → 恢复总线 → 清 <code>IC_CLR_SCL_STUCK_DET</code>）。</li>
+</ol>
+
+<h3 id="s5-2">5.2 MI2C（待机域 master I2C）<span class="tag" style="background:var(--green-tint);color:var(--green)">STBY 域</span></h3>
+<ul>
+  <li>作用：<strong>由 LEON 控制的 master I2C，访问外部 EEPROM</strong>（电源切换流程中“LEON 在 EEPROM 记录状态”即通过它）。</li>
+  <li>引脚与封装强相关：<code>PAD_MI2C_SCL/SDA</code> 在部分封装下默认是 DDC 通路功能，FW 运行后需切换为 MI2C 并关闭 DebugI2C（见 4.5）。</li>
+</ul>
+
+<h3 id="s5-3">5.3 DDC / EDDC（VGA / HDMI 从机）<span class="tag" style="background:var(--green-tint);color:var(--green)">STBY 域</span></h3>
+<ul>
+  <li>每路视频输入各一条 DDC（I2C 从机）通道：VGA×1 + HDMI×2。</li>
+  <li>两个作用：①主机访问时产生<strong>唤醒中断</strong>给 LEON；②作为<strong>整机烧录/调试入口</strong> —— 经密钥握手把 DDC 通道切到 debug I2C 访问系统总线（见 5.5）。</li>
+</ul>
+
+<h3 id="s5-4">5.4 DBGI2C（调试 I2C 桥）<span class="tag" style="background:var(--purple-tint);color:var(--purple)">调试通道</span></h3>
+<p><strong>作用</strong>：把外部 I2C 交易转换成 AHB/APB 总线访问，让外部主机直接读写芯片内部地址空间，用于产线烧录与调试。AOSHAN2 中分两个 IP：</p>
+<ul>
+  <li><strong>AHBDBGI2C</strong>：位于 STBY 域 AHB 总线，可访问<strong>全局地址空间</strong>；Device ID、Password 均可配。</li>
+  <li><strong>APBDBGI2C</strong>：位于 HOST_APB_STBY 总线，可访问 PAGE 寄存器 <code>0x110b_0000~0x110b_ffff</code>。</li>
+</ul>
+<p><strong>工作机制（密码解锁）</strong>：IP 内含两个 I2C slave —— <code>I2C_PWD_Slave</code>（默认 Device ID <code>0x33</code>）校验密码；密码正确后 <code>I2C_SLV_Slave</code>（默认 <code>0x34</code>）解锁，可访问 AHB 总线，<code>regr_dbgi2c_on=1</code> 表示已解锁。配置寄存器：<code>reg_dbgi2c_pwdid</code>、<code>reg_dbgi2c_pwd_in</code>（32bit 密码）、<code>reg_dbgi2c_pwd_dis</code>、<code>reg_dbgi2c_slvid</code>、<code>reg_dbgi2c_cfgid</code>（默认 <code>0x32</code>，读写 I2C 内部寄存器）、<code>reg_host_scl_filter</code>、<code>reg_host_sda_filter</code>。</p>
+<figure class="figure">
+  <img src="assets/dbgi2c-unlock.svg" alt="DBGI2C 解锁时序">
+  <figcaption>图 4 · DBGI2C 密码解锁与寄存器访问时序（依据 STD-DBGI2C_APPlication_Note.vsdx）</figcaption>
+</figure>
+<p><strong>协议时序</strong>：</p>
+<ul>
+  <li><strong>Password 写</strong>：<code>S + DeviceID(7bit)+W + Password Address(8bit) + Password ID(8'h78) + 密码字节…</code>；读密码用 Repeat Start 切读。</li>
+  <li><strong>DATA 写</strong>：<code>S + DeviceID+W + Register Address(32bit，4 字节) + Data(32bit，4 字节) + P</code>。</li>
+  <li><strong>DATA 读</strong>：<code>S + DeviceID+W + 32bit 地址 + RS + DeviceID+R + 32bit 数据 + NACK + P</code>。</li>
+  <li><code>reg_scl_stretch_en</code> 置 0 后 slave 不再拉 SCL，可兼容不支持 stretch 的 master；读数正确性取决于 slave 取数速度（需在“发完 address 到发完 device id”之间取回，可延后 repeat start 调整）。速率 100/400 KHz。</li>
+</ul>
+<p><strong>系统控制（CPU / BUS / WatchDog 复位）</strong>：DBGI2C→APB 访问开启后访问 Device ID <code>7'h32</code>（DDC 通路为 <code>8'h64</code>）：写 <code>0x80</code>（[0]=WatchDog 关闭、[1]=CPU_RST_N、[4]=BUS_RST_N）；写 <code>0x88/0x89</code> 秘钥 <code>0xDC/0xCB</code>，组合 <code>0xCBDC</code> 才许可 0x80 控制字生效。</p>
+
+<h3 id="s5-5">5.5 DDC 直通系统总线（DDC access system bus）</h3>
+<p>作用：<strong>上位机经显示器线材的 DDC（I2C）通道直接访问芯片内部寄存器，实现 CODE 升级</strong>。</p>
+<ul>
+  <li><strong>开启</strong>：DDC I2C 访问 base <code>0xFC</code>（可配）、sub <code>0x0</code>，写开启密码 <code>0x31393639</code>（ASCII "1969"）→ DDC 的 I2C 访问切到 debug I2C。</li>
+  <li><strong>关闭</strong>：base <code>0xFC</code>、sub <code>0x1</code>，写关闭密码 <code>0x414f5348</code>（ASCII "AOSH"）。</li>
+  <li>配套寄存器：<code>reg_slv_en_ddc_acc_sys</code>（使能，默认 1）、<code>reg_slv_addr_ddc_acc_sys</code>（base，默认 0xFC）、<code>reg_ddc_acc_sys_on/off_sub_addr</code>（默认 0/1）、<code>regr_sel_slv_ddc_acc_sys_sw</code>（RO，外部正在经 DDC 访问的标志）、<code>reg_ddc_i2c_slv_ddc_acc_sys_sw_write_en / sw_read_en</code>（read_en 不建议开）。</li>
+  <li>开启后访问 Device ID <code>8'h64</code> 即做 CPU/BUS/WatchDog 控制（布局同 5.4：0x80 控制 + 0xCBDC 秘钥）。</li>
+</ul>
+
+<h3 id="s5-6">5.6 附：DBGSPI（对照参考）</h3>
+<p>与 DBGI2C 同族的 SPI 调试桥（外部 SPI → AHB，STBY 域）：支持 burst/word/byte 读写、SPI mode 0、可配 32-bit 密码。命令字：<code>0x1</code> Burst Write、<code>0x2</code> Burst Read、<code>0x3</code> Word Write、<code>0x4</code> Word Read、<code>0x5</code> Byte Write、<code>0x6</code> Byte Read、<code>0x7</code> Password Write、<code>0x8</code> Password Read、<code>0x9</code> Read Status（spi_err / read_busy / write_busy）。详见 <code>STD_DBGSPI_Application_Note.vsdx</code>。</p>
+</section>
+
+<!-- ================= 6 ================= -->
+<section id="s6">
+<h2><span class="no">6</span>三项目差异速查</h2>
+<div class="tbl-wrap"><table>
+  <tr><th>项</th><th>AOSHAN</th><th>AOSHAN2</th><th>HK6T62</th></tr>
+  <tr><td>子系统命名</td><td>SH5_STBY</td><td>寄存器前缀 Sh6_*</td><td>同 AOSHAN2（QRG 完全复用）</td></tr>
+  <tr><td>电源域</td><td>AON+STBY 同域、MAIN 独立 DCDC</td><td>整芯片同一电源域，靠关时钟/复位省电</td><td>同 AOSHAN2</td></tr>
+  <tr><td>PMU 频率</td><td>27 MHz</td><td>27 / 13.5 MHz</td><td>同 AOSHAN2</td></tr>
+  <tr><td>LEON 频率</td><td>27 / 600 MHz</td><td>27 / 350 MHz</td><td>同 AOSHAN2</td></tr>
+  <tr><td>GPIO 数</td><td>33~34（文档两处不一致）</td><td>36</td><td>同 AOSHAN2</td></tr>
+  <tr><td>唤醒源</td><td>2 AUX PHY、5 CABLE、2 HDMI、2 DP、1 VGA、2 CEC、2 TYPEC、4ch SARADC</td><td>3 CABLE、2 HDMI、1 VGA、4ch SARADC</td><td>同 AOSHAN2</td></tr>
+  <tr><td>Level Shift</td><td>真实 1.8V↔0.9V</td><td>数字直连占位</td><td>—</td></tr>
+  <tr><td>通用 I2C</td><td>I2C0/1 @ 0x110A_3000 / 0x110A_4000（APB_MAIN）</td><td>资料侧重 DBGI2C</td><td>同左</td></tr>
+  <tr><td>调试通道</td><td>DBGSPI + DDC0/1 直通</td><td>DBGI2C（AHB+APB）+ DDC 0xFC 握手 + 独立 DBGI2C 引脚</td><td>DBGI2C/DBGSPI app note 同 AOSHAN2</td></tr>
+</table></div>
+</section>
+
+<!-- ================= 7 ================= -->
+<section id="s7">
+<h2><span class="no">7</span>资料来源与边界</h2>
+<ul>
+  <li>主要来源（<code>E:\_archive\projects-old\</code> 下三套 sh5 文档集）：<code>AOSHAN_QRG_APP_Standby.doc(.vsdx)</code>、<code>AOSHAN2_QRG_APP_Standby.doc</code>（= HK6T62 同名文档）、<code>*_IP_QRG_LEON.doc</code>、<code>LEON_Feature.xlsx</code>、<code>AOSHAN_IP_QRG_I2C.doc</code>、<code>AOSHAN2_IP_QRG_DBGI2C.doc</code>、<code>AOSHAN2_IP_QRG_ddc_access_system_bus.doc</code>、<code>AOSHAN_IP_QRG_DBGSPI.doc</code>、<code>STD-DBGI2C_APPlication_Note.vsdx</code>、<code>STD_DBGSPI_Application_Note.vsdx</code>、<code>DW_apb_i2c_databook.pdf</code>（v2.02a，2018-07，338 页）。</li>
+  <li>原始文件为企业透明加密，内容经 Office COM（.doc/.xlsx）、Visio COM（.vsdx）、pypdf（.pdf）提取整理。</li>
+  <li>边界说明：①原 .doc 中部分内嵌图片无法文字提取，已用同名 .vsdx 的图内文字补全（PMU 框图、mode switch sequence、DBGI2C/DBGSPI 时序）；②AOSHAN 文档 GPIO 数量两处不一致（34 vs 33），按原文如实标注；③LEON 深度细节见 <code>leon_grip_v4144.pdf</code>（cache 70.3/70.10/70.11.4，DSU 寄存器 25.6），启动细节见各项目 Boot_Sequence 与 interrupt_src 表格（不在归档内）。</li>
+  <li>配套 Markdown 版：<code>E:\docs\sh5_subsystem_guide.md</code>；本报告图源生成器：<code>tools\gen_svgs.py</code>。</li>
+</ul>
+</section>
+</main>
+
+<script>
+(function () {
+  var sidebar = document.getElementById('sidebar');
+  var toggle = document.getElementById('menu-toggle');
+  toggle.addEventListener('click', function () { sidebar.classList.toggle('open'); });
+  document.addEventListener('click', function (e) {
+    if (window.innerWidth < 1024 && sidebar.classList.contains('open')
+        && !sidebar.contains(e.target) && e.target !== toggle) {
+      sidebar.classList.remove('open');
+    }
+  });
+
+  // scrollspy
+  var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+  var map = links.map(function (a) {
+    return { a: a, sec: document.querySelector(a.getAttribute('href')) };
+  }).filter(function (x) { return x.sec; });
+  function onScroll() {
+    var y = window.scrollY + 120;
+    var cur = map[0];
+    for (var i = 0; i < map.length; i++) {
+      if (map[i].sec.offsetTop <= y) cur = map[i];
+    }
+    links.forEach(function (a) { a.classList.remove('active'); });
+    if (cur) cur.a.classList.add('active');
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+</script>
+</body>
+</html>

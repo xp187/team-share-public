@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" width="960" height="640">
+  <style>text { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', 'Microsoft JhengHei', 'SimHei', sans-serif; }</style>
+  <defs>
+    <marker id="ar-b" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
+    <marker id="ar-o" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
+    <marker id="ar-g" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
+    <marker id="ar-p" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#9333ea"/></marker>
+    <marker id="ar-gr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
+  </defs>
+  <rect width="960" height="640" fill="#ffffff"/>
+  <text x="480" y="30" font-size="17" font-weight="600" fill="#111827" text-anchor="middle">DBGI2C 密码解锁与寄存器访问时序</text>
+  <rect x="70" y="46" width="160" height="44" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="150.0" y="64.0" font-size="13" font-weight="600" fill="#111827" text-anchor="middle">外部主机</text>
+  <text x="150.0" y="81.0" font-size="11" fill="#6b7280" text-anchor="middle">I2C master</text>
+  <line x1="150" y1="90" x2="150" y2="540" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <rect x="320" y="46" width="160" height="44" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+  <text x="400.0" y="64.0" font-size="13" font-weight="600" fill="#111827" text-anchor="middle">I2C_PWD_Slave</text>
+  <text x="400.0" y="81.0" font-size="11" fill="#6b7280" text-anchor="middle">Device ID 0x33</text>
+  <line x1="400" y1="90" x2="400" y2="540" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <rect x="540" y="46" width="160" height="44" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+  <text x="620.0" y="64.0" font-size="13" font-weight="600" fill="#111827" text-anchor="middle">I2C_SLV_Slave</text>
+  <text x="620.0" y="81.0" font-size="11" fill="#6b7280" text-anchor="middle">Device ID 0x34</text>
+  <line x1="620" y1="90" x2="620" y2="540" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <rect x="760" y="46" width="160" height="44" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+  <text x="840.0" y="64.0" font-size="13" font-weight="600" fill="#111827" text-anchor="middle">内部 AHB/APB</text>
+  <text x="840.0" y="81.0" font-size="11" fill="#6b7280" text-anchor="middle">地址空间</text>
+  <line x1="840" y1="90" x2="840" y2="540" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <line x1="150" y1="120" x2="400" y2="120" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ar-b)"/>
+  <text x="275.0" y="113" font-size="11.5" fill="#2563eb" text-anchor="middle">① 写密码：S · 0x33+W · Pwd地址 · 密码ID 0x78 · 32bit 密码</text>
+  <rect x="395" y="126" width="10" height="34" fill="#dbeafe" stroke="#93c5fd"/>
+  <text x="412" y="152" font-size="11" fill="#6b7280">校验通过 → 解锁 SLV，regr_dbgi2c_on=1</text>
+  <line x1="150" y1="186" x2="620" y2="186" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ar-b)"/>
+  <text x="385.0" y="179" font-size="11.5" fill="#2563eb" text-anchor="middle">② DATA 写：S · 0x34+W · 32bit 寄存器地址 · 32bit 数据 · P</text>
+  <rect x="615" y="192" width="10" height="34" fill="#dbeafe" stroke="#93c5fd"/>
+  <line x1="620" y1="220" x2="840" y2="220" stroke="#ea580c" stroke-width="1.5" marker-end="url(#ar-o)"/>
+  <text x="730.0" y="213" font-size="11.5" fill="#ea580c" text-anchor="middle">AHB/APB 写事务</text>
+  <line x1="150" y1="252" x2="620" y2="252" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ar-b)"/>
+  <text x="385.0" y="245" font-size="11.5" fill="#2563eb" text-anchor="middle">③ DATA 读：S · 0x34+W · 32bit 地址 · RS · 0x34+R</text>
+  <rect x="615" y="258" width="10" height="34" fill="#dbeafe" stroke="#93c5fd"/>
+  <line x1="840" y1="286" x2="620" y2="286" stroke="#ea580c" stroke-width="1.5" marker-end="url(#ar-o)"/>
+  <text x="730.0" y="279" font-size="11.5" fill="#ea580c" text-anchor="middle">读回 32bit 数据</text>
+  <line x1="620" y1="322" x2="150" y2="322" stroke="#16a34a" stroke-width="1.5" marker-end="url(#ar-g)"/>
+  <text x="385.0" y="315" font-size="11.5" fill="#16a34a" text-anchor="middle">④ 返回 4 字节数据 · 末字节 NACK · STOP</text>
+  <rect x="90" y="376" width="780" height="116" rx="8" fill="none" stroke="#6b7280" stroke-width="1.2" stroke-dasharray="6,4"/>
+  <rect x="90" y="367" width="150" height="18" fill="#f3f4f6" stroke="#d1d5db"/>
+  <text x="100" y="380" font-size="11" font-weight="600" fill="#111827">系统控制（可选）</text>
+  <line x1="150" y1="416" x2="620" y2="416" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ar-b)"/>
+  <text x="385.0" y="409" font-size="11.5" fill="#2563eb" text-anchor="middle">Device 0x32（DDC 通路 0x64）· 写 0x80 控制字</text>
+  <text x="385" y="438" font-size="10.5" fill="#6b7280" text-anchor="middle">0x80[0]=WatchDog 关闭 · [1]=CPU_RST_N · [4]=BUS_RST_N</text>
+  <line x1="150" y1="468" x2="620" y2="468" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ar-b)"/>
+  <text x="385.0" y="461" font-size="11.5" fill="#2563eb" text-anchor="middle">写秘钥：0x88=0xDC，0x89=0xCB（组合 0xCBDC 才生效）</text>
+  <rect x="90" y="522" width="780" height="44" rx="8" fill="#faf5ff" stroke="#d8b4fe" stroke-width="1.5"/>
+  <text x="480.0" y="548.0" font-size="13" font-weight="600" fill="#111827" text-anchor="middle"></text>
+  <text x="110" y="541" font-size="11.5" fill="#111827">DDC 直通握手：向 base 0xFC / sub 0x0 写 0x31393639（"1969"）开启，DDC 通道切换到 debug I2C；</text>
+  <text x="110" y="559" font-size="11.5" fill="#111827">向 base 0xFC / sub 0x1 写 0x414f5348（"AOSH"）关闭。速率 100/400 KHz；reg_scl_stretch_en=0 可兼容不持 stretch 的主机。</text>
+  <line x1="90" y1="600" x2="122" y2="600" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ar-b)"/>
+  <text x="128" y="604" font-size="11" fill="#6b7280">I2C 交易</text>
+  <line x1="210" y1="600" x2="242" y2="600" stroke="#ea580c" stroke-width="1.5" marker-end="url(#ar-o)"/>
+  <text x="248" y="604" font-size="11" fill="#6b7280">内部总线事务</text>
+  <line x1="360" y1="600" x2="392" y2="600" stroke="#16a34a" stroke-width="1.5" marker-end="url(#ar-g)"/>
+  <text x="398" y="604" font-size="11" fill="#6b7280">返回数据</text>
+</svg>

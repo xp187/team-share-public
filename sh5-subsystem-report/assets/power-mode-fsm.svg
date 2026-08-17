@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 500" width="960" height="500">
+  <style>text { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', 'Microsoft JhengHei', 'SimHei', sans-serif; }</style>
+  <defs>
+    <marker id="ar-b" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
+    <marker id="ar-o" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
+    <marker id="ar-g" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
+    <marker id="ar-p" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#9333ea"/></marker>
+    <marker id="ar-gr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
+  </defs>
+  <rect width="960" height="500" fill="#ffffff"/>
+  <text x="480" y="30" font-size="17" font-weight="600" fill="#111827" text-anchor="middle">SH5 电源状态机 —— Active / Standby / OFF</text>
+  <rect x="90" y="190" width="200" height="96" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+  <text x="190" y="222" font-size="15" font-weight="600" fill="#111827" text-anchor="middle">ACTIVE</text>
+  <text x="190" y="246" font-size="11" fill="#6b7280" text-anchor="middle">AON / STBY / MAIN 全上电</text>
+  <text x="190" y="263" font-size="11" fill="#6b7280" text-anchor="middle">LEON 27/600MHz 高速运行</text>
+  <rect x="380" y="190" width="200" height="96" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="480" y="222" font-size="15" font-weight="600" fill="#111827" text-anchor="middle">STANDBY</text>
+  <text x="480" y="246" font-size="11" fill="#6b7280" text-anchor="middle">STBY 有电有时钟 · MAIN 断电</text>
+  <text x="480" y="263" font-size="11" fill="#6b7280" text-anchor="middle">LEON 值守，监控唤醒源</text>
+  <rect x="670" y="190" width="200" height="96" rx="10" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1.5"/>
+  <text x="770" y="222" font-size="15" font-weight="600" fill="#111827" text-anchor="middle">OFF</text>
+  <text x="770" y="246" font-size="11" fill="#6b7280" text-anchor="middle">STBY 无 OSC CLK · MAIN 断电</text>
+  <text x="770" y="263" font-size="11" fill="#6b7280" text-anchor="middle">仅 PMU 状态机工作</text>
+  <circle cx="330" cy="238" r="7" fill="#111827"/>
+  <line x1="337" y1="238" x2="374" y2="238" stroke="#111827" stroke-width="1.5" marker-end="url(#ar-gr)"/>
+  <text x="330" y="262" font-size="10.5" fill="#6b7280" text-anchor="middle">上电 boot</text>
+  <path d="M 260 190 C 300 130, 340 130, 400 186" stroke="#ea580c" stroke-width="2" fill="none" marker-end="url(#ar-o)"/>
+  <text x="330" y="128" font-size="11.5" fill="#ea580c" text-anchor="middle" font-weight="600">无信号超时</text>
+  <text x="330" y="144" font-size="10.5" fill="#6b7280" text-anchor="middle">MAIN 切 OSC 时钟 → 关时钟 → 拉复位 → 开 iso → 断电</text>
+  <path d="M 400 292 C 360 350, 320 350, 264 290" stroke="#16a34a" stroke-width="2" fill="none" marker-end="url(#ar-g)"/>
+  <text x="330" y="342" font-size="11.5" fill="#16a34a" text-anchor="middle" font-weight="600">唤醒中断（Cable/CEC/AUX/ADC/DDC）</text>
+  <text x="330" y="358" font-size="10.5" fill="#6b7280" text-anchor="middle">POWER_ON → 关 iso → 放复位 → 切高速时钟</text>
+  <path d="M 550 190 C 590 130, 630 130, 690 186" stroke="#dc2626" stroke-width="2" fill="none" marker-end="url(#ar-o)"/>
+  <text x="620" y="128" font-size="11.5" fill="#dc2626" text-anchor="middle" font-weight="600">Power Key</text>
+  <text x="620" y="144" font-size="10.5" fill="#6b7280" text-anchor="middle">LEON 记 EEPROM → reg_pmu_mcu_off_req=1 → 关 OSC CLK</text>
+  <path d="M 690 292 C 650 350, 610 350, 554 290" stroke="#2563eb" stroke-width="2" fill="none" marker-end="url(#ar-b)"/>
+  <text x="620" y="342" font-size="11.5" fill="#2563eb" text-anchor="middle" font-weight="600">Power Key 脉冲</text>
+  <text x="620" y="358" font-size="10.5" fill="#6b7280" text-anchor="middle">开 OSC CLK → 释放 pmu_stby_rstn → LEON boot</text>
+  <path d="M 190 186 C 240 70, 720 70, 770 186" stroke="#dc2626" stroke-width="1.5" fill="none" marker-end="url(#ar-o)"/>
+  <text x="480" y="76" font-size="11.5" fill="#dc2626" text-anchor="middle" font-weight="600">Power Key（Active 直接进 OFF）</text>
+  <text x="480" y="92" font-size="10.5" fill="#6b7280" text-anchor="middle">先执行 ACTIVE→STANDBY 的降级 sequence，再按 STANDBY→OFF 关断</text>
+  <rect x="90" y="410" width="780" height="60" rx="8" fill="#fafafa" stroke="#d1d5db" stroke-width="1.5"/>
+  <text x="480.0" y="444.0" font-size="13" font-weight="600" fill="#111827" text-anchor="middle"></text>
+  <text x="110" y="434" font-size="11.5" fill="#111827">假 OFF 变体（ADC 复用 Power Key）：不写 reg_pmu_mcu_off_req，仅关闭 STBY 域内除 ADC/LEON 外的时钟与复位，状态机停在 STBY 态。</text>
+  <text x="110" y="454" font-size="11.5" fill="#111827">状态回读：regr_stb_pwr_on / regr_stb_rst_n / regr_power_on / regr_stb_sw_rst_n / regr_stby_iso；启动原因：regr_boot_status[1:0]。</text>
+</svg>
