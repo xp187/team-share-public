@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 320" width="960" height="320">
+  <style>text { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', 'Microsoft JhengHei', 'SimHei', sans-serif; }</style>
+  <defs>
+    <marker id="ar-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
+    <marker id="ar-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
+    <marker id="ar-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
+    <marker id="ar-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
+    <marker id="ar-mute" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
+  </defs>
+  <rect width="960" height="320" fill="#ffffff"/>
+<text x="40" y="42" fill="#111827" font-size="17" font-weight="600" text-anchor="start">7 位地址字节结构</text>
+<text x="40" y="64" fill="#6b7280" font-size="12" font-weight="400" text-anchor="start">bit7..bit1 为设备地址，bit0 为 R/W；软件常用 8 位形式 (addr&lt;&lt;1)|R/W</text>
+<line x1="40" y1="76" x2="920" y2="76" stroke="#d1d5db" stroke-width="1"/>
+<rect x="120" y="110" width="88" height="56" rx="8" ry="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="164.0" y="144" fill="#1e40af" font-size="14" font-weight="600" text-anchor="middle">A6</text>
+<text x="164.0" y="100" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">bit7</text>
+<rect x="208" y="110" width="88" height="56" rx="0" ry="0" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="252.0" y="144" fill="#1e40af" font-size="14" font-weight="600" text-anchor="middle">A5</text>
+<text x="252.0" y="100" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">bit6</text>
+<rect x="296" y="110" width="88" height="56" rx="0" ry="0" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="340.0" y="144" fill="#1e40af" font-size="14" font-weight="600" text-anchor="middle">A4</text>
+<text x="340.0" y="100" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">bit5</text>
+<rect x="384" y="110" width="88" height="56" rx="0" ry="0" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="428.0" y="144" fill="#1e40af" font-size="14" font-weight="600" text-anchor="middle">A3</text>
+<text x="428.0" y="100" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">bit4</text>
+<rect x="472" y="110" width="88" height="56" rx="0" ry="0" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="516.0" y="144" fill="#1e40af" font-size="14" font-weight="600" text-anchor="middle">A2</text>
+<text x="516.0" y="100" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">bit3</text>
+<rect x="560" y="110" width="88" height="56" rx="0" ry="0" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="604.0" y="144" fill="#1e40af" font-size="14" font-weight="600" text-anchor="middle">A1</text>
+<text x="604.0" y="100" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">bit2</text>
+<rect x="648" y="110" width="88" height="56" rx="0" ry="0" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="692.0" y="144" fill="#1e40af" font-size="14" font-weight="600" text-anchor="middle">A0</text>
+<text x="692.0" y="100" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">bit1</text>
+<rect x="736" y="110" width="88" height="56" rx="0" ry="0" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/>
+<text x="780.0" y="144" fill="#9a3412" font-size="14" font-weight="600" text-anchor="middle">R/W</text>
+<text x="780.0" y="100" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">bit0</text>
+<text x="404" y="194" fill="#1e40af" font-size="12" font-weight="400" text-anchor="start">7 位设备地址</text>
+<text x="780.0" y="194" fill="#9a3412" font-size="12" font-weight="400" text-anchor="middle">0=写 1=读</text>
+<text x="120" y="250" fill="#111827" font-size="13" font-weight="600" text-anchor="start">例：设备地址 0x33</text>
+<line x1="300" y1="244" x2="360" y2="244" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<text x="330" y="236" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">左移1位</text>
+<rect x="380" y="222" width="170" height="40" rx="8" ry="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+<text x="395" y="247" fill="#111827" font-size="12" font-weight="400" text-anchor="start">写：0x66  (0x33&lt;&lt;1|0)</text>
+<rect x="570" y="222" width="170" height="40" rx="8" ry="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+<text x="585" y="247" fill="#111827" font-size="12" font-weight="400" text-anchor="start">读：0x67  (0x33&lt;&lt;1|1)</text>
+<text x="120" y="292" fill="#6b7280" font-size="11" font-weight="400" text-anchor="start">10 位寻址：首字节 11110XX+R/W，第二字节为地址低 8 位（挂大量设备时使用）</text>
+</svg>

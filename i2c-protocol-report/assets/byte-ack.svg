@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" width="960" height="360">
+  <style>text { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', 'Microsoft JhengHei', 'SimHei', sans-serif; }</style>
+  <defs>
+    <marker id="ar-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
+    <marker id="ar-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
+    <marker id="ar-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
+    <marker id="ar-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
+    <marker id="ar-mute" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
+  </defs>
+  <rect width="960" height="360" fill="#ffffff"/>
+<text x="40" y="42" fill="#111827" font-size="17" font-weight="600" text-anchor="start">一字节传输与 ACK（第 9 拍）</text>
+<text x="40" y="64" fill="#6b7280" font-size="12" font-weight="400" text-anchor="start">MSB first；发送方在第 9 拍释放 SDA，由接收方拉低产生 ACK</text>
+<line x1="40" y1="76" x2="920" y2="76" stroke="#d1d5db" stroke-width="1"/>
+<path d="M 110,138 L 122,138 L 122,100 L 178,100 L 178,138 L 206,138 L 206,100 L 262,100 L 262,138 L 290,138 L 290,100 L 346,100 L 346,138 L 374,138 L 374,100 L 430,100 L 430,138 L 458,138 L 458,100 L 514,100 L 514,138 L 542,138 L 542,100 L 598,100 L 598,138 L 626,138 L 626,100 L 682,100 L 682,138 L 710,138 L 710,100 L 766,100 L 766,138 L 794,138 L 794,100 L 850,100 L 850,138 L 886,138" fill="none" stroke="#111827" stroke-width="2"/>
+<path d="M 116,200 L 194,200 L 198,200 L 206,238 L 278,238 L 282,238 L 290,200 L 362,200 L 446,200 L 450,200 L 458,238 L 530,238 L 614,238 L 618,238 L 626,200 L 698,200 L 702,200 L 710,238 L 782,238 L 786,238 L 794,200" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+<line x1="794" y1="200" x2="812" y2="200" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4,3"/>
+<path d="M 812,200 L 822,238 L 872,238" fill="none" stroke="#16a34a" stroke-width="2.5"/>
+<text x="152.0" y="172" fill="#111827" font-size="12" font-weight="600" text-anchor="middle">D7</text>
+<text x="236.0" y="172" fill="#111827" font-size="12" font-weight="600" text-anchor="middle">D6</text>
+<text x="320.0" y="172" fill="#111827" font-size="12" font-weight="600" text-anchor="middle">D5</text>
+<text x="404.0" y="172" fill="#111827" font-size="12" font-weight="600" text-anchor="middle">D4</text>
+<text x="488.0" y="172" fill="#111827" font-size="12" font-weight="600" text-anchor="middle">D3</text>
+<text x="572.0" y="172" fill="#111827" font-size="12" font-weight="600" text-anchor="middle">D2</text>
+<text x="656.0" y="172" fill="#111827" font-size="12" font-weight="600" text-anchor="middle">D1</text>
+<text x="740.0" y="172" fill="#111827" font-size="12" font-weight="600" text-anchor="middle">D0</text>
+<text x="824.0" y="172" fill="#16a34a" font-size="12" font-weight="600" text-anchor="middle">ACK</text>
+<text x="824.0" y="268" fill="#16a34a" font-size="11" font-weight="400" text-anchor="middle">接收方拉低 = ACK（保持高 = NACK）</text>
+<text x="110" y="296" fill="#2563eb" font-size="12" font-weight="400" text-anchor="start">发送方驱动 D7..D0（蓝）</text>
+<text x="340" y="296" fill="#6b7280" font-size="12" font-weight="400" text-anchor="start">第 9 拍发送方释放 SDA（灰虚线）</text>
+<text x="680" y="296" fill="#16a34a" font-size="12" font-weight="400" text-anchor="start">接收方拉低 SDA（绿）</text>
+<text x="110" y="326" fill="#111827" font-size="12" font-weight="400" text-anchor="start">规则：SDA 只在 SCL=0 期间允许变化；每字节固定 9 个 SCL 周期</text>
+<text x="620" y="90" fill="#6b7280" font-size="11" font-weight="400" text-anchor="start">示例字节 0xB2（MSB first）</text>
+</svg>

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 430" width="960" height="430">
+  <style>text { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', 'Microsoft JhengHei', 'SimHei', sans-serif; }</style>
+  <defs>
+    <marker id="ar-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
+    <marker id="ar-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
+    <marker id="ar-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
+    <marker id="ar-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
+    <marker id="ar-mute" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
+  </defs>
+  <rect width="960" height="430" fill="#ffffff"/>
+<text x="40" y="42" fill="#111827" font-size="17" font-weight="600" text-anchor="start">I2C 总线拓扑：开漏 + 上拉</text>
+<text x="40" y="64" fill="#6b7280" font-size="12" font-weight="400" text-anchor="start">SDA/SCL 只能被拉低或释放（高阻）；释放后由上拉电阻拉高 —— 线与逻辑的基础</text>
+<line x1="40" y1="76" x2="920" y2="76" stroke="#d1d5db" stroke-width="1"/>
+<text x="60" y="108" fill="#111827" font-size="13" font-weight="600" text-anchor="start">VDD</text>
+<line x1="100" y1="104" x2="880" y2="104" stroke="#111827" stroke-width="2"/>
+<line x1="340" y1="104" x2="340" y2="122" stroke="#111827" stroke-width="2"/>
+<rect x="324" y="122" width="32" height="44" rx="2" ry="2" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+<text x="340" y="149" fill="#111827" font-size="12" font-weight="600" text-anchor="middle">Rp</text>
+<line x1="340" y1="166" x2="340" y2="186" stroke="#111827" stroke-width="2"/>
+<line x1="620" y1="104" x2="620" y2="122" stroke="#111827" stroke-width="2"/>
+<rect x="604" y="122" width="32" height="44" rx="2" ry="2" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+<text x="620" y="149" fill="#111827" font-size="12" font-weight="600" text-anchor="middle">Rp</text>
+<line x1="620" y1="166" x2="620" y2="186" stroke="#111827" stroke-width="2"/>
+<text x="280" y="92" fill="#6b7280" font-size="11" font-weight="400" text-anchor="start">上拉电阻（典型 1k~10k，速率/总线电容折中）</text>
+<line x1="60" y1="186" x2="900" y2="186" stroke="#2563eb" stroke-width="2.5"/>
+<text x="64" y="178" fill="#2563eb" font-size="13" font-weight="600" text-anchor="start">SCL</text>
+<line x1="60" y1="246" x2="900" y2="246" stroke="#16a34a" stroke-width="2.5"/>
+<text x="64" y="238" fill="#16a34a" font-size="13" font-weight="600" text-anchor="start">SDA</text>
+<line x1="150" y1="186" x2="150" y2="246" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4,3"/>
+<line x1="150" y1="246" x2="150" y2="286" stroke="#6b7280" stroke-width="1.5"/>
+<rect x="75" y="286" width="150" height="74" rx="8" ry="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="150" y="316" fill="#111827" font-size="14" font-weight="600" text-anchor="middle">Master</text>
+<text x="150" y="338" fill="#6b7280" font-size="11" font-weight="400" text-anchor="middle">产生时钟/发起传输</text>
+<line x1="400" y1="186" x2="400" y2="246" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4,3"/>
+<line x1="400" y1="246" x2="400" y2="286" stroke="#6b7280" stroke-width="1.5"/>
+<rect x="325" y="286" width="150" height="74" rx="8" ry="8" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+<text x="400" y="316" fill="#111827" font-size="14" font-weight="600" text-anchor="middle">Slave #1</text>
+<text x="400" y="338" fill="#6b7280" font-size="11" font-weight="400" text-anchor="middle">地址 0x33</text>
+<line x1="610" y1="186" x2="610" y2="246" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4,3"/>
+<line x1="610" y1="246" x2="610" y2="286" stroke="#6b7280" stroke-width="1.5"/>
+<rect x="535" y="286" width="150" height="74" rx="8" ry="8" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+<text x="610" y="316" fill="#111827" font-size="14" font-weight="600" text-anchor="middle">Slave #2</text>
+<text x="610" y="338" fill="#6b7280" font-size="11" font-weight="400" text-anchor="middle">地址 0x34</text>
+<line x1="800" y1="186" x2="800" y2="246" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4,3"/>
+<line x1="800" y1="246" x2="800" y2="286" stroke="#6b7280" stroke-width="1.5"/>
+<rect x="725" y="286" width="150" height="74" rx="8" ry="8" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+<text x="800" y="316" fill="#111827" font-size="14" font-weight="600" text-anchor="middle">Slave #N</text>
+<text x="800" y="338" fill="#6b7280" font-size="11" font-weight="400" text-anchor="middle">…</text>
+<rect x="60" y="386" width="560" height="30" rx="6" ry="6" fill="#fff7ed" stroke="#fdba74" stroke-width="1"/>
+<text x="72" y="406" fill="#9a3412" font-size="12" font-weight="400" text-anchor="start">每个引脚 = 开漏输出：只能【拉低】或【释放为高阻】，不能主动输出高电平</text>
+<text x="660" y="406" fill="#dc2626" font-size="12" font-weight="600" text-anchor="start">线与：任一设备拉低 → 总线为低</text>
+</svg>

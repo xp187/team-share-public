@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 400" width="960" height="400">
+  <style>text { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', 'Microsoft JhengHei', 'SimHei', sans-serif; }</style>
+  <defs>
+    <marker id="ar-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
+    <marker id="ar-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
+    <marker id="ar-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
+    <marker id="ar-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
+    <marker id="ar-mute" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
+  </defs>
+  <rect width="960" height="400" fill="#ffffff"/>
+<text x="40" y="42" fill="#111827" font-size="17" font-weight="600" text-anchor="start">寄存器读写流程（最常见场景）</text>
+<text x="40" y="64" fill="#6b7280" font-size="12" font-weight="400" text-anchor="start">读必须先用写方向发寄存器地址，再用 Repeated START(SR) 切到读方向；最后一个读字节由 master 回 NACK</text>
+<line x1="40" y1="76" x2="920" y2="76" stroke="#d1d5db" stroke-width="1"/>
+<text x="40" y="112" fill="#1e40af" font-size="13" font-weight="600" text-anchor="start">写（W）：S → ADR+W → REG → DATA×n → P</text>
+<rect x="40" y="130" width="46" height="52" rx="8" ry="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="63.0" y="154" fill="#1e40af" font-size="12" font-weight="600" text-anchor="middle">S</text>
+<text x="63.0" y="171" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">START</text>
+<line x1="88" y1="156" x2="116" y2="156" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<rect x="118" y="130" width="92" height="52" rx="8" ry="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="164.0" y="154" fill="#1e40af" font-size="12" font-weight="600" text-anchor="middle">ADR+W</text>
+<text x="164.0" y="171" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">地址+写</text>
+<line x1="212" y1="156" x2="240" y2="156" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<circle cx='226' cy='128' r='13' fill='#f0fdf4' stroke='#86efac'/>
+<text x="226" y="132" fill="#16a34a" font-size="11" font-weight="600" text-anchor="middle">A</text>
+<rect x="242" y="130" width="86" height="52" rx="8" ry="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="285.0" y="154" fill="#1e40af" font-size="12" font-weight="600" text-anchor="middle">REG</text>
+<text x="285.0" y="171" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">寄存器地址</text>
+<line x1="330" y1="156" x2="358" y2="156" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<circle cx='344' cy='128' r='13' fill='#f0fdf4' stroke='#86efac'/>
+<text x="344" y="132" fill="#16a34a" font-size="11" font-weight="600" text-anchor="middle">A</text>
+<rect x="360" y="130" width="84" height="52" rx="8" ry="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="402.0" y="154" fill="#1e40af" font-size="12" font-weight="600" text-anchor="middle">DATA0</text>
+<text x="402.0" y="171" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">数据</text>
+<line x1="446" y1="156" x2="474" y2="156" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<circle cx='460' cy='128' r='13' fill='#f0fdf4' stroke='#86efac'/>
+<text x="460" y="132" fill="#16a34a" font-size="11" font-weight="600" text-anchor="middle">A</text>
+<rect x="476" y="130" width="40" height="52" rx="8" ry="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="496.0" y="154" fill="#1e40af" font-size="12" font-weight="600" text-anchor="middle">…</text>
+<line x1="518" y1="156" x2="546" y2="156" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<rect x="548" y="130" width="84" height="52" rx="8" ry="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="590.0" y="154" fill="#1e40af" font-size="12" font-weight="600" text-anchor="middle">DATAn</text>
+<text x="590.0" y="171" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">数据</text>
+<line x1="634" y1="156" x2="662" y2="156" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<circle cx='648' cy='128' r='13' fill='#f0fdf4' stroke='#86efac'/>
+<text x="648" y="132" fill="#16a34a" font-size="11" font-weight="600" text-anchor="middle">A</text>
+<rect x="664" y="130" width="46" height="52" rx="8" ry="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="687.0" y="154" fill="#1e40af" font-size="12" font-weight="600" text-anchor="middle">P</text>
+<text x="687.0" y="171" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">STOP</text>
+<text x="40" y="262" fill="#166534" font-size="13" font-weight="600" text-anchor="start">读（R）：S → ADR+W → REG → SR → ADR+R → DATA×n（末字节 NACK）→ P</text>
+<rect x="40" y="280" width="46" height="52" rx="8" ry="8" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+<text x="63.0" y="304" fill="#166534" font-size="12" font-weight="600" text-anchor="middle">S</text>
+<text x="63.0" y="321" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">START</text>
+<line x1="88" y1="306" x2="116" y2="306" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<rect x="118" y="280" width="92" height="52" rx="8" ry="8" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+<text x="164.0" y="304" fill="#166534" font-size="12" font-weight="600" text-anchor="middle">ADR+W</text>
+<text x="164.0" y="321" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">地址+写</text>
+<line x1="212" y1="306" x2="240" y2="306" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<circle cx='226' cy='278' r='13' fill='#f0fdf4' stroke='#86efac'/>
+<text x="226" y="282" fill="#16a34a" font-size="11" font-weight="600" text-anchor="middle">A</text>
+<rect x="242" y="280" width="86" height="52" rx="8" ry="8" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+<text x="285.0" y="304" fill="#166534" font-size="12" font-weight="600" text-anchor="middle">REG</text>
+<text x="285.0" y="321" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">寄存器地址</text>
+<line x1="330" y1="306" x2="358" y2="306" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<circle cx='344' cy='278' r='13' fill='#f0fdf4' stroke='#86efac'/>
+<text x="344" y="282" fill="#16a34a" font-size="11" font-weight="600" text-anchor="middle">A</text>
+<rect x="360" y="280" width="46" height="52" rx="8" ry="8" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+<text x="383.0" y="304" fill="#166534" font-size="12" font-weight="600" text-anchor="middle">SR</text>
+<text x="383.0" y="321" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">重启动</text>
+<line x1="408" y1="306" x2="436" y2="306" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<rect x="438" y="280" width="92" height="52" rx="8" ry="8" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+<text x="484.0" y="304" fill="#166534" font-size="12" font-weight="600" text-anchor="middle">ADR+R</text>
+<text x="484.0" y="321" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">地址+读</text>
+<line x1="532" y1="306" x2="560" y2="306" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<circle cx='546' cy='278' r='13' fill='#f0fdf4' stroke='#86efac'/>
+<text x="546" y="282" fill="#16a34a" font-size="11" font-weight="600" text-anchor="middle">A</text>
+<rect x="562" y="280" width="84" height="52" rx="8" ry="8" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+<text x="604.0" y="304" fill="#166534" font-size="12" font-weight="600" text-anchor="middle">DATA0</text>
+<text x="604.0" y="321" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">数据</text>
+<line x1="648" y1="306" x2="676" y2="306" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<circle cx='662' cy='278' r='13' fill='#f0fdf4' stroke='#86efac'/>
+<text x="662" y="282" fill="#16a34a" font-size="11" font-weight="600" text-anchor="middle">A</text>
+<rect x="678" y="280" width="40" height="52" rx="8" ry="8" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+<text x="698.0" y="304" fill="#166534" font-size="12" font-weight="600" text-anchor="middle">…</text>
+<line x1="720" y1="306" x2="748" y2="306" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<rect x="750" y="280" width="84" height="52" rx="8" ry="8" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+<text x="792.0" y="304" fill="#166534" font-size="12" font-weight="600" text-anchor="middle">DATAn</text>
+<text x="792.0" y="321" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">末字节</text>
+<line x1="836" y1="306" x2="864" y2="306" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<circle cx='850' cy='278' r='13' fill='#fef2f2' stroke='#fca5a5'/>
+<text x="850" y="282" fill="#dc2626" font-size="11" font-weight="600" text-anchor="middle">N</text>
+<rect x="866" y="280" width="46" height="52" rx="8" ry="8" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+<text x="889.0" y="304" fill="#166534" font-size="12" font-weight="600" text-anchor="middle">P</text>
+<text x="889.0" y="321" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">STOP</text>
+<circle cx='52' cy='368' r='10' fill='#f0fdf4' stroke='#86efac'/>
+<text x="52" y="372" fill="#16a34a" font-size="10" font-weight="600" text-anchor="middle">A</text>
+<text x="68" y="372" fill="#6b7280" font-size="11" font-weight="400" text-anchor="start">ACK（接收方拉低 SDA）</text>
+<circle cx='240' cy='368' r='10' fill='#fef2f2' stroke='#fca5a5'/>
+<text x="240" y="372" fill="#dc2626" font-size="10" font-weight="600" text-anchor="middle">N</text>
+<text x="256" y="372" fill="#6b7280" font-size="11" font-weight="400" text-anchor="start">NACK（保持高，读末尾/异常）</text>
+<text x="460" y="372" fill="#ea580c" font-size="11" font-weight="400" text-anchor="start">SR = Repeated START：不发 STOP 直接再次 START，切方向并占住总线</text>
+</svg>

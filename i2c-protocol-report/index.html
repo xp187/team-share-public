@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I2C 协议入门（数字验证工程师视角）</title>
+<style>
+  :root {
+    --bg: #f4f6f8; --surface: #ffffff; --surface2: #f9fafb;
+    --line: #d9e0e7; --text: #17212b; --muted: #607080;
+    --accent: #1d4ed8; --accent-soft: #eff6ff;
+    --warn: #9a3412; --warn-bg: #fff7ed; --warn-line: #fdba74;
+    --shadow: 0 10px 26px rgba(26,36,46,.08);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+         font-size: 14.5px; line-height: 1.75; }
+  /* ---------- sidebar ---------- */
+  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 264px;
+             background: var(--surface); border-right: 1px solid var(--line);
+             overflow-y: auto; padding: 18px 14px 30px; z-index: 40; }
+  .sidebar h1 { font-size: 16px; color: var(--accent); margin: 0 4px 2px; }
+  .sidebar .sub { font-size: 11.5px; color: var(--muted); margin: 0 4px 14px; }
+  .toc a { display: block; padding: 5px 10px; color: var(--text); text-decoration: none;
+           border-left: 3px solid transparent; border-radius: 0 6px 6px 0; font-size: 13.5px; }
+  .toc a:hover { background: var(--accent-soft); }
+  .toc a.active { background: var(--accent-soft); border-left-color: var(--accent);
+                  color: var(--accent); font-weight: 600; }
+  .toc a .n { color: var(--muted); font-size: 12px; margin-right: 6px; }
+  /* ---------- main ---------- */
+  .main { margin-left: 264px; padding: 30px 42px 80px; }
+  .content { max-width: 900px; margin: 0 auto; }
+  section { background: var(--surface); border-radius: 12px; box-shadow: var(--shadow);
+            padding: 28px 36px; margin-bottom: 26px; }
+  section h2 { font-size: 20px; margin: 0 0 14px; padding-bottom: 10px;
+               border-bottom: 2px solid var(--line); }
+  section h2 .n { color: var(--accent); margin-right: 8px; }
+  h3 { font-size: 16px; margin: 22px 0 8px; }
+  h4 { font-size: 14.5px; margin: 18px 0 6px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0; padding-left: 24px; }
+  li { margin: 4px 0; }
+  code { background: var(--surface2); border: 1px solid var(--line); border-radius: 4px;
+         padding: 1px 5px; font-family: Consolas, monospace; font-size: 13px; }
+  pre { background: #0f172a; color: #e2e8f0; border-radius: 8px; padding: 14px 16px;
+        overflow-x: auto; font-size: 12.5px; line-height: 1.6; }
+  pre code { background: none; border: 0; padding: 0; color: inherit; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 13.5px; }
+  th, td { border: 1px solid var(--line); padding: 7px 11px; text-align: left; }
+  th { background: var(--surface2); }
+  tr:nth-child(even) td { background: #fcfdfe; }
+  figure { margin: 16px 0; text-align: center; }
+  figure img { max-width: 100%; border: 1px solid var(--line); border-radius: 10px;
+               background: #fff; }
+  figcaption { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+  .tip { border-left: 4px solid var(--accent); background: var(--accent-soft);
+         border-radius: 0 8px 8px 0; padding: 10px 16px; margin: 12px 0; }
+  .tip .t { font-weight: 600; color: var(--accent); }
+  .warn { border-left: 4px solid var(--warn-line); background: var(--warn-bg);
+          border-radius: 0 8px 8px 0; padding: 10px 16px; margin: 12px 0; }
+  .warn .t { font-weight: 600; color: var(--warn); }
+  .topbar { display: none; }
+  .src-note { font-size: 12px; color: var(--muted); }
+  /* ---------- mobile ---------- */
+  @media (max-width: 860px) {
+    .topbar { display: flex; position: fixed; top: 0; left: 0; right: 0; height: 48px;
+              background: var(--surface); border-bottom: 1px solid var(--line);
+              align-items: center; padding: 0 14px; z-index: 50; gap: 10px; }
+    .topbar .ttl { font-size: 14px; font-weight: 600; color: var(--accent); }
+    .topbar button { border: 1px solid var(--line); background: var(--surface2);
+                     border-radius: 6px; font-size: 18px; padding: 2px 10px; cursor: pointer; }
+    .sidebar { transform: translateX(-100%); transition: transform .2s; top: 48px; }
+    body.nav-open .sidebar { transform: translateX(0); box-shadow: var(--shadow); }
+    .main { margin-left: 0; padding: 62px 12px 60px; }
+    section { padding: 18px 16px; }
+    table { display: block; overflow-x: auto; }
+    code { word-break: break-all; }
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <button id="nav-btn" aria-label="目录">☰</button>
+  <span class="ttl">I2C 协议入门（数字验证视角）</span>
+</div>
+
+<aside class="sidebar">
+  <h1>I2C 协议入门</h1>
+  <p class="sub">数字验证工程师视角 · 依据 NXP UM10204 / DW_apb_i2c / 本项目实践整理</p>
+  <nav class="toc" id="toc">
+    <a href="#s1"><span class="n">01</span>概述与特点</a>
+    <a href="#s2"><span class="n">02</span>物理层与电气特性</a>
+    <a href="#s3"><span class="n">03</span>速率模式</a>
+    <a href="#s4"><span class="n">04</span>基本时序信号</a>
+    <a href="#s5"><span class="n">05</span>字节传输与 ACK/NACK</a>
+    <a href="#s6"><span class="n">06</span>寻址方式</a>
+    <a href="#s7"><span class="n">07</span>典型读写流程</a>
+    <a href="#s8"><span class="n">08</span>Repeated START</a>
+    <a href="#s9"><span class="n">09</span>时钟拉伸</a>
+    <a href="#s10"><span class="n">10</span>多主机与总线仲裁</a>
+    <a href="#s11"><span class="n">11</span>Bus Clear 异常恢复</a>
+    <a href="#s12"><span class="n">12</span>时序参数速查</a>
+    <a href="#s13"><span class="n">13</span>验证要点（DV 视角）</a>
+    <a href="#s14"><span class="n">14</span>本项目中的 I2C</a>
+    <a href="#s15"><span class="n">附</span>常见误区对照</a>
+  </nav>
+</aside>
+
+<main class="main">
+<div class="content">
+
+<section id="s1">
+  <h2><span class="n">01</span>概述与特点</h2>
+  <p>I2C（Inter-Integrated Circuit）是 Philips（现 NXP）提出的<strong>两线制</strong>串行总线协议，用于芯片内部或板级芯片间的低速通信。对验证工程师来说，它几乎是每个 SoC/显示驱动项目都会遇到的寄存器配置接口。</p>
+  <ul>
+    <li><strong>两线制</strong>：<code>SDA</code>（数据线）+ <code>SCL</code>（时钟线），加上公共地即可通信。</li>
+    <li><strong>主从结构</strong>：master 产生时钟、发起传输；slave 响应地址，被寻址时参与传输。</li>
+    <li><strong>寻址制</strong>：每次传输先发一个地址字节（7 位地址 + 读写位），总线上可挂多个 slave。</li>
+    <li><strong>低速中速兼备</strong>：100 kbit/s ~ 3.4 Mbit/s（见 03 速率模式）。</li>
+    <li><strong>双向半双工</strong>：同一时刻仅一方驱动 SDA。</li>
+    <li><strong>可热插拔/即插即用</strong>：设备可随时挂接/摘除（需要处理仲裁）。</li>
+  </ul>
+  <p>典型用途：传感器读取、EEPROM 读写、寄存器配置、DDC（显示数据通道）、调试桥（DBGI2C）等。</p>
+  <p class="src-note">源文档：<code>E:\docs\i2c_protocol_guide.md</code>；参考资料：NXP UM10204 Rev.6、Synopsys DW_apb_i2c databook、本项目 i2c_model 与寄存器访问实现。</p>
+</section>
+
+<section id="s2">
+  <h2><span class="n">02</span>物理层与电气特性</h2>
+  <h3>2.1 线型：开漏 + 上拉</h3>
+  <ul>
+    <li><code>SDA</code>/<code>SCL</code> 均为<strong>开漏（open-drain）输出</strong>，外部接上拉电阻到 VDD。</li>
+    <li>设备只能把线<strong>拉低</strong>（输出 0）或<strong>释放</strong>（高阻，由外部上拉拉高）。</li>
+    <li>因此总线电平为"线与"：任何设备拉低，整条线就是低电平。这一点是多主机仲裁和时钟拉伸的基础。</li>
+    <li>电平要求（Fast-mode 以下兼容 3.3V/5V，实际阈值见各器件手册）：<code>V_IL ≤ 0.3 × VDD</code>，<code>V_IH ≥ 0.7 × VDD</code>；输入需带毛刺滤波器（抑制 &lt;50ns 的尖峰）。</li>
+  </ul>
+  <figure>
+    <img src="assets/bus-topology.svg" alt="I2C 总线拓扑：开漏 + 上拉">
+    <figcaption>图 1 · 总线拓扑：上拉电阻 + 开漏设备，"线与"逻辑</figcaption>
+  </figure>
+  <div class="tip"><span class="t">DV 提示：</span>验证 I2C 模块时，驱动方式必须是<strong>拉低/释放</strong>模型，而不是推挽输出；释放状态通常用 <code>1'bz</code>（三态）建模。本项目 <code>i2c_model.sv</code> 中即用 <code>SDA_OE</code>/<code>SDA_LO</code> 区分"驱动低"与"释放"。</div>
+</section>
+
+<section id="s3">
+  <h2><span class="n">03</span>速率模式</h2>
+  <table>
+    <tr><th>模式</th><th>缩写</th><th>速率</th><th>备注</th></tr>
+    <tr><td>标准模式</td><td>Sm</td><td>100 kbit/s</td><td>最常见，几乎所有器件支持</td></tr>
+    <tr><td>快速模式</td><td>Fm</td><td>400 kbit/s</td><td>需要 4mA 灌电流能力</td></tr>
+    <tr><td>快速模式+</td><td>Fm+</td><td>1 Mbit/s</td><td>需更强驱动，常用于长走线</td></tr>
+    <tr><td>高速模式</td><td>Hs</td><td>3.4 Mbit/s</td><td>需 master 先发 Hs 主码 <code>00001XXX</code> 握手</td></tr>
+    <tr><td>超快模式</td><td>UFm</td><td>5 Mbit/s</td><td><strong>单向</strong>（只写），无 ACK，开漏+推挽混合</td></tr>
+  </table>
+  <p>本项目（DW_apb_i2c 配置）常用 <strong>Sm 100 kbit/s / Fm 400 kbit/s</strong>，master 与 slave 均支持。</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">04</span>基本时序信号</h2>
+  <p>I2C 的 4 个核心信号事件（全由 <strong>SCL 高电平期间 SDA 的变化</strong>定义）：</p>
+  <h3>4.1 START 条件（S）</h3>
+  <ul>
+    <li>定义：<strong>SCL=1 时，SDA 由高→低</strong>。</li>
+    <li>作用：开始一次传输，所有 slave 收到后开始监听地址。由 master 产生（单主机时）；多主机时也是仲裁点。</li>
+  </ul>
+  <h3>4.2 STOP 条件（P）</h3>
+  <ul>
+    <li>定义：<strong>SCL=1 时，SDA 由低→高</strong>。</li>
+    <li>作用：结束一次传输，总线释放。</li>
+  </ul>
+  <h3>4.3 数据位有效（SDA 稳定规则）</h3>
+  <ul>
+    <li>SDA 的电平只在 <strong>SCL=0</strong> 期间允许变化；</li>
+    <li><strong>SCL=1</strong> 期间 SDA 必须保持稳定（该窗口内的跳变会被解释为 START/STOP，属于协议违规）。</li>
+  </ul>
+  <figure>
+    <img src="assets/start-stop.svg" alt="START/STOP 条件与数据有效窗口">
+    <figcaption>图 2 · START/STOP 条件：SCL 高期间的 SDA 跳变；数据位期间 SCL 高时 SDA 必须稳定</figcaption>
+  </figure>
+  <h3>4.4 一字节传输</h3>
+  <p>数据 <strong>MSB first</strong>，每字节 8 位，之后紧跟 1 个 ACK 时钟位（共 9 个 SCL 周期），详见下一节。</p>
+</section>
+
+<section id="s5">
+  <h2><span class="n">05</span>字节传输与 ACK/NACK</h2>
+  <figure>
+    <img src="assets/byte-ack.svg" alt="一字节传输与 ACK">
+    <figcaption>图 3 · 一字节 8 位 + 第 9 拍 ACK：发送方释放 SDA，接收方拉低应答</figcaption>
+  </figure>
+  <h3>5.1 ACK（应答）</h3>
+  <ul>
+    <li>发送方（master 或 slave）释放 SDA，由<strong>接收方</strong>在第 9 个时钟周期将 SDA 拉低。</li>
+    <li>含义：成功接收到字节。master 发送完每个字节后<strong>释放 SDA</strong>，slave 在第 9 拍拉低 ACK。</li>
+  </ul>
+  <h3>5.2 NACK（无应答）</h3>
+  <ul>
+    <li>接收方在第 9 拍保持 SDA 高。常见场景：
+      <ul>
+        <li><strong>读传输的最后字节</strong>：master 用 NACK 通知 slave"不用再发了"，随后发 STOP。</li>
+        <li><strong>slave 忙 / 地址不存在 / 数据错误</strong>：slave 返回 NACK。</li>
+        <li>写传输中 slave NACK 通常意味着错误，master 应停止。</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>5.3 总线"塞字节/阻塞"</h3>
+  <p>若总线上某一方将 SDA 拉低不放，双方进入死锁，需要 Bus Clear 恢复（见 11 节）。</p>
+</section>
+
+<section id="s6">
+  <h2><span class="n">06</span>寻址方式</h2>
+  <h3>6.1 7 位地址</h3>
+  <p>第一个字节（地址字节）= <code>[7 位地址][R/W]</code>：<code>R/W=0</code> 为 master 写，<code>R/W=1</code> 为 master 读。软件里常写成 <strong>8 位形式</strong>：<code>(addr &lt;&lt; 1) | R/W</code>。</p>
+  <figure>
+    <img src="assets/addr-byte.svg" alt="7 位地址字节结构">
+    <figcaption>图 4 · 地址字节结构：7 位地址 + R/W 位；8 位形式示例（0x33 → 0x66/0x67）</figcaption>
+  </figure>
+  <h3>6.2 10 位地址</h3>
+  <p>第一个字节 = <code>11110XX + R/W</code>（XX 为地址高 2 位），第二个字节 = 地址低 8 位。多用于同一总线挂大量设备。</p>
+  <h3>6.3 保留地址（7 位地址前缀）</h3>
+  <table>
+    <tr><th>地址 (7bit)</th><th>用途</th></tr>
+    <tr><td><code>0000 000</code></td><td>广播呼叫（General Call，所有 slave 应答，常用于重启或固件升级握手）</td></tr>
+    <tr><td><code>0000 001</code></td><td>START byte（同步模式，供无硬件 I2C 的 MCU 用）</td></tr>
+    <tr><td><code>0000 010</code></td><td>CBUS 地址</td></tr>
+    <tr><td><code>0000 011</code></td><td>保留</td></tr>
+    <tr><td><code>0000 1XX</code></td><td>Hs 模式主码</td></tr>
+    <tr><td><code>1111 0XX</code></td><td>10 位寻址</td></tr>
+    <tr><td><code>1111 1XX</code></td><td>Device ID（可读器件标识）</td></tr>
+  </table>
+  <div class="tip"><span class="t">DV 提示：</span>slave 的地址比较逻辑必须正确处理保留地址区间，避免把 General Call/保留地址当普通地址响应。</div>
+</section>
+
+<section id="s7">
+  <h2><span class="n">07</span>典型读写流程</h2>
+  <p>以下以"访问从机寄存器"为例（最常见场景：addr 为寄存器地址）。</p>
+  <figure>
+    <img src="assets/rw-flow.svg" alt="寄存器读写流程">
+    <figcaption>图 5 · 寄存器写 / 读完整流程：读需要用 SR 切方向，末字节回 NACK</figcaption>
+  </figure>
+  <h3>7.1 寄存器写（W）</h3>
+  <ol>
+    <li>START</li>
+    <li>地址字节（7 位地址 + W），slave ACK</li>
+    <li>寄存器地址，slave ACK</li>
+    <li>依次写数据字节，每个 ACK</li>
+    <li>STOP</li>
+  </ol>
+  <h3>7.2 寄存器读（R）</h3>
+  <p>必须先在写方向发送寄存器地址，再切换方向读：中间用 <strong>Repeated START (SR)</strong> 切换方向而不发 STOP；最后一个读字节由 <strong>master 发 NACK</strong>，然后 STOP。</p>
+  <h3>7.3 连续读写（burst / auto-increment）</h3>
+  <ul>
+    <li>写：一个寄存器地址后连续写多个数据字节，地址自动递增（本项目 HV2M23 I2C-008/009 场景）。</li>
+    <li>读：SR 后连续读多个字节。</li>
+  </ul>
+  <h3>7.4 8 位写地址示例（本项目 i2c_model 风格）</h3>
+  <pre><code>i2c_write(dev_addr, sub_addr, data):
+    start
+    write_byte(dev_addr &lt;&lt; 1)      // 8 位写地址
+    expect_ack
+    write_byte(sub_addr)           // 寄存器地址
+    expect_ack
+    write_byte(data)
+    expect_ack
+    stop</code></pre>
+</section>
+
+<section id="s8">
+  <h2><span class="n">08</span>Repeated START</h2>
+  <ul>
+    <li>定义：在一次传输中，<strong>不发 STOP 的情况下再次产生 START 条件（SR）</strong>。</li>
+    <li>用途：
+      <ul>
+        <li>读操作中切换方向（写→读）。</li>
+        <li>保持总线占用，避免其他 master 插入（多主机场景下等同于"锁定总线"）。</li>
+        <li>连续读多个寄存器区间。</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="tip"><span class="t">DV 提示：</span>验证时需检查 SR 之后地址字节的 R/W 位处理、方向切换时 <code>SDA_OE</code> 的时序。</div>
+</section>
+
+<section id="s9">
+  <h2><span class="n">09</span>时钟拉伸 Clock Stretching</h2>
+  <ul>
+    <li>定义：slave 通过<strong>把 SCL 拉低不放</strong>，强制 master 暂停时钟，为自己争取准备时间（处理中断、填充 FIFO、响应慢速存储等）。</li>
+    <li>master 检测到 SCL 低且未释放时，必须等待，不得继续传输。</li>
+    <li>可能出现在<strong>任何 SCL 高→低后</strong>，最常见是 ACK 位之后。</li>
+  </ul>
+  <figure>
+    <img src="assets/clock-stretch.svg" alt="时钟拉伸">
+    <figcaption>图 6 · 时钟拉伸：slave 保持拉低 SCL，master 等待</figcaption>
+  </figure>
+  <div class="tip"><span class="t">DV 提示：</span>
+    <ul>
+      <li>slave 时钟拉伸的长度需要受控（过长会导致 master 超时）。</li>
+      <li>master 侧要有 SCL 被拉低的等待/超时逻辑；DW_apb_i2c 有 <code>tx/rx</code> 超时配置。</li>
+      <li>验证 case 应覆盖：ACK 后拉伸、地址字节后拉伸、以及拉伸期间 master 不发数据。</li>
+    </ul>
+  </div>
+</section>
+
+<section id="s10">
+  <h2><span class="n">10</span>多主机与总线仲裁</h2>
+  <p>I2C 允许多个 master 共存，通过<strong>仲裁</strong>决定谁占用总线：</p>
+  <ul>
+    <li><strong>仲裁原则（线与）</strong>：master 每发送一位就采样 SDA 回读。若自己发出高电平却读到低电平（有别的设备在拉低），说明<strong>仲裁失败</strong>，立即停止驱动，退出传输。仲裁按位进行，最低地址的 master 最终获胜。</li>
+    <li><strong>START/STOP 条件也参与仲裁</strong>：如一个 master 发 START，另一个在同一时刻发 STOP，则发 START 的获胜。</li>
+    <li>仲裁不损失数据（"不丢字节"），失败方之后可重试。</li>
+    <li>多主机必须支持<strong>总线忙检测</strong>：发起传输前若检测到总线忙（START 后未 STOP），应等待。</li>
+  </ul>
+  <figure>
+    <img src="assets/arbitration.svg" alt="多主机仲裁">
+    <figcaption>图 7 · 仲裁：发 1 却回读到 0 即失败退出，总线数据不受影响</figcaption>
+  </figure>
+  <div class="tip"><span class="t">DV 提示：</span>验证多主机仲裁需要两个 master 同时驱动，注意三态建模与采样回读，避免竞争冒险（race）。</div>
+</section>
+
+<section id="s11">
+  <h2><span class="n">11</span>Bus Clear 与异常恢复</h2>
+  <p>当 slave 因故障把 SDA 一直拉低（例如收到非法地址卡死），总线会被"锁死"，任何 START 都无法发出。</p>
+  <p><strong>Bus Clear 流程（I2C 规范建议）</strong>：</p>
+  <ol>
+    <li>master 直接发 STOP（若还能控制时钟）。</li>
+    <li>master 在 SCL 上产生<strong>最多 9 个时钟脉冲</strong>，期间不驱动 SDA，让卡住的 slave 在检测到"第 9 个时钟后 SDA 仍未释放"时复位其内部状态并释放 SDA。</li>
+    <li>恢复后 master 可发 STOP 重新初始化总线。</li>
+  </ol>
+  <div class="tip"><span class="t">DV 提示：</span>DW_apb_i2c databook 将其称为 <strong>BUS CLEAR（SCL/SDA 低电平超时检测与恢复）</strong>，本项目 QRG 注明已裁剪支持。验证 case 中应包含"SDA 卡低 → Bus Clear 恢复"场景。</div>
+</section>
+
+<section id="s12">
+  <h2><span class="n">12</span>时序参数速查</h2>
+  <p>NXP UM10204 规定的关键时序（最小建立/保持时间），DV 断言可参考：</p>
+  <table>
+    <tr><th>参数</th><th>含义</th><th>Sm (100k)</th><th>Fm (400k)</th><th>Fm+ (1M)</th></tr>
+    <tr><td><code>tSU;STA</code></td><td>START 建立时间（STOP→START 间隔）</td><td>4.7 µs</td><td>0.6 µs</td><td>0.26 µs</td></tr>
+    <tr><td><code>tHD;STA</code></td><td>START 保持时间</td><td>4.0 µs</td><td>0.6 µs</td><td>0.26 µs</td></tr>
+    <tr><td><code>tSU;DAT</code></td><td>数据建立时间（SCL↑ 前）</td><td>250 ns</td><td>100 ns</td><td>50 ns</td></tr>
+    <tr><td><code>tHD;DAT</code></td><td>数据保持时间（SCL↓ 后）</td><td>0 ns</td><td>0 ns</td><td>0 ns</td></tr>
+    <tr><td><code>tLOW</code></td><td>SCL 低电平时间</td><td>4.7 µs</td><td>1.3 µs</td><td>0.5 µs</td></tr>
+    <tr><td><code>tHIGH</code></td><td>SCL 高电平时间</td><td>4.0 µs</td><td>0.6 µs</td><td>0.26 µs</td></tr>
+    <tr><td><code>tSU;STO</code></td><td>STOP 建立时间</td><td>4.0 µs</td><td>0.6 µs</td><td>0.26 µs</td></tr>
+    <tr><td><code>tBUF</code></td><td>STOP 后总线空闲时间</td><td>4.7 µs</td><td>1.3 µs</td><td>0.5 µs</td></tr>
+  </table>
+  <p class="src-note">上述为最小要求值；实际验证常以对应模式的边界值做 SVA 断言或约束随机（corner）。</p>
+</section>
+
+<section id="s13">
+  <h2><span class="n">13</span>验证要点（DV 视角）</h2>
+  <p>综合本项目验证计划（HV2M23 I2C-001 ~ I2C-015）整理：</p>
+  <h4>① 协议基础</h4>
+  <ul>
+    <li>START/STOP 条件检测（SCL 高时 SDA 跳变）。</li>
+    <li>SCL 高期间 SDA 不得变化（<code>tSU;DAT</code>/<code>tHD;DAT</code> 断言）。</li>
+    <li>每字节 9 拍（8 数据 + ACK）。</li>
+  </ul>
+  <h4>② 寻址与应答</h4>
+  <ul>
+    <li>7 位地址正确匹配（区分 8 位形式与 7 位形式）。</li>
+    <li>ACK/NACK 正确生成与释放时序（读最后字节 NACK）。</li>
+    <li>保留地址、广播呼叫、非法地址不误响应、不挂死。</li>
+  </ul>
+  <h4>③ 寄存器访问</h4>
+  <ul>
+    <li>单字节/连续读写、地址自增、读回一致。</li>
+    <li>复位期间事务、<code>T_REGLD</code> 建立保持、软件复位恢复默认值。</li>
+  </ul>
+  <h4>④ 三态与方向控制</h4>
+  <ul>
+    <li><code>SDA_OE</code>/<code>SDA_LO</code> 方向控制正确（写驱动低、读释放）。</li>
+    <li>释放态为高阻（<code>1'bz</code>），无多驱动冲突。</li>
+  </ul>
+  <h4>⑤ 异常场景</h4>
+  <ul>
+    <li>时钟拉伸、NACK 后 master 行为、SDA 卡低 Bus Clear。</li>
+    <li>复位竞态、仲裁（多 master）。</li>
+  </ul>
+</section>
+
+<section id="s14">
+  <h2><span class="n">14</span>本项目中的 I2C</h2>
+  <table>
+    <tr><th>项目/模块</th><th>说明</th></tr>
+    <tr><td>HV2M23 <code>I2C_CTL</code></td><td>I2C 配置接口，读写内部寄存器；验证计划含 15 条 I2C case 与 SVA checker</td></tr>
+    <tr><td>HK1V11 <code>CHPI</code>/I2C</td><td>寄存器配置双接口（CHPI/I2C），<code>generate_i2c_cases.py</code> 自动生成读写/密码/unlock case</td></tr>
+    <tr><td>HKSB66 <code>i2c_model.sv</code></td><td>I2C BFM（start/stop 检测、<code>i2c_write</code>/<code>i2c_read</code>、多 ID 支持、<code>ahb32c_*</code> 系列 task）</td></tr>
+    <tr><td>DW_apb_i2c（SH5/AOSHAN）</td><td>标准 master/slave 控制器，Sm/Fm，支持 clock stretch、DMA、BUS CLEAR</td></tr>
+    <tr><td>DBGI2C / DDC</td><td>调试桥与显示数据通道（0xFC 密码握手访问系统总线，见 <code>E:\docs\sh5_subsystem_guide.md</code>）</td></tr>
+  </table>
+  <p>典型设备地址（内部实现，供参考）：</p>
+  <ul>
+    <li>DBGI2C 密码从机 Device ID：<code>0x33</code>（校验密码）、<code>0x34</code>（密码正确后解锁访问 AHB）、<code>0x32</code>（Config，读写 I2C 内部寄存器）。</li>
+    <li>DDC access system bus：base address <code>0xFC</code> + 开启密码 <code>0x31393639</code>（ASCII "1969"）。</li>
+  </ul>
+</section>
+
+<section id="s15">
+  <h2><span class="n">附</span>常见误区对照</h2>
+  <table>
+    <tr><th>误区</th><th>正确理解</th></tr>
+    <tr><td>发送完字节 master 必须等 slave ACK</td><td>读方向最后一个字节 master 发 <strong>NACK</strong></td></tr>
+    <tr><td>SCL 只能由 master 拉低</td><td>slave 可通过时钟拉伸拉低 SCL 暂停 master</td></tr>
+    <tr><td>地址字节就是设备地址</td><td>8 位地址 = 7 位地址左移 1 位 + R/W</td></tr>
+    <tr><td>释放 SDA 等于输出 1</td><td>释放是<strong>高阻</strong>，靠上拉电阻拉高；输出 1 需三态模型</td></tr>
+    <tr><td>START/STOP 之后 SDA 立即可变</td><td>START/STOP 是 SCL 高时的 SDA 跳变，其余时间 SDA 必须在 SCL 低时变</td></tr>
+  </table>
+  <p class="src-note">本文档为内部学习/参考资料，不替代官方规范。协议权威定义请以 NXP UM10204 为准。</p>
+</section>
+
+</div>
+</main>
+
+<script>
+(function () {
+  // scrollspy
+  var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+  var map = {};
+  links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+  var secs = links.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+  function setActive(id) {
+    links.forEach(function (a) { a.classList.toggle('active', a === map[id]); });
+  }
+  function onScroll() {
+    var cur = secs[0] && secs[0].id;
+    secs.forEach(function (s) { if (s.getBoundingClientRect().top <= 120) cur = s.id; });
+    setActive(cur);
+  }
+  document.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  // mobile drawer
+  var btn = document.getElementById('nav-btn');
+  if (btn) btn.addEventListener('click', function () { document.body.classList.toggle('nav-open'); });
+  links.forEach(function (a) {
+    a.addEventListener('click', function () { document.body.classList.remove('nav-open'); });
+  });
+})();
+</script>
+</body>
+</html>

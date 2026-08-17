@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" width="960" height="360">
+  <style>text { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', 'Microsoft JhengHei', 'SimHei', sans-serif; }</style>
+  <defs>
+    <marker id="ar-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
+    <marker id="ar-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
+    <marker id="ar-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
+    <marker id="ar-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
+    <marker id="ar-mute" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
+  </defs>
+  <rect width="960" height="360" fill="#ffffff"/>
+<text x="40" y="42" fill="#111827" font-size="17" font-weight="600" text-anchor="start">多主机仲裁（线与回读）</text>
+<text x="40" y="64" fill="#6b7280" font-size="12" font-weight="400" text-anchor="start">每个 master 发位同时回读 SDA：发 1 却读到 0 → 仲裁失败立即退出；数据不丢失</text>
+<line x1="40" y1="76" x2="920" y2="76" stroke="#d1d5db" stroke-width="1"/>
+<text x="40" y="125" fill="#1e40af" font-size="12" font-weight="600" text-anchor="start">Master A 想发</text>
+<text x="40" y="195" fill="#166534" font-size="12" font-weight="600" text-anchor="start">Master B 想发</text>
+<text x="40" y="265" fill="#dc2626" font-size="12" font-weight="600" text-anchor="start">总线 SDA 实际</text>
+<line x1="200" y1="96" x2="200" y2="300" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,3"/>
+<text x="245.0" y="88" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">bit7</text>
+<line x1="290" y1="96" x2="290" y2="300" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,3"/>
+<text x="335.0" y="88" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">bit6</text>
+<line x1="380" y1="96" x2="380" y2="300" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,3"/>
+<text x="425.0" y="88" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">bit5</text>
+<line x1="470" y1="96" x2="470" y2="300" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,3"/>
+<text x="515.0" y="88" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">bit4</text>
+<rect x="384" y="98" width="82" height="210" rx="6" ry="6" fill="#fef2f2" stroke="#fca5a5" stroke-width="1"/>
+<text x="245.0" y="125" fill="#1e40af" font-size="14" font-weight="600" text-anchor="middle">0</text>
+<text x="245.0" y="195" fill="#166534" font-size="14" font-weight="600" text-anchor="middle">0</text>
+<text x="245.0" y="265" fill="#dc2626" font-size="14" font-weight="600" text-anchor="middle">0</text>
+<text x="335.0" y="125" fill="#1e40af" font-size="14" font-weight="600" text-anchor="middle">0</text>
+<text x="335.0" y="195" fill="#166534" font-size="14" font-weight="600" text-anchor="middle">0</text>
+<text x="335.0" y="265" fill="#dc2626" font-size="14" font-weight="600" text-anchor="middle">0</text>
+<text x="425.0" y="125" fill="#1e40af" font-size="14" font-weight="600" text-anchor="middle">1</text>
+<text x="425.0" y="195" fill="#166534" font-size="14" font-weight="600" text-anchor="middle">0</text>
+<text x="425.0" y="265" fill="#dc2626" font-size="14" font-weight="600" text-anchor="middle">0</text>
+<rect x="476" y="106" width="78" height="28" rx="4" ry="4" fill="#f9fafb" stroke="#d1d5db" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="515.0" y="125" fill="#6b7280" font-size="10" font-weight="400" text-anchor="middle">退出驱动</text>
+<text x="515.0" y="195" fill="#166534" font-size="14" font-weight="600" text-anchor="middle">0</text>
+<text x="515.0" y="265" fill="#dc2626" font-size="14" font-weight="600" text-anchor="middle">0</text>
+<text x="425.0" y="330" fill="#dc2626" font-size="12" font-weight="600" text-anchor="middle">A 发 1 却回读到 0 → 仲裁失败，立即停止驱动</text>
+<text x="580" y="125" fill="#6b7280" font-size="11" font-weight="400" text-anchor="start">失败方可稍后重试，获胜方数据不受影响</text>
+</svg>

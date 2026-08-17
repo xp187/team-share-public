@@ -8,3 +8,5 @@
 - [HK1V11 DV_TCON_C 验证环境使用指南](./hk1v11-dv-env-guide/)
 - [HV2M23 DV_TCON_C 验证环境使用指南](./hv2m23-dv-env-guide/)
 - [MIPI DSI Protocol Report](./mipi-dsi-report/)
+- [SH5 Subsystem Report](./sh5-subsystem-report/)
+- [I2C 协议入门（数字验证工程师视角）](./i2c-protocol-report/)
