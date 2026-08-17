@@ -353,6 +353,192 @@ def arbitration():
     return L
 
 
+# ------------------------------------------------------- task call graph
+def task_callgraph():
+    L = header(960, 660)
+    L += title("i2c_model task 调用关系", "scenario task 全部组合自 7 个协议原子 task；原子 task 直接操作信号层（基于 i2c_model.sv 源码逐行核对）", 960)
+
+    # ---- layer 1: scenario task groups
+    L.append(box(40, 96, 430, 236, BLUE_T, BLUE_T2))
+    L.append(text(56, 122, "普通寄存器访问（i2c_*）", 14, "#1e40af", "start", 600))
+    rows_a = [
+        ("i2c_unlock", "start → addr(0xA4) → wr(78,98,76) → stop"),
+        ("i2c_write", "两段：wr(50,addr32,data32) → stop；wr(70,01) 触发 → stop"),
+        ("i2c_read", "三段写(50地址/71使能/58锁存) → addr(0xA5) → rd×4 → stop"),
+    ]
+    yy = 148
+    for name, flow in rows_a:
+        L.append(box(56, yy - 16, 398, 52, "#ffffff", BLUE_T2, 6, 1))
+        L.append(text(66, yy + 4, name, 12, INK, "start", 600))
+        L.append(text(66, yy + 22, flow, 10, MUTE))
+        yy += 62
+
+    L.append(box(500, 96, 420, 280, GREEN_T, GREEN_T2))
+    L.append(text(516, 122, "AHB/I2C 桥接（ahbi2c_*，设备 id 作参数）", 14, "#166534", "start", 600))
+    rows_b = [
+        ("enable", "addr(0xA6) → wr(80,03) → stop"),
+        ("unlock(id)", "wr(78,pwd32 低字节先) → stop"),
+        ("rd_pwd(_test)(id)", "wr(78) → SR → addr(id,R) → rd×1/×4 → stop"),
+        ("write(id) / write_8a(id)", "连写地址+数据；两者字节序不同"),
+        ("cfg_read / cfg_write(id)", "单字节配置读写；cfg_read 用 id,R 发起"),
+        ("burst_write_no_stop", "addr(A8)+addr32 → 循环 wr，无 STOP"),
+        ("burst_read", "addr32 → SR → addr(A9) → 循环 rd → stop"),
+    ]
+    yy = 148
+    for name, flow in rows_b:
+        L.append(box(516, yy - 16, 388, 28, "#ffffff", GREEN_T2, 6, 1))
+        L.append(text(524, yy + 3, name, 11, INK, "start", 600))
+        L.append(text(724, yy + 3, flow, 9, MUTE))
+        yy += 32
+
+    # ---- collector rail
+    rail_y = 412
+    L.append(line(255, 332, 255, rail_y, MUTE, 1.5))
+    L.append(line(705, 376, 705, rail_y, MUTE, 1.5))
+    L.append(line(120, rail_y, 840, rail_y, MUTE, 1.5))
+
+    # ---- layer 2: protocol atoms
+    atoms = [
+        ("master_start", "START 条件；置 M=1", "← 全部 scenario"),
+        ("master_address", "地址字节+读 ACK", "← 全部"),
+        ("master_wr", "发字节+采样 ACK", "← 除 cfg_read/rd_pwd"),
+        ("master_rd", "收字节+ACK/NACK", "← i2c_read/rd_pwd/cfg/burst_rd"),
+        ("master_repeat_start", "SR 重启动", "← rd_pwd(_test)/burst_rd"),
+        ("master_stop", "STOP；清 M=0", "← 除 burst_wr_no_stop"),
+    ]
+    aw, gap = 118, 6
+    ax = 40
+    ay = 452
+    for name, role, callers in atoms:
+        L.append(line(ax + aw / 2, rail_y, ax + aw / 2, ay, MUTE, 1.5, marker="ar-mute"))
+        L.append(box(ax, ay, aw, 86, "#ffffff", LINE))
+        L.append(text(ax + aw / 2, ay + 22, name, 11, INK, "middle", 600))
+        L.append(text(ax + aw / 2, ay + 40, role, 9, MUTE, "middle"))
+        # wrap caller tag into at most 2 lines
+        L.append(text(ax + aw / 2, ay + 58, callers[:26], 8.5, "#9a3412", "middle"))
+        if len(callers) > 26:
+            L.append(text(ax + aw / 2, ay + 70, callers[26:], 8.5, "#9a3412", "middle"))
+        ax += aw + gap
+    # master_acksig: standalone, no rail connection
+    L.append(box(ax, ay, aw, 86, GRAY_T, LINE, 8, 1.5, dash="5,3"))
+    L.append(text(ax + aw / 2, ay + 22, "master_acksig", 11, MUTE, "middle", 600))
+    L.append(text(ax + aw / 2, ay + 40, "单独发 ACK/NACK", 9, MUTE, "middle"))
+    L.append(text(ax + aw / 2, ay + 58, "无内部调用者", 8.5, RED, "middle"))
+    L.append(text(ax + aw / 2, ay + 70, "(burst_read 中被注释)", 8.5, RED, "middle"))
+
+    # ---- layer 3: signals
+    sy = 584
+    L.append(box(40, sy - 20, 880, 56, ORANGE_T, ORANGE_T2))
+    L.append(text(56, sy, "信号层", 12, "#9a3412", "start", 600))
+    L.append(text(130, sy, "sdai：SDA 驱动源（0=拉低/1=释放） · force_PIN_sda：驱动窗口标记 · M：时钟源选择", 11, INK))
+    L.append(text(130, sy + 18, "sclo/clk：task 内 @ 边沿等待 · sdao：master_rd 采样源", 11, INK))
+    for cx in (255, 705):
+        L.append(line(cx, 538, cx, sy - 20, MUTE, 1.5, dash="4,3"))
+    return L
+
+
+# ------------------------------------------------------- signal relations
+def signal_relations():
+    L = header(960, 640)
+    L += title("i2c_model 信号作用与联系", "实线=驱动/赋值关系，虚线=观测或未被消费；端口加粗（基于 i2c_model.sv 源码逐行核对）", 960)
+
+    # ---- SCL chain (top)
+    L.append(box(50, 96, 80, 44, BLUE_T, BLUE_T2))
+    L.append(text(90, 123, "clk", 13, INK, "middle", 600))
+    L.append(box(180, 88, 190, 60, "#ffffff", LINE))
+    L.append(text(275, 112, "clk_cnt[6:0] 计数", 12, INK, "middle", 600))
+    L.append(text(275, 130, "0x22 → sclk↓（0x45 升沿为死分支）", 9, MUTE, "middle"))
+    L.append(line(130, 118, 176, 118, INK, 1.5, marker="ar-blue"))
+
+    L.append(box(430, 76, 110, 40, "#ffffff", LINE))
+    L.append(text(485, 101, "sclk（内部钟）", 11, INK, "middle", 600))
+    L.append(box(430, 128, 110, 40, GRAY_T, LINE))
+    L.append(text(485, 153, "scl_sync（静态）", 11, MUTE, "middle", 600))
+    L.append(line(370, 108, 426, 96, INK, 1.5, marker="ar-blue"))
+
+    L.append(box(590, 96, 130, 56, "#ffffff", LINE))
+    L.append(text(655, 118, "assign scli =", 11, INK, "middle", 600))
+    L.append(text(655, 134, "M ? sclk : scl_sync", 11, INK, "middle", 600))
+    L.append(line(540, 96, 586, 110, INK, 1.5, marker="ar-blue"))
+    L.append(line(540, 148, 586, 138, MUTE, 1.5, marker="ar-mute"))
+
+    L.append(box(590, 180, 130, 40, BLUE_T, BLUE_T2))
+    L.append(text(655, 204, "M（master 标志）", 11, INK, "middle", 600))
+    L.append(line(655, 180, 655, 156, BLUE, 1.5, marker="ar-blue"))
+    L.append(text(700, 170, "start 置 1 / stop 清 0", 9, MUTE))
+
+    L.append(box(780, 92, 130, 56, "#ffffff", INK, 8, 2.5))
+    L.append(text(845, 116, "sclo（端口）", 12, INK, "middle", 600))
+    L.append(text(845, 134, "tri1 · assign #10", 9, MUTE, "middle"))
+    L.append(line(720, 124, 776, 122, INK, 2, marker="ar-blue"))
+    L.append(text(748, 112, "scli", 10, MUTE, "middle"))
+
+    # wait_start feedback
+    L.append(box(430, 236, 290, 56, ORANGE_T, ORANGE_T2))
+    L.append(text(575, 256, "wait_start 逻辑（always @(posedge scli or posedge sclo)）", 9.5, "#9a3412", "middle", 600))
+    L.append(text(575, 274, "沿后 #10 检测到 sclo 低 → wait_start=1 → 异步复位 sclk=1, clk_cnt=0", 9, INK, "middle"))
+    L.append(path("M 845,148 C 845,300 760,264 724,262", MUTE, 1.5, dash="4,3", marker="ar-mute"))
+    L.append(line(430, 250, 370, 160, MUTE, 1.5, dash="4,3", marker="ar-mute"))
+    L.append(text(352, 210, "复位 sclk/clk_cnt", 9, MUTE, "middle"))
+
+    # clk -> sda_d sampling & task delays
+    L.append(line(90, 140, 90, 330, INK, 1.5, marker="ar-blue"))
+    L.append(text(96, 240, "posedge clk", 9, MUTE))
+
+    # ---- SDA chain (bottom)
+    L.append(box(50, 352, 150, 56, BLUE_T, BLUE_T2))
+    L.append(text(125, 374, "task 内驱动", 11, INK, "middle", 600))
+    L.append(text(125, 392, "0=拉低 / 1=释放", 9, MUTE, "middle"))
+    L.append(box(240, 352, 120, 56, "#ffffff", LINE))
+    L.append(text(300, 386, "sdai（reg）", 12, INK, "middle", 600))
+    L.append(line(200, 380, 236, 380, INK, 1.5, marker="ar-blue"))
+
+    L.append(box(240, 428, 120, 50, GRAY_T, LINE, 8, 1.5, dash="5,3"))
+    L.append(text(300, 448, "force_PIN_sda", 10, MUTE, "middle", 600))
+    L.append(text(300, 464, "窗口标记·本文件无消费者", 8.5, RED, "middle"))
+
+    L.append(box(420, 352, 150, 56, "#ffffff", LINE))
+    L.append(text(495, 374, "assign #5 sdao =", 10.5, INK, "middle", 600))
+    L.append(text(495, 390, "sdai ? 1'bz : sdai", 10.5, INK, "middle", 600))
+    L.append(line(360, 380, 416, 380, INK, 1.5, marker="ar-blue"))
+
+    L.append(box(640, 348, 130, 64, "#ffffff", INK, 8, 2.5))
+    L.append(text(705, 374, "sdao（端口）", 12, INK, "middle", 600))
+    L.append(text(705, 392, "tri1 · 双向", 9, MUTE, "middle"))
+    L.append(line(570, 380, 636, 380, INK, 2, marker="ar-blue"))
+
+    # sda_d + start/stop detection
+    L.append(box(420, 452, 130, 46, "#ffffff", LINE))
+    L.append(text(485, 472, "sda_d <= sdao", 10.5, INK, "middle", 600))
+    L.append(text(485, 488, "@(posedge clk)", 9, MUTE, "middle"))
+    L.append(path("M 705,412 C 705,470 600,475 554,475", MUTE, 1.5, dash="4,3", marker="ar-mute"))
+
+    L.append(box(600, 446, 210, 58, "#ffffff", LINE))
+    L.append(text(705, 466, "SCL 高时判 {sdao,sda_d}", 10.5, INK, "middle", 600))
+    L.append(text(705, 482, "01→start_signal · 10→stop_signal", 9.5, MUTE, "middle"))
+    L.append(line(550, 475, 596, 475, INK, 1.5, marker="ar-blue"))
+    L.append(path("M 770,412 C 790,430 760,442 754,444", MUTE, 1, dash="3,3"))
+
+    L.append(box(830, 446, 110, 58, GRAY_T, LINE, 8, 1.5, dash="5,3"))
+    L.append(text(885, 466, "start/stop_signal", 9.5, MUTE, "middle", 600))
+    L.append(text(885, 482, "未被 task 消费", 8.5, RED, "middle"))
+    L.append(line(810, 475, 826, 475, MUTE, 1.5, dash="4,3", marker="ar-mute"))
+
+    # master_rd sampling note
+    L.append(box(240, 528, 330, 56, "#ffffff", LINE))
+    L.append(text(405, 548, "master_rd：@(posedge sclo) 采样 sdao → data_rd", 10.5, INK, "middle", 600))
+    L.append(text(405, 566, "→ mhost_rx_data；ack=1 时第 9 拍拉低 sdai 回 ACK", 9.5, MUTE, "middle"))
+    L.append(path("M 705,412 C 700,500 620,520 574,540", MUTE, 1.5, dash="4,3", marker="ar-mute"))
+
+    # status outputs
+    L.append(box(600, 528, 340, 88, BLUE_T, BLUE_T2))
+    L.append(text(616, 548, "状态输出", 11, "#1e40af", "start", 600))
+    L.append(text(616, 566, "master_ok：地址应答（1=失配，命名与含义相反）", 9.5, INK))
+    L.append(text(616, 582, "master_ack：写应答（1=NACK）；判据是内部 sdai 而非总线 sdao", 9.5, INK))
+    L.append(text(616, 598, "ddc_32mode：声明为 output，全文件无驱动", 9.5, RED))
+    return L
+
+
 # ------------------------------------------------------- reserved addresses
 def main():
     os.makedirs(OUT, exist_ok=True)
@@ -363,6 +549,8 @@ def main():
     save("rw-flow.svg", rw_flow())
     save("clock-stretch.svg", clock_stretch())
     save("arbitration.svg", arbitration())
+    save("task-callgraph.svg", task_callgraph())
+    save("signal-relations.svg", signal_relations())
 
 
 if __name__ == "__main__":

@@ -497,6 +497,51 @@ STOP</code></pre>
   </ol>
   <p>波形检查至少应观察：START、设备地址、每个字节后的 ACK、Repeated START、最后字节的 NACK、STOP，以及 STOP 后 SDA/SCL 是否回到空闲高电平。</p>
 
+  <h3>15.10 task 调用关系（源码核对）</h3>
+  <p>全部 scenario task 都由 7 个协议原子 task 组合而成；原子 task 直接驱动/等待信号层。下图按 <code>i2c_model.sv</code> 逐行统计调用关系：</p>
+  <figure>
+    <img src="assets/task-callgraph.svg" alt="i2c_model task 调用关系">
+    <figcaption>图 8 · task 调用关系：scenario → 协议原子 → 信号层；橙色小字为每个原子 task 的调用者</figcaption>
+  </figure>
+  <ul>
+    <li><code>master_start</code>/<code>master_address</code>/<code>master_stop</code> 几乎被所有 scenario task 使用；<code>master_stop</code> 的唯一例外是 <code>ahbi2c_burst_write_no_stop</code>——它<strong>故意不发 STOP</strong>，配合后续事务（如 burst_read 的 SR）保持总线占用。</li>
+    <li><code>master_repeat_start</code> 只被 <code>ahbi2c_rd_pwd(_test)</code> 与 <code>ahbi2c_burst_read</code> 使用；<code>i2c_read</code> 用的是"STOP 后再 START"，不是 SR。</li>
+    <li><code>master_acksig</code> 当前<strong>无内部调用者</strong>（<code>burst_read</code> 中的调用被注释掉），是保留的手工应答工具。</li>
+    <li><code>ahbi2c_cfg_read</code> 直接用 <code>{id,1'b1}</code> 读方向发起，不先发寄存器地址——与其他读流程不同。</li>
+    <li>字节序陷阱在源码中确实存在：<code>ahbi2c_write</code> 地址/数据均高字节先发，而 <code>ahbi2c_write_8a</code> 的数据是低字节先发。</li>
+  </ul>
+
+  <h3>15.11 信号作用与联系（源码核对）</h3>
+  <figure>
+    <img src="assets/signal-relations.svg" alt="i2c_model 信号作用与联系">
+    <figcaption>图 9 · 信号关系：SCL 链（clk→clk_cnt→sclk→scli→sclo）与 SDA 链（sdai→sdao），虚线为观测/未被消费路径</figcaption>
+  </figure>
+  <table>
+    <tr><th>信号</th><th>类型</th><th>作用与联系</th></tr>
+    <tr><td><code>clk</code></td><td>input</td><td>仿真时钟：驱动 <code>clk_cnt</code> 计数、<code>sda_d</code> 采样，以及所有 task 内的 <code>repeat @(posedge clk)</code> 延时</td></tr>
+    <tr><td><code>sdao</code>/<code>sclo</code></td><td>inout <code>tri1</code></td><td>总线端口；分别由 <code>assign #5/#10</code> 三态赋值模拟开漏（内部源为 1 → 释放 Z，为 0 → 拉低）</td></tr>
+    <tr><td><code>sdai</code></td><td>reg</td><td>SDA 驱动源：task 内写 0 拉低、写 1 释放；START/STOP/数据位/ACK 全靠它配合 <code>sclo</code> 边沿变化</td></tr>
+    <tr><td><code>scli</code></td><td>wire</td><td>SCL 驱动源选择：<code>M ? sclk : scl_sync</code>（master 用内部钟，否则用外部同步钟）</td></tr>
+    <tr><td><code>M</code></td><td>reg</td><td>master 标志：<code>master_start</code> 置 1，<code>master_stop</code> 清 0</td></tr>
+    <tr><td><code>sclk</code>/<code>clk_cnt</code></td><td>reg</td><td>内部 SCL 发生器：<code>clk_cnt==0x22</code> 时 <code>sclk</code> 拉低；<code>wait_start</code> 异步复位 <code>sclk=1</code>、<code>clk_cnt=0</code></td></tr>
+    <tr><td><code>wait_start</code></td><td>reg</td><td>在 <code>scli/sclo</code> 上升沿后 #10 检测 <code>sclo</code> 仍为低则置 1，用于总线状态变化后重建内部时钟相位</td></tr>
+    <tr><td><code>scl_sync</code></td><td>reg</td><td>slave 模式外部钟输入路径；初始化为 1 后本文件未再驱动（<code>M=0</code> 路径为静态）</td></tr>
+    <tr><td><code>sda_d</code></td><td>reg</td><td><code>sdao</code> 打拍值；与 <code>sdao</code> 组合在 SCL 高时判 START/STOP</td></tr>
+    <tr><td><code>start_signal</code>/<code>stop_signal</code></td><td>reg</td><td>起停检测结果；<strong>本文件内未被 task 消费</strong>，供波形观测</td></tr>
+    <tr><td><code>force_PIN_sda</code></td><td>reg</td><td>task 内的"正在驱动 SDA"窗口标记；<strong>本文件内无 assign 消费</strong>，疑由 testbench 层次引用，需对照原工程</td></tr>
+    <tr><td><code>master_ok</code></td><td>output reg</td><td>地址应答状态：<strong>1 = 地址失配</strong>（命名与含义相反）；<code>master_address</code> 中赋值</td></tr>
+    <tr><td><code>master_ack</code></td><td>output reg</td><td>写应答状态：<strong>1 = 收到 NACK</strong>；<code>master_wr</code> 中赋值</td></tr>
+    <tr><td><code>mhost_rx_data</code></td><td>reg</td><td><code>master_rd</code> 的读出数据出口（<code>mhost_tx_data</code> 声明后实际未用）</td></tr>
+    <tr><td><code>ddc_32mode</code></td><td>output</td><td><strong>全文件无驱动</strong>（声明旁的 <code>//????</code> 注释也标记了疑问）</td></tr>
+  </table>
+  <div class="warn"><span class="t">源码现状提示（逐行核对发现，DV 使用前请注意）：</span>
+    <ul>
+      <li><code>master_address</code>/<code>master_wr</code> 的应答判据是<strong>内部 <code>sdai</code> 释放后的值</strong>，而非总线 <code>sdao</code>——按当前代码路径几乎总是判 ACK OK，slave 真实的 NACK 检测不到。</li>
+      <li>时钟生成中 <code>else if(clk_cnt==7'h6f) if(clk_cnt==7'h45)</code> 内层条件永假（死分支），<code>sclk</code> 上升沿依赖该分支，疑为截图恢复误差，需对照原工程。</li>
+      <li><code>scl_sync</code> 与 <code>ddc_32mode</code> 处于未驱动/静态状态；在依赖 slave 模式或 DDC 模式前需确认原始实现。</li>
+    </ul>
+  </div>
+
   <div class="warn"><span class="t">文件边界：</span>当前 <code>i2c_model.sv</code> 由 gVim 截图逐段恢复，代码结构与主要时序已整理，但注释、空行、行号和个别调试文本可能与原工程不同；<code>ahbi2c_burst_write_no_stop</code> 的数据表达式含 <code>cnt</code> 偏移，需结合原始 testbench 确认。正式回归前请与工程原始版本逐行 diff。</div>
 </section>
 

@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 660" width="960" height="660">
+  <style>text { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', 'Microsoft JhengHei', 'SimHei', sans-serif; }</style>
+  <defs>
+    <marker id="ar-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
+    <marker id="ar-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
+    <marker id="ar-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
+    <marker id="ar-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
+    <marker id="ar-mute" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
+  </defs>
+  <rect width="960" height="660" fill="#ffffff"/>
+<text x="40" y="42" fill="#111827" font-size="17" font-weight="600" text-anchor="start">i2c_model task 调用关系</text>
+<text x="40" y="64" fill="#6b7280" font-size="12" font-weight="400" text-anchor="start">scenario task 全部组合自 7 个协议原子 task；原子 task 直接操作信号层（基于 i2c_model.sv 源码逐行核对）</text>
+<line x1="40" y1="76" x2="920" y2="76" stroke="#d1d5db" stroke-width="1"/>
+<rect x="40" y="96" width="430" height="236" rx="8" ry="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="56" y="122" fill="#1e40af" font-size="14" font-weight="600" text-anchor="start">普通寄存器访问（i2c_*）</text>
+<rect x="56" y="132" width="398" height="52" rx="6" ry="6" fill="#ffffff" stroke="#bfdbfe" stroke-width="1"/>
+<text x="66" y="152" fill="#111827" font-size="12" font-weight="600" text-anchor="start">i2c_unlock</text>
+<text x="66" y="170" fill="#6b7280" font-size="10" font-weight="400" text-anchor="start">start → addr(0xA4) → wr(78,98,76) → stop</text>
+<rect x="56" y="194" width="398" height="52" rx="6" ry="6" fill="#ffffff" stroke="#bfdbfe" stroke-width="1"/>
+<text x="66" y="214" fill="#111827" font-size="12" font-weight="600" text-anchor="start">i2c_write</text>
+<text x="66" y="232" fill="#6b7280" font-size="10" font-weight="400" text-anchor="start">两段：wr(50,addr32,data32) → stop；wr(70,01) 触发 → stop</text>
+<rect x="56" y="256" width="398" height="52" rx="6" ry="6" fill="#ffffff" stroke="#bfdbfe" stroke-width="1"/>
+<text x="66" y="276" fill="#111827" font-size="12" font-weight="600" text-anchor="start">i2c_read</text>
+<text x="66" y="294" fill="#6b7280" font-size="10" font-weight="400" text-anchor="start">三段写(50地址/71使能/58锁存) → addr(0xA5) → rd×4 → stop</text>
+<rect x="500" y="96" width="420" height="280" rx="8" ry="8" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+<text x="516" y="122" fill="#166534" font-size="14" font-weight="600" text-anchor="start">AHB/I2C 桥接（ahbi2c_*，设备 id 作参数）</text>
+<rect x="516" y="132" width="388" height="28" rx="6" ry="6" fill="#ffffff" stroke="#86efac" stroke-width="1"/>
+<text x="524" y="151" fill="#111827" font-size="11" font-weight="600" text-anchor="start">enable</text>
+<text x="724" y="151" fill="#6b7280" font-size="9" font-weight="400" text-anchor="start">addr(0xA6) → wr(80,03) → stop</text>
+<rect x="516" y="164" width="388" height="28" rx="6" ry="6" fill="#ffffff" stroke="#86efac" stroke-width="1"/>
+<text x="524" y="183" fill="#111827" font-size="11" font-weight="600" text-anchor="start">unlock(id)</text>
+<text x="724" y="183" fill="#6b7280" font-size="9" font-weight="400" text-anchor="start">wr(78,pwd32 低字节先) → stop</text>
+<rect x="516" y="196" width="388" height="28" rx="6" ry="6" fill="#ffffff" stroke="#86efac" stroke-width="1"/>
+<text x="524" y="215" fill="#111827" font-size="11" font-weight="600" text-anchor="start">rd_pwd(_test)(id)</text>
+<text x="724" y="215" fill="#6b7280" font-size="9" font-weight="400" text-anchor="start">wr(78) → SR → addr(id,R) → rd×1/×4 → stop</text>
+<rect x="516" y="228" width="388" height="28" rx="6" ry="6" fill="#ffffff" stroke="#86efac" stroke-width="1"/>
+<text x="524" y="247" fill="#111827" font-size="11" font-weight="600" text-anchor="start">write(id) / write_8a(id)</text>
+<text x="724" y="247" fill="#6b7280" font-size="9" font-weight="400" text-anchor="start">连写地址+数据；两者字节序不同</text>
+<rect x="516" y="260" width="388" height="28" rx="6" ry="6" fill="#ffffff" stroke="#86efac" stroke-width="1"/>
+<text x="524" y="279" fill="#111827" font-size="11" font-weight="600" text-anchor="start">cfg_read / cfg_write(id)</text>
+<text x="724" y="279" fill="#6b7280" font-size="9" font-weight="400" text-anchor="start">单字节配置读写；cfg_read 用 id,R 发起</text>
+<rect x="516" y="292" width="388" height="28" rx="6" ry="6" fill="#ffffff" stroke="#86efac" stroke-width="1"/>
+<text x="524" y="311" fill="#111827" font-size="11" font-weight="600" text-anchor="start">burst_write_no_stop</text>
+<text x="724" y="311" fill="#6b7280" font-size="9" font-weight="400" text-anchor="start">addr(A8)+addr32 → 循环 wr，无 STOP</text>
+<rect x="516" y="324" width="388" height="28" rx="6" ry="6" fill="#ffffff" stroke="#86efac" stroke-width="1"/>
+<text x="524" y="343" fill="#111827" font-size="11" font-weight="600" text-anchor="start">burst_read</text>
+<text x="724" y="343" fill="#6b7280" font-size="9" font-weight="400" text-anchor="start">addr32 → SR → addr(A9) → 循环 rd → stop</text>
+<line x1="255" y1="332" x2="255" y2="412" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="705" y1="376" x2="705" y2="412" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="120" y1="412" x2="840" y2="412" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="99.0" y1="412" x2="99.0" y2="452" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<rect x="40" y="452" width="118" height="86" rx="8" ry="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+<text x="99.0" y="474" fill="#111827" font-size="11" font-weight="600" text-anchor="middle">master_start</text>
+<text x="99.0" y="492" fill="#6b7280" font-size="9" font-weight="400" text-anchor="middle">START 条件；置 M=1</text>
+<text x="99.0" y="510" fill="#9a3412" font-size="8" font-weight="400" text-anchor="middle">← 全部 scenario</text>
+<line x1="223.0" y1="412" x2="223.0" y2="452" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<rect x="164" y="452" width="118" height="86" rx="8" ry="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+<text x="223.0" y="474" fill="#111827" font-size="11" font-weight="600" text-anchor="middle">master_address</text>
+<text x="223.0" y="492" fill="#6b7280" font-size="9" font-weight="400" text-anchor="middle">地址字节+读 ACK</text>
+<text x="223.0" y="510" fill="#9a3412" font-size="8" font-weight="400" text-anchor="middle">← 全部</text>
+<line x1="347.0" y1="412" x2="347.0" y2="452" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<rect x="288" y="452" width="118" height="86" rx="8" ry="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+<text x="347.0" y="474" fill="#111827" font-size="11" font-weight="600" text-anchor="middle">master_wr</text>
+<text x="347.0" y="492" fill="#6b7280" font-size="9" font-weight="400" text-anchor="middle">发字节+采样 ACK</text>
+<text x="347.0" y="510" fill="#9a3412" font-size="8" font-weight="400" text-anchor="middle">← 除 cfg_read/rd_pwd</text>
+<line x1="471.0" y1="412" x2="471.0" y2="452" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<rect x="412" y="452" width="118" height="86" rx="8" ry="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+<text x="471.0" y="474" fill="#111827" font-size="11" font-weight="600" text-anchor="middle">master_rd</text>
+<text x="471.0" y="492" fill="#6b7280" font-size="9" font-weight="400" text-anchor="middle">收字节+ACK/NACK</text>
+<text x="471.0" y="510" fill="#9a3412" font-size="8" font-weight="400" text-anchor="middle">← i2c_read/rd_pwd/cfg/burs</text>
+<text x="471.0" y="522" fill="#9a3412" font-size="8" font-weight="400" text-anchor="middle">t_rd</text>
+<line x1="595.0" y1="412" x2="595.0" y2="452" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<rect x="536" y="452" width="118" height="86" rx="8" ry="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+<text x="595.0" y="474" fill="#111827" font-size="11" font-weight="600" text-anchor="middle">master_repeat_start</text>
+<text x="595.0" y="492" fill="#6b7280" font-size="9" font-weight="400" text-anchor="middle">SR 重启动</text>
+<text x="595.0" y="510" fill="#9a3412" font-size="8" font-weight="400" text-anchor="middle">← rd_pwd(_test)/burst_rd</text>
+<line x1="719.0" y1="412" x2="719.0" y2="452" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)"/>
+<rect x="660" y="452" width="118" height="86" rx="8" ry="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5"/>
+<text x="719.0" y="474" fill="#111827" font-size="11" font-weight="600" text-anchor="middle">master_stop</text>
+<text x="719.0" y="492" fill="#6b7280" font-size="9" font-weight="400" text-anchor="middle">STOP；清 M=0</text>
+<text x="719.0" y="510" fill="#9a3412" font-size="8" font-weight="400" text-anchor="middle">← 除 burst_wr_no_stop</text>
+<rect x="784" y="452" width="118" height="86" rx="8" ry="8" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="5,3"/>
+<text x="843.0" y="474" fill="#6b7280" font-size="11" font-weight="600" text-anchor="middle">master_acksig</text>
+<text x="843.0" y="492" fill="#6b7280" font-size="9" font-weight="400" text-anchor="middle">单独发 ACK/NACK</text>
+<text x="843.0" y="510" fill="#dc2626" font-size="8" font-weight="400" text-anchor="middle">无内部调用者</text>
+<text x="843.0" y="522" fill="#dc2626" font-size="8" font-weight="400" text-anchor="middle">(burst_read 中被注释)</text>
+<rect x="40" y="564" width="880" height="56" rx="8" ry="8" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/>
+<text x="56" y="584" fill="#9a3412" font-size="12" font-weight="600" text-anchor="start">信号层</text>
+<text x="130" y="584" fill="#111827" font-size="11" font-weight="400" text-anchor="start">sdai：SDA 驱动源（0=拉低/1=释放） · force_PIN_sda：驱动窗口标记 · M：时钟源选择</text>
+<text x="130" y="602" fill="#111827" font-size="11" font-weight="400" text-anchor="start">sclo/clk：task 内 @ 边沿等待 · sdao：master_rd 采样源</text>
+<line x1="255" y1="538" x2="255" y2="564" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4,3"/>
+<line x1="705" y1="538" x2="705" y2="564" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4,3"/>
+</svg>
