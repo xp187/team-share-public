@@ -104,7 +104,8 @@
     <a href="#s12"><span class="n">12</span>时序参数速查</a>
     <a href="#s13"><span class="n">13</span>验证要点（DV 视角）</a>
     <a href="#s14"><span class="n">14</span>本项目中的 I2C</a>
-    <a href="#s15"><span class="n">附</span>常见误区对照</a>
+    <a href="#s15"><span class="n">15</span>HK6T62 i2c_model task</a>
+    <a href="#s16"><span class="n">附</span>常见误区对照</a>
   </nav>
 </aside>
 
@@ -394,6 +395,112 @@
 </section>
 
 <section id="s15">
+  <h2><span class="n">15</span>HK6T62 i2c_model：I2C task 详解</h2>
+  <p>本节对应 <code>E:\projects\HK6T62\i2c_model.sv</code>——一个仿真用的 I2C master BFM（Bus Functional Model），通过 <code>sdao</code>/<code>sclo</code> 两根开漏信号线产生 START/STOP/地址/读写/ACK 时序，供验证环境访问被测芯片的寄存器或 AHB/I2C 桥接接口。内容依据配套说明 <code>i2c_model_explanation.md</code> 整理。</p>
+  <div class="warn"><span class="t">注意：</span>该文件不是可综合 RTL，内部大量使用 <code>task</code>、<code>#延时</code>（如 <code>#3</code>/<code>#10</code>）和 <code>force</code>，只能在 testbench 仿真环境中使用。</div>
+
+  <h3>15.1 接口与开漏模型</h3>
+  <ul>
+    <li>接口：<code>clk</code>（仿真时钟）、<code>sdao</code>/<code>sclo</code>（双向线）、<code>master_ok</code>/<code>master_ack</code>（状态/应答标志）、<code>ddc_32mode</code>（模式输出）。</li>
+    <li><code>sdao</code>/<code>sclo</code> 声明为 <code>tri1</code>，用三态赋值模拟开漏输出——内部信号为 1 时释放总线（Z），为 0 时拉低：</li>
+  </ul>
+  <pre><code>assign #5  sdao = (sdai) ? 1'bz : sdai;
+assign #10 sclo = (scli) ? 1'bz : scli;</code></pre>
+  <ul>
+    <li><code>force_PIN_sda</code> 用于在特定时序阶段强制控制 SDA；task 结束时必须释放（置 0），否则后续事务会把 SDA 强制在错误状态，表现为总线卡死或始终不 ACK。</li>
+    <li>起停检测：SCL 为高时，SDA 高→低产生 <code>start_signal</code>，低→高产生 <code>stop_signal</code>。时钟选择：<code>scli = M ? sclk : scl_sync</code>（<code>M</code> 为 master 标志）；<code>wait_start</code> 用于在总线状态变化后重新初始化时钟计数器。</li>
+  </ul>
+
+  <h3>15.2 基础时序 task（协议原子操作）</h3>
+  <table>
+    <tr><th>Task</th><th>作用</th></tr>
+    <tr><td><code>master_start</code></td><td>产生 START 条件：在 SCL 适当阶段拉低 SDA，并进入 master 模式</td></tr>
+    <tr><td><code>master_address</code></td><td>发送 8 位地址字节并读取 slave 返回的 ACK；最低位 0=写、1=读</td></tr>
+    <tr><td><code>master_wr</code></td><td>MSB first 发送一个字节，第 9 个时钟周期采样 ACK，更新 <code>master_ack</code></td></tr>
+    <tr><td><code>master_rd</code></td><td>MSB first 采样一个字节；<code>ack=1</code> 回 ACK 继续读，<code>ack=0</code> 回 NACK 表示最后一字节</td></tr>
+    <tr><td><code>master_acksig</code></td><td>单独发送 ACK/NACK，供需要手工控制应答的场景使用</td></tr>
+    <tr><td><code>master_stop</code></td><td>释放 SDA 产生 STOP 条件，并退出 master 控制状态</td></tr>
+    <tr><td><code>master_repeat_start</code></td><td>产生 Repeated START，常用于写入寄存器地址后立即切换到读操作</td></tr>
+  </table>
+  <p>每个 <code>master_wr</code> 内部都会等满 8 个 SCL 数据位 + 1 个 ACK 周期，因此 <strong>task 调用顺序就是总线上的字节顺序，不能随意交换</strong>；SDA 的改变必须与 SCL 边沿配合，直接把 <code>sdao</code> 当普通寄存器写会破坏模型。</p>
+
+  <h3>15.3 普通寄存器访问 task</h3>
+  <table>
+    <tr><th>Task</th><th>作用</th></tr>
+    <tr><td><code>i2c_unlock</code></td><td>向设备地址 <code>8'ha4</code> 发送页面解锁序列（依次写 <code>8'h78</code>、<code>8'h98</code>、<code>8'h76</code>）</td></tr>
+    <tr><td><code>i2c_write</code></td><td>32 位地址 + 32 位数据写：S → 设备 <code>0xA4</code>+W → 前缀 <code>0x50</code> → 地址 4 字节（低字节先发）→ 数据 4 字节 → P；随后再向 <code>0x70</code> 写 <code>0x01</code> 触发写操作</td></tr>
+    <tr><td><code>i2c_read</code></td><td>先写待读地址（含 <code>0x71</code>/<code>0x01</code> 使能与 <code>0x58</code> 锁存），Repeated START 切到读地址 <code>0xA5</code>，连读 4 字节；前 3 字节回 ACK，最后字节回 NACK</td></tr>
+  </table>
+
+  <h3>15.4 一次标准写事务时序（<code>i2c_write</code>）</h3>
+  <pre><code>START
+  device address = 0xA4, write
+  register/address prefix = 0x50
+  address[7:0] / [15:8] / [23:16] / [31:24]
+  data[7:0]    / [15:8] / [23:16] / [31:24]
+STOP
+START
+  device address = 0xA4, write
+  command = 0x70
+  enable  = 0x01        // 触发写操作
+STOP</code></pre>
+
+  <h3>15.5 一次标准读事务时序（<code>i2c_read</code>）</h3>
+  <pre><code>START → 0xA4 write → 0x50 → address[7:0] ... address[31:24] → STOP
+START → 0xA4 write → 0x71 → 0x01 → STOP     // 使能
+START → 0xA4 write → 0x58 → STOP            // 锁存待读数据
+START → 0xA5 read
+  master_rd(1, rdata[7:0])    // ACK
+  master_rd(1, rdata[15:8])   // ACK
+  master_rd(1, rdata[23:16])  // ACK
+  master_rd(0, rdata[31:24])  // NACK = 读取结束
+STOP</code></pre>
+
+  <h3>15.6 AHB/I2C 桥接 task</h3>
+  <p><code>ahbi2c_*</code> 系列把设备 ID 作为参数（<code>master_address({id,1'b0/1'b1}, flag)</code>），同一个 task 可访问不同 AHB/I2C 从设备：</p>
+  <table>
+    <tr><th>Task</th><th>地址宽度</th><th>数据宽度</th><th>特点</th></tr>
+    <tr><td><code>ahbi2c_enable</code></td><td>—</td><td>—</td><td>向设备 <code>8'ha6</code> 写 <code>8'h80</code>/<code>8'h03</code>，打开 AHB/I2C 访问路径</td></tr>
+    <tr><td><code>ahbi2c_unlock</code></td><td>—</td><td>32 bit</td><td>按参数 <code>id</code> 组设备地址，发页面使能 <code>8'h78</code> 后写 32 位解锁数据</td></tr>
+    <tr><td><code>ahbi2c_rd_pwd_test</code> / <code>ahbi2c_rd_pwd</code></td><td>—</td><td>32 / 8 bit</td><td>写地址阶段 + Repeated START 进入读模式，读取密码/状态</td></tr>
+    <tr><td><code>ahbi2c_write</code></td><td>32 bit</td><td>32 bit</td><td>地址和数据均按<strong>高字节先发</strong>的 4 字节顺序写入</td></tr>
+    <tr><td><code>ahbi2c_write_8a</code></td><td>8 bit</td><td>32 bit</td><td>适用于较短地址格式的访问</td></tr>
+    <tr><td><code>ahbi2c_cfg_read</code> / <code>ahbi2c_cfg_write</code></td><td>32 bit 参数</td><td>8 bit 实际</td><td>配置空间单字节快速读写</td></tr>
+    <tr><td><code>ahbi2c_burst_write_no_stop</code></td><td>32 bit</td><td>多个 32 bit</td><td>先发 32 位起始地址，循环连续写，数据项之间不发 STOP</td></tr>
+    <tr><td><code>ahbi2c_burst_read</code></td><td>32 bit</td><td>多个 32 bit</td><td>Repeated START 后用读地址 <code>8'ha9</code> 连续读，最后字节 NACK 结束</td></tr>
+  </table>
+
+  <h3>15.7 字节序与 ACK 规则</h3>
+  <ul>
+    <li>普通 <code>i2c_*</code> task：32 位地址/数据<strong>低字节先上总线</strong>（<code>[7:0] → [15:8] → [23:16] → [31:24]</code>）。</li>
+    <li><code>ahbi2c_*</code> task：多为<strong>高字节先发</strong>。两类 task 不能混用字节序假设（读回数据反序首先查这里）。</li>
+    <li>连续读：除最后一个字节外回 ACK，最后一字节回 NACK 后接 STOP——连续读结束的标准做法。</li>
+  </ul>
+
+  <h3>15.8 常见问题定位</h3>
+  <table>
+    <tr><th>现象</th><th>排查方向</th></tr>
+    <tr><td>一直收不到 ACK</td><td>设备地址最低位（R/W）；slave 是否已退出复位；SDA/SCL 是否被其他 driver 拉低；<code>master_address</code> 后是否真的释放了 SDA</td></tr>
+    <tr><td>读回数据字节反序</td><td>检查发送顺序：<code>i2c_*</code> 低字节先发、<code>ahbi2c_*</code> 高字节先发，勿混用</td></tr>
+    <tr><td>SCL 不再翻转</td><td>查 <code>wait_start</code>/<code>M</code>/<code>sclk</code>/<code>scl_sync</code>/<code>scli</code> 驱动关系；<code>M</code> 未置位会切到 <code>scl_sync</code>，<code>wait_start</code> 未触发则 <code>clk_cnt</code> 不重新计数</td></tr>
+    <tr><td>STOP 后 SDA 仍被拉低</td><td>查 <code>master_stop</code> 中 <code>force_PIN_sda = 0</code> 是否执行、<code>sdai</code> 是否释放为 1；确认 testbench 没有其他过程继续 force SDA</td></tr>
+  </table>
+
+  <h3>15.9 建议的最小验证场景</h3>
+  <ol>
+    <li>单次 <code>i2c_unlock</code>，确认设备返回 ACK。</li>
+    <li>单次 <code>i2c_write</code> 后用 <code>i2c_read</code> 读回同一地址。</li>
+    <li>读写边界地址 <code>0x00000000</code> 与 <code>0xFFFFFFFF</code>。</li>
+    <li><code>ahbi2c_write_8a</code> 的 8 位地址访问。</li>
+    <li><code>ahbi2c_burst_write_no_stop</code> 后立即执行 <code>ahbi2c_burst_read</code>。</li>
+    <li>人为让 slave NACK，确认 <code>DBG_DISPLAY</code> 信息与 task 返回状态符合预期。</li>
+  </ol>
+  <p>波形检查至少应观察：START、设备地址、每个字节后的 ACK、Repeated START、最后字节的 NACK、STOP，以及 STOP 后 SDA/SCL 是否回到空闲高电平。</p>
+
+  <div class="warn"><span class="t">文件边界：</span>当前 <code>i2c_model.sv</code> 由 gVim 截图逐段恢复，代码结构与主要时序已整理，但注释、空行、行号和个别调试文本可能与原工程不同；<code>ahbi2c_burst_write_no_stop</code> 的数据表达式含 <code>cnt</code> 偏移，需结合原始 testbench 确认。正式回归前请与工程原始版本逐行 diff。</div>
+</section>
+
+<section id="s16">
   <h2><span class="n">附</span>常见误区对照</h2>
   <table>
     <tr><th>误区</th><th>正确理解</th></tr>
