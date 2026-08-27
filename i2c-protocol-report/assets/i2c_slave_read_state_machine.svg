@@ -1,17 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 450" width="960" height="450">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 500" width="960" height="500">
   <defs>
     <marker id="ar-blue" markerWidth="8" markerHeight="6" refX="7" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
     <marker id="ar-green" markerWidth="8" markerHeight="6" refX="7" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#16a34a"/></marker>
     <marker id="ar-red" markerWidth="8" markerHeight="6" refX="7" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#dc2626"/></marker>
     <marker id="ar-mute" markerWidth="8" markerHeight="6" refX="7" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#6b7280"/></marker>
   </defs>
-<rect width="960" height="450" fill="#ffffff"/>
+<rect width="960" height="500" fill="#ffffff"/>
 <text x="40" y="40" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20px" font-weight="700" fill="#111827" text-anchor="start">I2C Slave 读操作状态机</text>
-<text x="40" y="63" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="400" fill="#6b7280" text-anchor="start">读方向进入数据发送阶段后，主机在每个字节末尾用 ACK/NACK 控制事务走向</text>
+<text x="40" y="63" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="400" fill="#6b7280" text-anchor="start">以 RTL 为准：rw=1 时 slave_ack 没有跳转到 data；下方虚线为文档描述的预期路径</text>
 <line x1="40" y1="78" x2="920" y2="78" stroke="#d1d5db"/>
 <line x1="165.0" y1="188" x2="255.0" y2="188" stroke="#2563eb" stroke-width="1.8" marker-end="url(#ar-blue)"/>
-<line x1="389.0" y1="188" x2="469.0" y2="188" stroke="#2563eb" stroke-width="1.8" marker-end="url(#ar-blue)"/>
-<line x1="595.0" y1="188" x2="669.0" y2="188" stroke="#2563eb" stroke-width="1.8" marker-end="url(#ar-blue)"/>
+<line x1="389.0" y1="188" x2="469.0" y2="188" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)" stroke-dasharray="6 5"/>
+<line x1="595.0" y1="188" x2="669.0" y2="188" stroke="#6b7280" stroke-width="1.5" marker-end="url(#ar-mute)" stroke-dasharray="6 5"/>
 <line x1="54" y1="188" x2="59.0" y2="188" stroke="#111827" stroke-width="1.8" marker-end="url(#ar-mute)"/>
 <circle cx="48" cy="188" r="6" fill="#111827"/>
 <rect x="66.0" y="157.0" width="92" height="62" rx="12" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.2"/>
@@ -20,33 +20,35 @@
 <rect x="262.0" y="157.0" width="120" height="62" rx="12" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.2"/>
 <text x="322" y="184" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', monospace" font-size="14px" font-weight="700" fill="#2563eb" text-anchor="middle">slave_ack</text>
 <text x="322" y="206" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="middle">地址 ACK</text>
-<rect x="476.0" y="157.0" width="112" height="62" rx="12" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.2"/>
-<text x="532" y="184" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', monospace" font-size="14px" font-weight="700" fill="#2563eb" text-anchor="middle">data</text>
+<rect x="476.0" y="157.0" width="112" height="62" rx="12" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.2"/>
+<text x="532" y="184" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', monospace" font-size="14px" font-weight="700" fill="#6b7280" text-anchor="middle">data</text>
 <text x="532" y="206" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="middle">发送读数据</text>
-<rect x="676.0" y="157.0" width="132" height="62" rx="12" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.2"/>
-<text x="742" y="184" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', monospace" font-size="14px" font-weight="700" fill="#2563eb" text-anchor="middle">data_ack</text>
+<rect x="676.0" y="157.0" width="132" height="62" rx="12" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.2"/>
+<text x="742" y="184" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', monospace" font-size="14px" font-weight="700" fill="#6b7280" text-anchor="middle">data_ack</text>
 <text x="742" y="206" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="middle">采样主机响应</text>
-<rect x="180.0" y="128" width="74" height="22" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1"/>
-<text x="217" y="143" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#2563eb" text-anchor="middle">地址匹配</text>
-<rect x="395.0" y="128" width="64" height="22" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1"/>
-<text x="427" y="143" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#2563eb" text-anchor="middle">R/W=1</text>
+<rect x="181.0" y="128" width="72" height="22" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1"/>
+<text x="217" y="143" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#2563eb" text-anchor="middle">my_adr=1</text>
+<rect x="361.0" y="128" width="132" height="22" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1"/>
+<text x="427" y="143" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#2563eb" text-anchor="middle">rw=1：缺 state&lt;=data</text>
 <rect x="608.0" y="128" width="58" height="22" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1"/>
 <text x="637" y="143" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#2563eb" text-anchor="middle">8 bit</text>
-<path d="M 742,219 C 742,278 532,278 532,219" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#ar-green)"/>
-<rect x="588.0" y="259" width="98" height="22" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1"/>
-<text x="637" y="274" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#16a34a" text-anchor="middle">ACK (sda=0)</text>
-<path d="M 742,219 C 742,346 112,346 112,219" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#ar-red)"/>
-<rect x="377.0" y="327" width="106" height="22" rx="6" fill="#fef2f2" stroke="#dc2626" stroke-width="1"/>
-<text x="430" y="342" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#dc2626" text-anchor="middle">NACK (sda=1)</text>
-<rect x="40" y="374" width="270" height="60" rx="10" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.2"/>
-<text x="54" y="397" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="700" fill="#16a34a" text-anchor="start">ACK 分支</text>
-<text x="54" y="418" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="start">主机继续接收：data_ack → data</text>
-<rect x="330" y="374" width="270" height="60" rx="10" fill="#fef2f2" stroke="#fecaca" stroke-width="1.2"/>
-<text x="344" y="397" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="700" fill="#dc2626" text-anchor="start">NACK 分支</text>
-<text x="344" y="418" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="start">主机结束读取：data_ack → idle</text>
-<rect x="620" y="374" width="300" height="60" rx="10" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.2"/>
-<text x="634" y="397" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="700" fill="#ea580c" text-anchor="start">协议要点</text>
-<text x="634" y="418" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="start">SDA 在 ACK 位由接收方控制</text>
+<path d="M 400,219 C 460,302 200,302 260,219" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#ar-red)"/>
+<rect x="272.0" y="279" width="116" height="22" rx="6" fill="#fef2f2" stroke="#dc2626" stroke-width="1"/>
+<text x="330" y="294" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#dc2626" text-anchor="middle">RTL 自循环：rw=1</text>
+<path d="M 742,219 C 742,286 532,286 532,219" fill="none" stroke="#16a34a" stroke-width="1.5" marker-end="url(#ar-green)" stroke-dasharray="6 5"/>
+<rect x="599.0" y="265" width="76" height="22" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1"/>
+<text x="637" y="280" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#16a34a" text-anchor="middle">预期 ACK</text>
+<path d="M 742,219 C 742,346 112,346 112,219" fill="none" stroke="#dc2626" stroke-width="1.5" marker-end="url(#ar-red)" stroke-dasharray="6 5"/>
+<rect x="388.0" y="325" width="84" height="22" rx="6" fill="#fef2f2" stroke="#dc2626" stroke-width="1"/>
+<text x="430" y="340" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#dc2626" text-anchor="middle">预期 NACK</text>
+<text x="480" y="366" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="middle">实线 = RTL 当前可达路径；虚线 = 文档/设计意图。当前 slave_ack 的 rw=1 分支未赋值 state，读数据阶段不会被进入。</text>
+<rect x="40" y="394" width="270" height="60" rx="10" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.2"/>
+<text x="54" y="417" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="700" fill="#16a34a" text-anchor="start">ACK 分支</text>
+<text x="54" y="438" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="start">主机继续接收：data_ack → data</text>
+<rect x="330" y="394" width="270" height="60" rx="10" fill="#fef2f2" stroke="#fecaca" stroke-width="1.2"/>
+<text x="344" y="417" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="700" fill="#dc2626" text-anchor="start">NACK 分支</text>
+<text x="344" y="438" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="start">主机结束读取：data_ack → idle</text>
+<rect x="620" y="394" width="300" height="60" rx="10" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.2"/>
+<text x="634" y="417" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="700" fill="#ea580c" text-anchor="start">协议要点</text>
+<text x="634" y="438" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="start">SDA 在 ACK 位由接收方控制</text>
 </svg>
-
-

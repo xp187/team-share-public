@@ -668,8 +668,8 @@ parameter devid_error = 3'b111;  // 设备地址不匹配，进入错误态</cod
   <p>读操作指主设备从从机读取一个或多个寄存器数据：</p>
   <ol>
     <li>地址字节 R/W=1，匹配后进入 <code>slave_ack</code>；</li>
-    <li>因 <code>rw=1</code>，不进入 <code>get_address</code>，保持在 <code>slave_ack</code> 并释放 SDA，由后续 <code>data</code> 阶段处理；</li>
-    <li><code>data</code> 阶段从机驱动 SDA 发送数据，完成后进入 <code>data_ack</code>，由主设备回 ACK（继续读）或 NACK（结束读）。</li>
+    <li>RTL 在 <code>slave_ack</code> 的 <code>rw=1</code> 分支只释放 SDA，没有执行 <code>state &lt;= data</code>，因此状态实际保持在 <code>slave_ack</code>；此时 <code>rd</code> 仍可能触发 <code>din</code> 装载。</li>
+    <li>虽然 RTL 定义了 <code>data</code> / <code>data_ack</code> 的读数据和 ACK/NACK 逻辑，但从当前读入口没有可达转移；若要实现文档描述的读流程，需要在 <code>slave_ack</code> 的读分支显式进入 <code>data</code>。</li>
   </ol>
   <figure>
     <img src="assets/i2c_slave_read_state_machine.svg" alt="I2C Slave 读操作状态机">

@@ -1,13 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" width="960" height="480">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" width="960" height="520">
   <defs>
     <marker id="ar-blue" markerWidth="8" markerHeight="6" refX="7" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
     <marker id="ar-green" markerWidth="8" markerHeight="6" refX="7" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#16a34a"/></marker>
     <marker id="ar-red" markerWidth="8" markerHeight="6" refX="7" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#dc2626"/></marker>
     <marker id="ar-mute" markerWidth="8" markerHeight="6" refX="7" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#6b7280"/></marker>
   </defs>
-<rect width="960" height="480" fill="#ffffff"/>
+<rect width="960" height="520" fill="#ffffff"/>
 <text x="40" y="40" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20px" font-weight="700" fill="#111827" text-anchor="start">I2C Slave 写操作状态机</text>
-<text x="40" y="63" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="400" fill="#6b7280" text-anchor="start">从地址匹配到连续写入：数据阶段由 ACK 决定是否继续接收下一个字节</text>
+<text x="40" y="63" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="400" fill="#6b7280" text-anchor="start">RTL 实际路径：地址不匹配进入 devid_error；写数据完成后由 ACK 回到下一个 data 字节</text>
 <line x1="40" y1="78" x2="920" y2="78" stroke="#d1d5db"/>
 <line x1="153.0" y1="188" x2="171.0" y2="188" stroke="#2563eb" stroke-width="1.8" marker-end="url(#ar-blue)"/>
 <line x1="305.0" y1="188" x2="310.0" y2="188" stroke="#2563eb" stroke-width="1.8" marker-end="url(#ar-blue)"/>
@@ -34,8 +34,11 @@
 <rect x="778.0" y="157.0" width="120" height="62" rx="12" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.2"/>
 <text x="838" y="184" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', monospace" font-size="14px" font-weight="700" fill="#2563eb" text-anchor="middle">data_ack</text>
 <text x="838" y="206" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="middle">数据 ACK</text>
-<rect x="132.0" y="128" width="74" height="22" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1"/>
-<text x="169" y="143" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#2563eb" text-anchor="middle">地址匹配</text>
+<rect x="167.0" y="285.0" width="142" height="62" rx="12" fill="#fef2f2" stroke="#fecaca" stroke-width="1.2"/>
+<text x="238" y="312" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', monospace" font-size="14px" font-weight="700" fill="#dc2626" text-anchor="middle">devid_error</text>
+<text x="238" y="334" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="middle">地址不匹配后锁死</text>
+<rect x="133.0" y="128" width="72" height="22" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1"/>
+<text x="169" y="143" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#2563eb" text-anchor="middle">my_adr=1</text>
 <rect x="283.0" y="128" width="60" height="22" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1"/>
 <text x="313" y="143" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#2563eb" text-anchor="middle">rw=0</text>
 <rect x="434.0" y="128" width="58" height="22" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1"/>
@@ -44,22 +47,26 @@
 <text x="613" y="143" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#2563eb" text-anchor="middle">ld=1</text>
 <rect x="734.0" y="128" width="58" height="22" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1"/>
 <text x="763" y="143" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#2563eb" text-anchor="middle">8 bit</text>
-<path d="M 838,219 C 838,276 688,276 688,219" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#ar-green)"/>
-<rect x="728.0" y="257" width="70" height="22" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1"/>
-<text x="763" y="272" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#16a34a" text-anchor="middle">连续写</text>
-<path d="M 688,219 C 688,334 100,334 100,219" fill="none" stroke="#6b7280" stroke-width="1.4" marker-end="url(#ar-mute)" stroke-dasharray="6 5"/>
-<rect x="341.0" y="315" width="94" height="22" rx="6" fill="#ffffff" stroke="#6b7280" stroke-width="1"/>
-<text x="388" y="330" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#6b7280" text-anchor="middle">STOP / 重启</text>
-<text x="480" y="366" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="400" fill="#6b7280" text-anchor="middle">ACK=0：从机拉低 SDA，继续进入下一字节；ACK=1：结束当前写事务</text>
-<rect x="40" y="394" width="270" height="60" rx="10" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.2"/>
-<text x="54" y="417" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="700" fill="#2563eb" text-anchor="start">地址阶段</text>
-<text x="54" y="438" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="start">匹配设备地址后，rw=0 才进入写路径</text>
-<rect x="330" y="394" width="270" height="60" rx="10" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.2"/>
-<text x="344" y="417" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="700" fill="#2563eb" text-anchor="start">数据阶段</text>
-<text x="344" y="438" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="start">每收到 8 bit 数据，就产生一次 ACK</text>
-<rect x="620" y="394" width="300" height="60" rx="10" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.2"/>
-<text x="634" y="417" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="700" fill="#ea580c" text-anchor="start">RTL 对齐</text>
-<text x="634" y="438" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="start">状态名与 RTL parameter 保持一致</text>
+<path d="M 838,219 C 838,270 688,270 688,219" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#ar-green)"/>
+<rect x="715.0" y="251" width="96" height="22" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1"/>
+<text x="763" y="266" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#16a34a" text-anchor="middle">rw=0 → data</text>
+<path d="M 688,219 C 688,370 100,370 100,219" fill="none" stroke="#6b7280" stroke-width="1.4" marker-end="url(#ar-mute)" stroke-dasharray="6 5"/>
+<rect x="444.0" y="345" width="112" height="22" rx="6" fill="#ffffff" stroke="#6b7280" stroke-width="1"/>
+<text x="500" y="360" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#6b7280" text-anchor="middle">sta / sto → idle</text>
+<path d="M 100,219 C 100,278 238,278 238,285" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#ar-red)"/>
+<rect x="118.0" y="249" width="76" height="22" rx="6" fill="#fef2f2" stroke="#dc2626" stroke-width="1"/>
+<text x="156" y="264" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#dc2626" text-anchor="middle">my_adr=0</text>
+<path d="M 309,300 C 360,300 360,332 309,332" fill="none" stroke="#dc2626" stroke-width="1.5" marker-end="url(#ar-red)"/>
+<rect x="334.0" y="299" width="52" height="22" rx="6" fill="#fef2f2" stroke="#dc2626" stroke-width="1"/>
+<text x="360" y="314" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="600" fill="#dc2626" text-anchor="middle">锁死</text>
+<text x="480" y="400" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="400" fill="#6b7280" text-anchor="middle">ACK=0：从机拉低 SDA，继续进入下一字节；ACK=1：结束当前写事务</text>
+<rect x="40" y="424" width="270" height="60" rx="10" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.2"/>
+<text x="54" y="447" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="700" fill="#2563eb" text-anchor="start">地址阶段</text>
+<text x="54" y="468" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="start">匹配设备地址后，rw=0 才进入写路径</text>
+<rect x="330" y="424" width="270" height="60" rx="10" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.2"/>
+<text x="344" y="447" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="700" fill="#2563eb" text-anchor="start">数据阶段</text>
+<text x="344" y="468" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="start">每收到 8 bit 数据，就产生一次 ACK</text>
+<rect x="620" y="424" width="300" height="60" rx="10" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.2"/>
+<text x="634" y="447" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12px" font-weight="700" fill="#ea580c" text-anchor="start">RTL 对齐</text>
+<text x="634" y="468" font-family="'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11px" font-weight="400" fill="#6b7280" text-anchor="start">状态名与 RTL parameter 保持一致</text>
 </svg>
-
-
